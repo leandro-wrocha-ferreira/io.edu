@@ -17,7 +17,7 @@
 	<div class="container mt-4">
 		<div class="d-flex justify-content-between align-items-center mb-4">
 			<h1>Painel Administrativo</h1>
-			<a href="<?= base_url('logout') ?>" class="btn btn-outline-secondary">Sair</a>
+			<a href="<?= base_url('sair') ?>" class="btn btn-outline-secondary">Sair</a>
 		</div>
 
 		<div class="alert alert-info">
