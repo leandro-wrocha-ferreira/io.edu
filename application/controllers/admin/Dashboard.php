@@ -17,8 +17,6 @@ class Dashboard extends CI_Controller
             'title' => 'Painel Administrativo',
         ];
 
-        $this->load->view('layout/header', $data);
         $this->load->view('admin/dashboard', $data);
-        $this->load->view('layout/footer');
     }
 }

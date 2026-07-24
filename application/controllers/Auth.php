@@ -39,29 +39,28 @@ class Auth extends CI_Controller
 
                 $this->_redirect_by_role();
             } catch (\Exception $e) {
+                log_message('error', $e->getMessage());
                 $this->session->set_flashdata('error', $e->getMessage());
-                redirect('autenticacao/login');
+                redirect(base_url('entrar'));
             }
         }
 
-        $this->load->view('layout/header', ['title' => 'Login']);
-        $this->load->view('auth/login');
-        $this->load->view('layout/footer');
+        $this->load->view('login', ['title' => 'Login']);
     }
 
     public function logout()
     {
         $this->session->sess_destroy();
-        redirect('autenticacao/login');
+        redirect(base_url('entrar'));
     }
 
     private function _redirect_by_role()
     {
         $role = $this->session->userdata('user_role');
         if ($role === 'admin') {
-            redirect('admin/painel');
+            redirect(base_url('admin/painel'));
         } else {
-            redirect('aluno/painel');
+            redirect(base_url('aluno/painel'));
         }
     }
 }

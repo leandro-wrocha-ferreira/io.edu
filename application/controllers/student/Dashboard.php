@@ -17,8 +17,6 @@ class Dashboard extends CI_Controller
             'title' => 'Painel do Aluno',
         ];
 
-        $this->load->view('layout/header', $data);
         $this->load->view('student/dashboard', $data);
-        $this->load->view('layout/footer');
     }
 }
