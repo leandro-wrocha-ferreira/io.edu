@@ -4,7 +4,7 @@ namespace app\usecases\identity;
 
 use app\domain\identity\Email;
 use app\domain\identity\User;
-use app\Factories\Model_factory;
+use app\factories\Model_factory;
 
 class AuthenticateUserUseCase
 {
