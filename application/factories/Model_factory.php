@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Factories;
+namespace app\factories;
 
 class Model_factory
 {
