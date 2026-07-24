@@ -54,8 +54,8 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
 // Auth routes
-$route['autenticacao/login'] = 'auth/auth/login';
-$route['autenticacao/sair'] = 'auth/auth/logout';
+$route['entrar'] = 'auth/login';
+$route['sair'] = 'auth/logout';
 
 // Admin routes
 $route['admin/painel'] = 'admin/dashboard/index';

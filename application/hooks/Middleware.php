@@ -2,22 +2,22 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Auth_check
+class Middleware
 {
-    public function check()
+    public function validate()
     {
         $CI =& get_instance();
         $CI->load->library('session');
 
         $uri = $CI->uri->segment(1);
-        $public_routes = ['autenticacao', 'welcome'];
+        $public_routes = ['entrar', 'sair', 'welcome'];
 
         if (in_array($uri, $public_routes)) {
             return;
         }
 
         if (!$CI->session->userdata('logged_in')) {
-            redirect('autenticacao/login');
+            redirect(base_url('login'));
         }
 
         if ($uri === 'admin' && $CI->session->userdata('user_role') !== 'admin') {
