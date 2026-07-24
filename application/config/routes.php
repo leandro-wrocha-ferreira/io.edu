@@ -8,8 +8,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | This file lets you re-map URI requests to specific controller functions.
 |
 | Typically there is a one-to-one relationship between a URL string
-| and its corresponding controller class/method. The segments in a
-| URL normally follow this pattern:
+| and its corresponding controller class/method. The segments in a URL
+| normally follow this pattern:
 |
 |	example.com/class/method/id/
 |
@@ -52,3 +52,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] = 'welcome';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+
+// Auth routes
+$route['autenticacao/login'] = 'auth/auth/login';
+$route['autenticacao/sair'] = 'auth/auth/logout';
+
+// Admin routes
+$route['admin/painel'] = 'admin/dashboard/index';
+
+// Student routes
+$route['aluno/painel'] = 'student/dashboard/index';
