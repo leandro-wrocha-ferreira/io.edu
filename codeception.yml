@@ -1,0 +1,13 @@
+actor: AcceptanceTester
+bootstrap: _support/_bootstrap.php
+paths:
+    tests: tests
+    output: tests/_output
+    data: tests/_data
+    support: tests/_support
+namespace: Tests
+modules:
+    enabled:
+        - Asserts
+        - PhpBrowser:
+            url: 'http://localhost:80'
