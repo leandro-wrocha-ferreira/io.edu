@@ -19,13 +19,15 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"app\\": "application/"
+			"app\\domain\\": "application/domain/",
+			"app\\usecases\\": "application/usecases/",
+			"app\\factories\\": "application/factories/"
 		}
 	},
 	"autoload-dev": {
-		"psr-4": {
-			"Tests\\": "tests/"
-		}
+		"classmap": [
+			"tests/"
+		]
 	},
 	"scripts": {
 		"test:coverage": [
