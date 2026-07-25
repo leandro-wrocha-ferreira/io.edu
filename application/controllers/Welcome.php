@@ -1,6 +1,11 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Welcome Controller
+ *
+ * Default controller mapped to the application root URL.
+ */
 class Welcome extends CI_Controller {
 
 	/**

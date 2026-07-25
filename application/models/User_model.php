@@ -5,13 +5,28 @@ use app\domain\identity\Email;
 use app\domain\identity\User;
 use app\domain\identity\UserRepositoryInterface;
 
+/**
+ * User model implementing UserRepositoryInterface.
+ *
+ * Handles persistence for the User entity using CI3 Query Builder.
+ * Performs soft deletes and joins with the roles table for RBAC.
+ */
 class User_model extends CI_Model implements UserRepositoryInterface
 {
+    /**
+     * Constructor.
+     */
     public function __construct()
     {
         parent::__construct();
     }
 
+    /**
+     * Find a user by their ID.
+     *
+     * @param int $id User ID
+     * @return User|null User entity or null if not found
+     */
     public function find_by_id(int $id): ?User
     {
         $row = $this->db
@@ -25,6 +40,12 @@ class User_model extends CI_Model implements UserRepositoryInterface
         return $row ? User::from_database($row) : null;
     }
 
+    /**
+     * Find a user by their email address.
+     *
+     * @param Email $email User email (Value Object)
+     * @return User|null User entity or null if not found
+     */
     public function find_by_email(Email $email): ?User
     {
         $row = $this->db
@@ -37,6 +58,14 @@ class User_model extends CI_Model implements UserRepositoryInterface
         return $row ? User::from_database($row) : null;
     }
 
+    /**
+     * Save (insert or update) a user.
+     *
+     * If the user has an ID, performs an update; otherwise inserts a new record.
+     *
+     * @param User $user User entity to persist
+     * @return void
+     */
     public function save(User $user): void
     {
         $data = [
@@ -56,6 +85,14 @@ class User_model extends CI_Model implements UserRepositoryInterface
         }
     }
 
+    /**
+     * Soft delete a user by ID.
+     *
+     * Sets the deleted_at timestamp instead of removing the record.
+     *
+     * @param int $id User ID to delete
+     * @return void
+     */
     public function delete(int $id): void
     {
         $this->db

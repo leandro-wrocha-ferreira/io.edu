@@ -3,20 +3,20 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
- * Middleware de Autenticação e RBAC
+ * Authentication and RBAC Middleware
  *
- * Verifica se o usuário está autenticado e se possui a role adequada
- * para acessar as rotas protegidas (admin, aluno).
+ * Checks if the user is authenticated and has the appropriate role
+ * to access protected routes (admin, student).
  *
- * Hook registrado em post_controller_constructor.
+ * Hook registered in post_controller_constructor.
  */
 class Middleware
 {
     /**
-     * Valida o acesso à rota atual.
+     * Validate access to the current route.
      *
-     * Rotas públicas (entrar, sair, welcome) são permitidas sem autenticação.
-     * Demais rotas exigem login. As rotas admin e aluno verificam a role.
+     * Public routes (entrar, sair, welcome) are allowed without authentication.
+     * All other routes require login. Admin and student routes check the role.
      *
      * @return void
      */

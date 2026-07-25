@@ -1,8 +1,18 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Dashboard Controller (Student)
+ *
+ * Manages the student panel page display.
+ */
 class Dashboard extends CI_Controller
 {
+    /**
+     * Constructor.
+     *
+     * Loads helpers and libraries needed for the dashboard.
+     */
     public function __construct()
     {
         parent::__construct();
@@ -10,6 +20,13 @@ class Dashboard extends CI_Controller
         $this->load->library('session');
     }
 
+    /**
+     * Student panel home page.
+     *
+     * Loads the student dashboard view with user data.
+     *
+     * @return void
+     */
     public function index()
     {
         $data = [

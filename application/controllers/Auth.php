@@ -3,8 +3,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 use app\usecases\identity\AuthenticateUserUseCase;
 
+/**
+ * Authentication Controller
+ *
+ * Handles user login, logout, and role-based redirection.
+ */
 class Auth extends CI_Controller
 {
+    /**
+     * Constructor.
+     *
+     * Loads helpers, libraries, and session for authentication flow.
+     */
     public function __construct()
     {
         parent::__construct();
@@ -13,6 +23,15 @@ class Auth extends CI_Controller
         $this->load->library('session');
     }
 
+    /**
+     * Display login form or process login submission.
+     *
+     * If user is already logged in, redirects to their panel.
+     * On POST, validates credentials via AuthenticateUserUseCase
+     * and creates the session on success.
+     *
+     * @return void
+     */
     public function login()
     {
         if ($this->session->userdata('user_id')) {
@@ -48,12 +67,24 @@ class Auth extends CI_Controller
         $this->load->view('login', ['title' => 'Login']);
     }
 
+    /**
+     * Log out the current user.
+     *
+     * Destroys the session and redirects to the login page.
+     *
+     * @return void
+     */
     public function logout()
     {
         $this->session->sess_destroy();
         redirect(base_url('entrar'));
     }
 
+    /**
+     * Redirect user to their role-specific panel.
+     *
+     * @return void
+     */
     private function _redirect_by_role()
     {
         $role = $this->session->userdata('user_role');

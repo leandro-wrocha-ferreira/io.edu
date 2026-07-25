@@ -2,13 +2,43 @@
 
 namespace app\domain\identity;
 
+/**
+ * Repository interface for User persistence.
+ *
+ * Defines the contract for storing and retrieving User entities.
+ * Implementations handle the actual database interaction.
+ */
 interface UserRepositoryInterface
 {
+    /**
+     * Find a user by their ID.
+     *
+     * @param int $id User ID
+     * @return User|null User entity or null if not found
+     */
     public function find_by_id(int $id): ?User;
 
+    /**
+     * Find a user by their email address.
+     *
+     * @param Email $email User email (Value Object)
+     * @return User|null User entity or null if not found
+     */
     public function find_by_email(Email $email): ?User;
 
+    /**
+     * Save (insert or update) a user.
+     *
+     * @param User $user User entity to persist
+     * @return void
+     */
     public function save(User $user): void;
 
+    /**
+     * Soft delete a user by ID.
+     *
+     * @param int $id User ID to delete
+     * @return void
+     */
     public function delete(int $id): void;
 }

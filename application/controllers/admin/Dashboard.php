@@ -4,14 +4,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Dashboard Controller (Admin)
  *
- * Gerencia a exibição do painel administrativo principal.
+ * Manages the main admin panel page display.
  */
 class Dashboard extends CI_Controller
 {
     /**
-     * Construtor
+     * Constructor.
      *
-     * Carrega helpers e libraries necessários para o dashboard.
+     * Loads helpers and libraries needed for the dashboard.
      */
     public function __construct()
     {
@@ -21,9 +21,9 @@ class Dashboard extends CI_Controller
     }
 
     /**
-     * Página inicial do painel administrativo.
+     * Admin panel home page.
      *
-     * Carrega o layout com sidebar e o conteúdo dinâmico do dashboard.
+     * Loads the sidebar layout and the dynamic dashboard content.
      *
      * @return void
      */

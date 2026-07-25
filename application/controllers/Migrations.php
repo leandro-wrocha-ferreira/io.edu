@@ -1,8 +1,20 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Migration Controller
+ *
+ * CLI controller for managing database migrations.
+ * Provides commands for migrating, rolling back, listing status,
+ * and creating new migration files.
+ */
 class Migrations extends CI_Controller {
 
+	/**
+	 * Constructor.
+	 *
+	 * Restricts access to CLI only.
+	 */
 	public function __construct()
 	{
 		parent::__construct();
@@ -13,6 +25,11 @@ class Migrations extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Get the current migration version from the database.
+	 *
+	 * @return string Current version or '0'
+	 */
 	private function _get_current_version()
 	{
 		if ( ! $this->db->table_exists('migrations'))
@@ -24,6 +41,11 @@ class Migrations extends CI_Controller {
 		return $row ? $row->version : '0';
 	}
 
+	/**
+	 * Run all pending migrations up to the latest.
+	 *
+	 * @return void
+	 */
 	public function migrate()
 	{
 		$this->load->library('migration');
@@ -39,6 +61,12 @@ class Migrations extends CI_Controller {
 		echo "Current version: ".$this->_get_current_version()."\n";
 	}
 
+	/**
+	 * Roll back to a specific migration version.
+	 *
+	 * @param string|null $version Target version to roll back to
+	 * @return void
+	 */
 	public function rollback($version = NULL)
 	{
 		if ($version === NULL)
@@ -60,6 +88,11 @@ class Migrations extends CI_Controller {
 		echo "Current version: ".$this->_get_current_version()."\n";
 	}
 
+	/**
+	 * Display current migration status and all available migrations.
+	 *
+	 * @return void
+	 */
 	public function status()
 	{
 		$this->load->library('migration');
@@ -86,6 +119,12 @@ class Migrations extends CI_Controller {
 		}
 	}
 
+	/**
+	 * Create a new migration file from a template.
+	 *
+	 * @param string|null $name Migration name (snake_case)
+	 * @return void
+	 */
 	public function create($name = NULL)
 	{
 		if ($name === NULL)
