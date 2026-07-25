@@ -4,8 +4,19 @@ namespace Tests\Acceptance;
 
 use Tests\AcceptanceTester;
 
+/**
+ * E2E tests for logout flow.
+ *
+ * Covers admin and student logout after authentication.
+ */
 class LogoutCest
 {
+    /**
+     * Verify admin can log out and is redirected to login.
+     *
+     * @param AcceptanceTester $I
+     * @return void
+     */
     public function adminCanLogout(AcceptanceTester $I)
     {
         $I->amOnPage('/autenticacao/login');
@@ -18,6 +29,12 @@ class LogoutCest
         $I->seeCurrentUrlEquals('/autenticacao/login');
     }
 
+    /**
+     * Verify student can log out and is redirected to login.
+     *
+     * @param AcceptanceTester $I
+     * @return void
+     */
     public function studentCanLogout(AcceptanceTester $I)
     {
         $I->amOnPage('/autenticacao/login');

@@ -3,8 +3,19 @@
 use app\domain\identity\Email;
 use app\domain\identity\User;
 
+/**
+ * Test suite for User entity.
+ *
+ * Covers creation, password verification, role checks,
+ * database hydration, and soft delete lifecycle.
+ */
 class UserTest extends \PHPUnit\Framework\TestCase
 {
+    /**
+     * Test creating a user with valid data.
+     *
+     * @return void
+     */
     public function test_create_user()
     {
         $email = new Email('john@example.com');
@@ -16,6 +27,11 @@ class UserTest extends \PHPUnit\Framework\TestCase
         $this->assertNull($user->get_id());
     }
 
+    /**
+     * Test password verification with the correct password.
+     *
+     * @return void
+     */
     public function test_user_verify_correct_password()
     {
         $email = new Email('john@example.com');
@@ -24,6 +40,11 @@ class UserTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($user->verify_password('secret123'));
     }
 
+    /**
+     * Test password verification with a wrong password.
+     *
+     * @return void
+     */
     public function test_user_verify_wrong_password()
     {
         $email = new Email('john@example.com');
@@ -32,6 +53,11 @@ class UserTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($user->verify_password('wrongpassword'));
     }
 
+    /**
+     * Test changing the user password.
+     *
+     * @return void
+     */
     public function test_user_change_password()
     {
         $email = new Email('john@example.com');
@@ -43,6 +69,11 @@ class UserTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($user->verify_password('oldpass'));
     }
 
+    /**
+     * Test hydrating a User from a database row.
+     *
+     * @return void
+     */
     public function test_user_from_database()
     {
         $row = [
@@ -64,6 +95,11 @@ class UserTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('student', $user->get_role());
     }
 
+    /**
+     * Test role check for admin users.
+     *
+     * @return void
+     */
     public function test_user_is_admin()
     {
         $row = [
@@ -83,6 +119,11 @@ class UserTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($user->is_student());
     }
 
+    /**
+     * Test role check for student users.
+     *
+     * @return void
+     */
     public function test_user_is_student()
     {
         $row = [
@@ -102,6 +143,11 @@ class UserTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($user->is_admin());
     }
 
+    /**
+     * Test soft delete detection for a deleted user.
+     *
+     * @return void
+     */
     public function test_user_is_deleted()
     {
         $row = [
@@ -120,6 +166,11 @@ class UserTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($user->is_deleted());
     }
 
+    /**
+     * Test that a non-deleted user is correctly identified.
+     *
+     * @return void
+     */
     public function test_user_not_deleted()
     {
         $row = [

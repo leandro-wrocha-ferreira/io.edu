@@ -3,10 +3,22 @@
 use app\domain\identity\Email;
 use app\domain\identity\User;
 
+/**
+ * Integration test for User persistence layer.
+ *
+ * Uses SQLite in-memory to test CRUD operations
+ * and entity hydration from database rows.
+ */
 class User_repositoryTest extends \PHPUnit\Framework\TestCase
 {
+    /** @var \PDO */
     private $pdo;
 
+    /**
+     * Set up in-memory SQLite database and create users table.
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         $this->pdo = new \PDO('sqlite::memory:');
@@ -26,6 +38,11 @@ class User_repositoryTest extends \PHPUnit\Framework\TestCase
         ");
     }
 
+    /**
+     * Test inserting a user and retrieving it by ID.
+     *
+     * @return void
+     */
     public function test_insert_and_find_user()
     {
         $email = new Email('test@example.com');
@@ -54,6 +71,11 @@ class User_repositoryTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('test@example.com', $row['email']);
     }
 
+    /**
+     * Test finding a user by email address.
+     *
+     * @return void
+     */
     public function test_find_by_email()
     {
         $this->pdo->exec("
@@ -69,6 +91,11 @@ class User_repositoryTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('Test', $row['name']);
     }
 
+    /**
+     * Test that searching for a non-existing email returns false.
+     *
+     * @return void
+     */
     public function test_find_by_email_returns_null_for_nonexistent()
     {
         $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
@@ -78,6 +105,11 @@ class User_repositoryTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($row);
     }
 
+    /**
+     * Test hydrating a User entity from a raw database row.
+     *
+     * @return void
+     */
     public function test_user_entity_from_database_row()
     {
         $row = [
