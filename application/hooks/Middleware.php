@@ -2,8 +2,24 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+/**
+ * Middleware de Autenticação e RBAC
+ *
+ * Verifica se o usuário está autenticado e se possui a role adequada
+ * para acessar as rotas protegidas (admin, aluno).
+ *
+ * Hook registrado em post_controller_constructor.
+ */
 class Middleware
 {
+    /**
+     * Valida o acesso à rota atual.
+     *
+     * Rotas públicas (entrar, sair, welcome) são permitidas sem autenticação.
+     * Demais rotas exigem login. As rotas admin e aluno verificam a role.
+     *
+     * @return void
+     */
     public function validate()
     {
         $CI =& get_instance();
@@ -17,7 +33,7 @@ class Middleware
         }
 
         if (!$CI->session->userdata('logged_in')) {
-            redirect(base_url('login'));
+            redirect(base_url('entrar'));
         }
 
         if ($uri === 'admin' && $CI->session->userdata('user_role') !== 'admin') {
