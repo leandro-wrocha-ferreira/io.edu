@@ -32,3 +32,7 @@ user_guide_src/cilexer/pycilexer.egg-info/*
 /tests/results/
 /tests/_output/
 .phpunit.result.cache
+
+# GEMINI
+GEMINI.md
+.agents
