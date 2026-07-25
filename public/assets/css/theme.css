@@ -1,0 +1,108 @@
+/**
+ * Global Theme Palette
+ * Supports Light and Dark modes.
+ * To be used across Admin and Student interfaces.
+ */
+
+:root {
+    /* Brand Colors (Static across themes) */
+    --brand-primary: #3b82f6;
+    --brand-success: #10b981;
+    --brand-warning: #f59e0b;
+    --brand-danger: #ef4444;
+
+    /* Light Theme (Default) */
+    --bg-main: #f8fafc;
+    --bg-card: #ffffff;
+    
+    /* Sidebar remains dark in default light mode for contrast */
+    --bg-sidebar: #0f172a;
+    --sidebar-hover: rgba(255, 255, 255, 0.05);
+    --sidebar-color: #94a3b8;
+    --sidebar-active-color: #ffffff;
+
+    --text-main: #334155;
+    --text-heading: #1e293b;
+    --text-muted: #64748b;
+    
+    --border-color: #e2e8f0;
+    
+    /* Layout */
+    --sidebar-width: 280px;
+}
+
+[data-theme="dark"] {
+    /* Dark Theme */
+    --bg-main: #0f172a;
+    --bg-card: #1e293b;
+    
+    --bg-sidebar: #020617;
+    --sidebar-hover: rgba(255, 255, 255, 0.1);
+    --sidebar-color: #94a3b8;
+    --sidebar-active-color: #ffffff;
+
+    --text-main: #cbd5e1;
+    --text-heading: #f8fafc;
+    --text-muted: #94a3b8;
+    
+    --border-color: #334155;
+}
+
+/* Global Transitions for smooth theme switching */
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Theme Utility Classes */
+.bg-theme-main { background-color: var(--bg-main) !important; }
+.bg-theme-card { background-color: var(--bg-card) !important; }
+.bg-theme-sidebar { background-color: var(--bg-sidebar) !important; }
+
+.text-theme-main { color: var(--text-main) !important; }
+.text-theme-heading { color: var(--text-heading) !important; }
+.text-theme-muted { color: var(--text-muted) !important; }
+
+.border-theme { border-color: var(--border-color) !important; }
+
+/* Global Reusable UI Components */
+
+/* Buttons */
+.btn-theme-primary {
+    background-color: var(--brand-primary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.btn-theme-primary:hover {
+    background-color: #2563eb;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-theme-secondary {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.btn-theme-secondary:hover {
+    background-color: var(--border-color);
+    color: var(--text-heading);
+}
+
+.card-theme {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
