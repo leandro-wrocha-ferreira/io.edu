@@ -1,56 +1,67 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title><?= $title ?? 'Inverta' ?></title>
-	<link rel="stylesheet" href="<?= base_url('public/assets/css/bootstrap.min.css') ?>">
-</head>
-<body>
-	<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-		<div class="container">
-			<a class="navbar-brand" href="<?= base_url() ?>">Inverta</a>
-		</div>
-	</nav>
-	<div class="container mt-4">
-		<div class="d-flex justify-content-between align-items-center mb-4">
-			<h1>Painel Administrativo</h1>
-			<a href="<?= base_url('sair') ?>" class="btn btn-outline-secondary">Sair</a>
-		</div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-theme-heading">Dashboard</h1>
+</div>
 
-		<div class="alert alert-info">
-			Olá, <strong><?= htmlspecialchars($user_name) ?></strong>! Você está no painel administrativo.
-		</div>
+<div class="alert alert-primary bg-theme-card border-0 shadow-sm border-start border-primary border-4 mb-4 py-3">
+    <div class="d-flex align-items-center">
+        <i class="bi bi-info-circle-fill text-primary fs-4 me-3"></i>
+        <div class="text-theme-main">
+            Olá, <strong><?= htmlspecialchars($user_name ?? $this->session->userdata('user_name')) ?></strong>! Bem-vindo ao novo painel administrativo da Plataforma de Educação.
+        </div>
+    </div>
+</div>
 
-		<div class="row">
-			<div class="col-md-4">
-				<div class="card text-white bg-primary mb-3">
-					<div class="card-body">
-						<h5 class="card-title">Usuários</h5>
-						<p class="card-text display-6">-</p>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-4">
-				<div class="card text-white bg-success mb-3">
-					<div class="card-body">
-						<h5 class="card-title">Cursos</h5>
-						<p class="card-text display-6">-</p>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-4">
-				<div class="card text-white bg-warning mb-3">
-					<div class="card-body">
-						<h5 class="card-title">Matrículas</h5>
-						<p class="card-text display-6">-</p>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<script src="<?= base_url('public/assets/js/bootstrap.bundle.min.js') ?>"></script>
-</body>
-</html>
+<div class="row">
+    <!-- Usuários Card -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card bg-theme-card border-theme shadow-sm h-100 dashboard-card border-left-primary">
+            <div class="card-body py-4">
+                <div class="row align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">Usuários (Total)</div>
+                        <div class="h3 mb-0 fw-bold text-theme-heading">-</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-people text-theme-muted fs-1 opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cursos Card -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card bg-theme-card border-theme shadow-sm h-100 dashboard-card border-left-success">
+            <div class="card-body py-4">
+                <div class="row align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-success text-uppercase mb-1">Cursos Ativos</div>
+                        <div class="h3 mb-0 fw-bold text-theme-heading">-</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-journal-bookmark text-theme-muted fs-1 opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Matrículas Card -->
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card bg-theme-card border-theme shadow-sm h-100 dashboard-card border-left-warning">
+            <div class="card-body py-4">
+                <div class="row align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">Matrículas Recentes</div>
+                        <div class="h3 mb-0 fw-bold text-theme-heading">-</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-mortarboard text-theme-muted fs-1 opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
