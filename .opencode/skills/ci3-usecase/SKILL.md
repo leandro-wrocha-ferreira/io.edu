@@ -41,7 +41,7 @@ use app\domain\identity\User;
 use app\Factories\Model_factory;
 
 /**
- * Caso de uso para autenticar um usuário no sistema.
+ * Use case for authenticating a user in the system.
  */
 class AuthenticateUserUseCase
 {
@@ -49,9 +49,9 @@ class AuthenticateUserUseCase
     private $user_repository;
 
     /**
-     * Construtor.
+     * Constructor.
      *
-     * @param \app\domain\identity\UserRepositoryInterface|null $repository Repository para testes (opcional)
+     * @param \app\domain\identity\UserRepositoryInterface|null $repository Repository for testing (optional)
      */
     public function __construct($repository = null)
     {
@@ -63,27 +63,27 @@ class AuthenticateUserUseCase
     }
 
     /**
-     * Executa a autenticação.
+     * Execute authentication.
      *
-     * @param string $email Email do usuário
-     * @param string $password Senha em texto plano
-     * @return User Usuário autenticado
-     * @throws \RuntimeException Quando credenciais inválidas ou conta desativada
+     * @param string $email User email
+     * @param string $password Plain text password
+     * @return User Authenticated user
+     * @throws \RuntimeException When invalid credentials or deactivated account
      */
     public function execute(string $email, string $password): User
     {
         $user = $this->user_repository->find_by_email(new Email($email));
 
         if ($user === null) {
-            throw new \RuntimeException("Credenciais inválidas");
+            throw new \RuntimeException("Invalid credentials");
         }
 
         if ($user->is_deleted()) {
-            throw new \RuntimeException("Conta desativada");
+            throw new \RuntimeException("Deactivated account");
         }
 
         if (!$user->verify_password($password)) {
-            throw new \RuntimeException("Credenciais inválidas");
+            throw new \RuntimeException("Invalid credentials");
         }
 
         return $user;
@@ -111,7 +111,7 @@ $this->user_repository = Model_factory::make('User_model');
 5. Method name: `execute()` (consistent across all use cases)
 6. Throw exceptions for business rule violations (never return false/null for errors)
 7. Return entities, not arrays or objects
-8. All classes and methods MUST have docblocks with `@param` and `@return`
+8. All classes and methods MUST have docblocks with `@param` and `@return` — **always in English**
 9. Opening braces `{` on the NEXT line for classes and methods (PSR-12)
 10. Directories are lowercase: `usecases/`, `identity/`
 11. Files are PascalCase: `AuthenticateUserUseCase.php`

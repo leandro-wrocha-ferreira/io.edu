@@ -5,24 +5,24 @@ description: Use when creating, modifying or organizing JavaScript files and log
 
 # JavaScript Guidelines
 
-Este projeto utiliza uma abordagem modular e global para a organização de arquivos JavaScript.
+This project uses a modular and global approach for organizing JavaScript files.
 
-## Regras Obrigatórias
+## Mandatory Rules
 
-1. **Sem Scripts Inline Complexos**:
-   - NÃO utilize blocos `<script>` com lógicas extensas diretamente nas views (`.php`). 
-   - A lógica deve ser sempre extraída para arquivos `.js` estáticos na pasta `public/assets/js/`.
+1. **No Complex Inline Scripts**:
+   - DO NOT use `<script>` blocks with extensive logic directly in views (`.php`).
+   - Logic must always be extracted to static `.js` files in the `public/assets/js/` folder.
 
-2. **Organização por Módulos**:
-   - Scripts que pertencem a um contexto ou módulo específico (ex: admin, aluno, autenticação, cursos) devem ser agrupados em subdiretórios correspondentes.
-   - Exemplo: `public/assets/js/admin/layout.js` (para lógica exclusiva da área administrativa).
+2. **Module Organization**:
+   - Scripts belonging to a specific context or module (e.g. admin, student, auth, courses) must be grouped in corresponding subdirectories.
+   - Example: `public/assets/js/admin/layout.js` (exclusive logic for the admin area).
 
-3. **Scripts Globais Soltos na Raiz**:
-   - Scripts que compartilham comportamento entre vários módulos (ex: alternador de temas, validações genéricas, formatação de máscaras) devem ser colocados soltos na raiz da pasta `js/` e bem nomeados para serem facilmente encontrados.
-   - Exemplo: `public/assets/js/theme.js` (lida com o dark mode tanto no admin quanto no student).
-   - Scripts globais devem ser construídos considerando a ausência de elementos no DOM (use `if (!element) return;` ou certifique-se de validar a existência do node antes de vincular eventos).
+3. **Global Scripts at Root**:
+   - Scripts that share behavior across multiple modules (e.g. theme toggler, generic validations, mask formatting) should be placed at the root of the `js/` folder and well-named for easy discovery.
+   - Example: `public/assets/js/theme.js` (handles dark mode in both admin and student).
+   - Global scripts must be built considering the absence of DOM elements (use `if (!element) return;` or ensure node existence before binding events).
 
-4. **Inclusão em Views**:
-   - Ao incluir os scripts nas views, utilize sempre a função `base_url()`:
+4. **Inclusion in Views**:
+   - When including scripts in views, always use the `base_url()` function:
      `<script src="<?= base_url('public/assets/js/module/file.js') ?>"></script>`
-   - Para scripts visuais que previnem FOUC (Flash of Unstyled Content), como o tema, inclua-os na tag `<head>`. Outros scripts comportamentais devem ir para o final do `<body>`.
+   - For visual scripts that prevent FOUC (Flash of Unstyled Content), such as the theme, include them in the `<head>` tag. Other behavioral scripts should go at the end of `<body>`.

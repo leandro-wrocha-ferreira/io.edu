@@ -105,15 +105,15 @@ class User
 
 ### Docblocks
 
-Todas as classes, métodos e parâmetros devem ter docblocks:
+All classes, methods and parameters MUST have docblocks — **always in English**:
 
 ```php
 /**
- * Cria um novo usuário.
+ * Create a new user.
  *
- * @param string $name Nome do usuário
- * @param Email $email Email do usuário (Value Object)
- * @param string $password Senha em texto plano
+ * @param string $name User's name
+ * @param Email $email User's email (Value Object)
+ * @param string $password Plain text password
  * @return self
  */
 public static function create(string $name, Email $email, string $password): self
@@ -164,7 +164,7 @@ class Email
     public function __construct(string $email)
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException("Email inválido");
+            throw new \InvalidArgumentException("Invalid email");
         }
         $this->value = $email;
     }
@@ -217,10 +217,19 @@ use app\domain\identity\Email;
 use app\domain\identity\User;
 use app\Factories\Model_factory;
 
+/**
+ * Use case for authenticating a user in the system.
+ */
 class AuthenticateUserUseCase
 {
+    /** @var \app\domain\identity\UserRepositoryInterface */
     private $user_repository;
 
+    /**
+     * Constructor.
+     *
+     * @param \app\domain\identity\UserRepositoryInterface|null $repository Repository for testing (optional)
+     */
     public function __construct($repository = null)
     {
         if ($repository !== null) {
@@ -230,14 +239,22 @@ class AuthenticateUserUseCase
         }
     }
 
+    /**
+     * Execute authentication.
+     *
+     * @param string $email User email
+     * @param string $password Plain text password
+     * @return User Authenticated user
+     * @throws \RuntimeException When invalid credentials
+     */
     public function execute(string $email, string $password): User
     {
         $user = $this->user_repository->find_by_email(new Email($email));
         if ($user === null) {
-            throw new \RuntimeException("Credenciais inválidas");
+            throw new \RuntimeException("Invalid credentials");
         }
         if (!$user->verify_password($password)) {
-            throw new \RuntimeException("Credenciais inválidas");
+            throw new \RuntimeException("Invalid credentials");
         }
         return $user;
     }
@@ -383,7 +400,8 @@ vendor/bin/codecept run acceptance           # e2e
 - **Frontend:** Bootstrap 5.3.8 (via composer); CSS/JS copied to `public/assets/` on install/update
 - **Hooks:** enabled for auth middleware via `post_controller_constructor`
 - **PSR-12:** `{` on next line for classes and methods
-- **Docblocks:** obrigatórios em todas as classes e métodos
+- **Docblocks:** mandatory on all classes and methods — **always in English**
+- **IDE Helper:** `_ide_helper.php` at project root provides type resolution for CI3 core classes. Do NOT add `@property` annotations to individual models or controllers — they are inherited from the base class stubs.
 - **Directories:** lowercase para manter convenção CI3 (`domain/`, `usecases/`, `factories/`)
 - **Files:** PascalCase para classes namespaced (obrigação PSR-4)
 

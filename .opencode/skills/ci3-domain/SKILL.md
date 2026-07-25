@@ -39,7 +39,7 @@ namespace app\domain\identity;
 namespace app\domain\identity;
 
 /**
- * Entity que representa um usuário do sistema.
+ * Entity representing a system user.
  */
 class User
 {
@@ -48,11 +48,11 @@ class User
     private $email;  // Value Object
 
     /**
-     * Cria um novo usuário.
+     * Create a new user.
      *
-     * @param string $name Nome do usuário
-     * @param Email $email Email do usuário (Value Object)
-     * @param string $password Senha em texto plano
+     * @param string $name User's name
+     * @param Email $email User's email (Value Object)
+     * @param string $password Plain text password
      * @return self
      */
     public static function create(string $name, Email $email, string $password): self
@@ -66,9 +66,9 @@ class User
     }
 
     /**
-     * Hidrata um usuário a partir de um registro do banco.
+     * Hydrate a user from a database record.
      *
-     * @param array $row Registro do banco de dados
+     * @param array $row Database record
      * @return self
      */
     public static function from_database(array $row): self
@@ -82,7 +82,7 @@ class User
     }
 
     /**
-     * Obtém o ID do usuário.
+     * Get the user ID.
      *
      * @return int|null
      */
@@ -101,7 +101,7 @@ class User
 namespace app\domain\identity;
 
 /**
- * Value Object que representa um endereço de email.
+ * Value Object representing an email address.
  */
 class Email
 {
@@ -111,7 +111,7 @@ class Email
     {
         $trimmed = trim($email);
         if (!filter_var($trimmed, FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException("Email inválido: {$email}");
+            throw new \InvalidArgumentException("Invalid email: {$email}");
         }
         $this->value = strtolower($trimmed);
     }
@@ -154,7 +154,7 @@ interface UserRepositoryInterface
 3. Factory methods: `create()` for new entities, `from_database()` for hydration
 4. Value Objects must be immutable and implement `__toString()`
 5. Repository Interfaces define contracts, NOT implementations
-6. All classes and methods MUST have docblocks with `@param` and `@return`
+6. All classes and methods MUST have docblocks with `@param` and `@return` — **always in English**
 7. Opening braces `{` on the NEXT line for classes and methods (PSR-12)
 8. Use PSR-4 namespaces: `app\domain\<BoundedContext>\`
 9. Directories are lowercase: `domain/`, `identity/`
