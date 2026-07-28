@@ -407,7 +407,8 @@ vendor/bin/codecept run acceptance           # e2e
 - **Line endings:** LF
 - **Charset:** UTF-8
 - **Database:** `mysqli` driver, Query Builder enabled; credentials read from env vars (`DB_HOSTNAME`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, `DB_DRIVER`) with localhost fallback
-- **Autoloads:** database, migration, form_validation, and session libraries auto-loaded; url and form helpers auto-loaded (`application/config/autoload.php`)
+- **Autoloads:** database, migration, form_validation, and session libraries auto-loaded; url, form, and response helpers auto-loaded (`application/config/autoload.php`)
+- **JSON & File Responses:** controllers MUST send JSON responses using `json_response($data, $status_code)` from `response_helper.php`. For file downloads (such as PDF/DOCX), use dedicated response helpers (e.g. `response_pdf()`).
 - **Composer PSR-4:** `app\` → `application/`, `Tests\` → `tests/`
 - **Routing:** `translate_uri_dashes` is OFF; controller methods map directly to URL segments
 - **Frontend:** Bootstrap 5.3.8 (via composer); CSS/JS copied to `public/assets/` on install/update
