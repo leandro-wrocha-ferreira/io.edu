@@ -13,8 +13,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 
 $hook['post_controller_constructor'][] = [
+    'class'    => 'Language_check',
+    'function' => 'detect',
+    'filename' => 'Language_check.php',
+    'filepath' => 'hooks'
+];
+
+$hook['post_controller_constructor'][] = [
     'class'    => 'Middleware',
     'function' => 'validate',
     'filename' => 'Middleware.php',
     'filepath' => 'hooks'
 ];
+
