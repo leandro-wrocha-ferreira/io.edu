@@ -23,13 +23,6 @@ class Users extends CI_Controller
     {
         parent::__construct();
         $this->load->model('user_model');
-
-        // Load language based on browser preference (default to english)
-        $idiom = 'english';
-        if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']) && strpos($_SERVER['HTTP_ACCEPT_LANGUAGE'], 'pt-BR') !== false) {
-            $idiom = 'portuguese-brazilian';
-        }
-        $this->lang->load('admin', $idiom);
     }
 
     /**
