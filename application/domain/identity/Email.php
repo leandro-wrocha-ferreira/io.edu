@@ -10,7 +10,7 @@ namespace app\domain\identity;
  */
 class Email
 {
-    private $value;
+    private string $value;
 
     /**
      * Constructor.

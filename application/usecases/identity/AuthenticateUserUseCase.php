@@ -27,7 +27,7 @@ class AuthenticateUserUseCase
         if ($repository !== null) {
             $this->user_repository = $repository;
         } else {
-            $this->user_repository = Model_factory::make('User_model');
+            $this->user_repository = Model_factory::make('user_model');
         }
     }
 

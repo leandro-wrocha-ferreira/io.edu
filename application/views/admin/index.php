@@ -17,6 +17,7 @@
 	<!-- Styles -->
 	<link rel="stylesheet" href="<?= base_url('public/assets/css/bootstrap.min.css') ?>">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+	<link rel="stylesheet" href="//cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" href="<?= base_url('public/assets/css/theme.css') ?>">
 	<link rel="stylesheet" href="<?= base_url('public/assets/css/admin.css') ?>">
 </head>
@@ -42,12 +43,12 @@
 						<span class="nav-section-title">ADMINISTRAÇÃO</span>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="#">
+						<a class="nav-link <?= $this->uri->segment(2) == 'usuarios' ? 'active' : '' ?>" href="<?= base_url('admin/usuarios') ?>">
 							<i class="bi bi-people"></i> Gestão de Usuários
 						</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="#">
+						<a class="nav-link <?= $this->uri->segment(2) == 'perfis' ? 'active' : '' ?>" href="<?= base_url('admin/perfis') ?>">
 							<i class="bi bi-shield-lock"></i> Perfis e Permissões
 						</a>
 					</li>
@@ -123,8 +124,10 @@
 		</main>
 	</div>
 
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 	<script src="<?= base_url('public/assets/js/bootstrap.bundle.min.js') ?>"></script>
-	<!-- Admin Specific Scripts -->
+	<script src="//cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+	<script src="//cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 	<script src="<?= base_url('public/assets/js/admin/layout.js') ?>"></script>
 </body>
 </html>

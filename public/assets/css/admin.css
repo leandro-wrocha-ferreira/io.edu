@@ -213,6 +213,123 @@ body {
 .border-left-warning { border-left: 4px solid var(--brand-warning) !important; }
 
 /* Mobile Responsiveness */
+/* DataTables Theme Overrides */
+.dataTables_wrapper {
+    color: var(--text-main) !important;
+}
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 1rem;
+}
+.dataTables_wrapper .dataTables_length label,
+.dataTables_wrapper .dataTables_filter label {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+.dataTables_wrapper .dataTables_length select {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    padding: 0.4rem 2rem 0.4rem 0.75rem;
+    min-width: 80px;
+    font-size: 0.875rem;
+    transition: border-color 0.2s;
+}
+.dataTables_wrapper .dataTables_filter input {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.875rem;
+    transition: border-color 0.2s;
+}
+.dataTables_wrapper .dataTables_length select:focus,
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: var(--brand-primary);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+.dataTables_wrapper .dataTables_info {
+    margin-top: 1rem;
+    color: var(--text-muted);
+    font-size: 0.8125rem;
+}
+.dataTables_wrapper .dataTables_paginate {
+    margin-top: 1rem;
+    padding-top: 0.25rem;
+}
+table.dataTable {
+    border-collapse: collapse !important;
+    border: 1px solid var(--border-color) !important;
+}
+table.dataTable thead th {
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background-color: var(--bg-card) !important;
+}
+table.dataTable tbody td {
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main);
+    vertical-align: middle;
+    font-size: 0.875rem;
+    background-color: transparent !important;
+}
+table.dataTable tbody tr {
+    background-color: transparent !important;
+}
+table.dataTable tbody tr:hover td {
+    background-color: var(--sidebar-hover) !important;
+}
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: var(--bg-main) !important;
+    box-shadow: none !important;
+}
+[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-main);
+    --bs-table-border-color: var(--border-color);
+}
+
+div.dataTables_processing {
+    background: var(--bg-card) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* CRUD Form Styles */
+.form-label {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+.form-control, .form-select {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-control:focus, .form-select:focus {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+}
+.form-check-input:checked {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+
 @media (max-width: 768px) {
     .admin-sidebar {
         transform: translateX(-100%);
@@ -228,5 +345,11 @@ body {
     
     .admin-header {
         padding: 0 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .dataTables_wrapper .pagination .page-item:not(.previous):not(.next) {
+        display: none;
     }
 }

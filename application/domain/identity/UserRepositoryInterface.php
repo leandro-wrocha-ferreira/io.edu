@@ -41,4 +41,19 @@ interface UserRepositoryInterface
      * @return void
      */
     public function delete(int $id): void;
+
+    /**
+     * Find all non-deleted users, ordered by creation date DESC.
+     *
+     * @return array User entities
+     */
+    public function find_all(): array;
+
+    /**
+     * Count non-deleted users by role slug.
+     *
+     * @param string $role Role slug (e.g. 'student')
+     * @return int
+     */
+    public function count_by_role(string $role): int;
 }

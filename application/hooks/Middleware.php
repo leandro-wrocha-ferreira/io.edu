@@ -15,13 +15,18 @@ class Middleware
     /**
      * Validate access to the current route.
      *
-     * Public routes (entrar, sair, welcome) are allowed without authentication.
+     * Public routes (entrar, sair, welcome, migrations) are allowed without authentication.
+     * CLI requests bypass authentication entirely.
      * All other routes require login. Admin and student routes check the role.
      *
      * @return void
      */
     public function validate()
     {
+        if (is_cli()) {
+            return;
+        }
+
         $CI =& get_instance();
         $CI->load->library('session');
 

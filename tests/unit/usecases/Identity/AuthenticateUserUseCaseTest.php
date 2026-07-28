@@ -81,6 +81,39 @@ class MockUserRepository implements UserRepositoryInterface
             return $user->get_id() !== $id;
         });
     }
+
+    /**
+     * Return all users in the in-memory list.
+     *
+     * @return array User entities
+     */
+    public function find_all(): array
+    {
+        return $this->users;
+    }
+
+    /**
+     * Count users by role slug on a specific date.
+     *
+     * @param string $role Role slug
+     * @param string $date Date string (Y-m-d)
+     * @return int
+     */
+    public function count_by_role_and_date(string $role, string $date): int
+    {
+        $count = 0;
+        foreach ($this->users as $user) {
+            if (
+                $user->has_role($role)
+                && !$user->is_deleted()
+                && $user->get_created_at() !== null
+                && $user->get_created_at()->format('Y-m-d') === $date
+            ) {
+                $count++;
+            }
+        }
+        return $count;
+    }
 }
 
 /**

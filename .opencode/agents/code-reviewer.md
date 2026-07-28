@@ -39,7 +39,7 @@ Always check `AGENTS.md` for current conventions. Summary:
 - **Use Cases**: `app\usecases\context` — Business rule orchestration
 - **Models**: `application/models/` — Interface implementations (no namespace)
 - **Controllers**: `application/controllers/` — No namespace, subdirectories (`auth/`, `admin/`, `student/`)
-- **Factories**: `app\Factories` — Factory pattern for models
+- **Factories**: `app\factories` — Factory pattern for models
 
 ### Code Style
 - **PSR-12**: Braces `{` on the next line for classes and methods

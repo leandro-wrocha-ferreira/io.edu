@@ -14,14 +14,14 @@
 </div>
 
 <div class="row">
-    <!-- Usuários Card -->
+    <!-- Alunos (Total) Card -->
     <div class="col-xl-4 col-md-6 mb-4">
         <div class="card bg-theme-card border-theme shadow-sm h-100 dashboard-card border-left-primary">
             <div class="card-body py-4">
                 <div class="row align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">Usuários (Total)</div>
-                        <div class="h3 mb-0 fw-bold text-theme-heading">-</div>
+                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">Alunos (Total)</div>
+                        <div class="h3 mb-0 fw-bold text-theme-heading"><?= $total_students ?></div>
                     </div>
                     <div class="col-auto">
                         <i class="bi bi-people text-theme-muted fs-1 opacity-25"></i>

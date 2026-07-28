@@ -59,6 +59,18 @@ $route['sair'] = 'auth/logout';
 
 // Admin routes
 $route['admin/painel'] = 'admin/dashboard/index';
+$route['admin/usuarios'] = 'admin/users/index';
+$route['admin/usuarios/dados'] = 'admin/users/ajax_data';
+$route['admin/usuarios/novo'] = 'admin/users/create';
+$route['admin/usuarios/editar/(:num)'] = 'admin/users/update/$1';
+$route['admin/usuarios/ativar/(:num)'] = 'admin/users/activate/$1';
+$route['admin/usuarios/desativar/(:num)'] = 'admin/users/disable/$1';
+$route['admin/usuarios/excluir/(:num)'] = 'admin/users/delete/$1';
+$route['admin/perfis'] = 'admin/roles/index';
+$route['admin/perfis/dados'] = 'admin/roles/ajax_data';
+$route['admin/perfis/novo'] = 'admin/roles/create';
+$route['admin/perfis/editar/(:num)'] = 'admin/roles/update/$1';
+$route['admin/perfis/excluir/(:num)'] = 'admin/roles/delete/$1';
 
 // Student routes
 $route['aluno/painel'] = 'student/dashboard/index';

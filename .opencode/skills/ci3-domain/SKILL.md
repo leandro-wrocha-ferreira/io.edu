@@ -38,14 +38,23 @@ namespace app\domain\identity;
 
 namespace app\domain\identity;
 
+use DateTime;
+
 /**
  * Entity representing a system user.
  */
 class User
 {
-    private $id;
-    private $name;
-    private $email;  // Value Object
+    private ?int $id = null;
+    private string $name;
+    private Email $email;
+    private string $password;
+    private bool $is_active = true;
+    private array $role_ids = [];
+    private ?string $role = null;
+    private ?DateTime $created_at = null;
+    private ?DateTime $updated_at = null;
+    private ?DateTime $deleted_at = null;
 
     /**
      * Create a new user.
@@ -61,7 +70,6 @@ class User
         $user->name = $name;
         $user->email = $email;
         $user->password = password_hash($password, PASSWORD_BCRYPT);
-        $user->created_at = new \DateTime();
         return $user;
     }
 
@@ -93,6 +101,8 @@ class User
 }
 ```
 
+> **Note:** Entity `create()` methods MUST NOT set `created_at` or `updated_at`. Timestamps are managed by database triggers.
+
 ## Value Object Pattern
 
 ```php
@@ -105,7 +115,7 @@ namespace app\domain\identity;
  */
 class Email
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $email)
     {
@@ -151,11 +161,14 @@ interface UserRepositoryInterface
 
 1. Domain classes MUST NOT depend on CI3 (no `get_instance()`, no `CI_Model`)
 2. Use `private` properties with getters (no setters for immutable fields)
-3. Factory methods: `create()` for new entities, `from_database()` for hydration
-4. Value Objects must be immutable and implement `__toString()`
-5. Repository Interfaces define contracts, NOT implementations
-6. All classes and methods MUST have docblocks with `@param` and `@return` — **always in English**
-7. Opening braces `{` on the NEXT line for classes and methods (PSR-12)
-8. Use PSR-4 namespaces: `app\domain\<BoundedContext>\`
-9. Directories are lowercase: `domain/`, `identity/`
-10. Files are PascalCase: `User.php`, `Email.php`
+3. **All properties MUST use PHP 8.2 strict types** (e.g., `private int $id`, `private ?string $role = null`). Nullable properties that may be uninitialized must have `= null` default.
+4. Factory methods: `create()` for new entities, `from_database()` for hydration
+5. Value Objects must be immutable and implement `__toString()`
+6. Repository Interfaces define contracts, NOT implementations
+7. All classes and methods MUST have docblocks with `@param` and `@return` — **always in English**
+8. Opening braces `{` on the NEXT line for classes and methods (PSR-12)
+9. Use PSR-4 namespaces: `app\domain\<BoundedContext>\`
+10. Directories are lowercase: `domain/`, `identity/`
+11. Files are PascalCase: `User.php`, `Email.php`
+12. **Entity `create()` methods MUST NOT set `created_at` or `updated_at`** — timestamps are managed by database triggers.
+13. Typed properties that are nullable and not set in `create()` MUST default to `null` (e.g., `private ?int $id = null`).

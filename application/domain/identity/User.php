@@ -2,6 +2,8 @@
 
 namespace app\domain\identity;
 
+use DateTime;
+
 /**
  * Entity representing a system user.
  *
@@ -10,14 +12,16 @@ namespace app\domain\identity;
  */
 class User
 {
-    private $id;
-    private $name;
-    private $email;
-    private $password;
-    private $role;
-    private $created_at;
-    private $updated_at;
-    private $deleted_at;
+    private ?int $id = null;
+    private string $name;
+    private Email $email;
+    private string $password;
+    private bool $is_active = true;
+    private array $role_ids = [];
+    private ?string $role = null;
+    private ?DateTime $created_at = null;
+    private ?DateTime $updated_at = null;
+    private ?DateTime $deleted_at = null;
 
     /**
      * Create a new user with a hashed password.
@@ -40,7 +44,10 @@ class User
     /**
      * Hydrate a User entity from a database row.
      *
-     * @param array $row Database record with keys: id, name, email, password, role, created_at, updated_at, deleted_at
+     * Expects keys: id, name, email, password, role, role_ids,
+     * created_at, updated_at, deleted_at.
+     *
+     * @param array $row Database record
      * @return self
      */
     public static function from_database(array $row): self
@@ -50,7 +57,9 @@ class User
         $user->name = $row['name'];
         $user->email = new Email($row['email']);
         $user->password = $row['password'];
+        $user->is_active = isset($row['is_active']) ? (bool) $row['is_active'] : true;
         $user->role = $row['role'] ?? null;
+        $user->role_ids = isset($row['role_ids']) ? json_decode($row['role_ids'], true) ?? [] : [];
         $user->created_at = isset($row['created_at']) ? new \DateTime($row['created_at']) : null;
         $user->updated_at = isset($row['updated_at']) ? new \DateTime($row['updated_at']) : null;
         $user->deleted_at = isset($row['deleted_at']) ? new \DateTime($row['deleted_at']) : null;
@@ -68,6 +77,17 @@ class User
     }
 
     /**
+     * Set the user ID (used after insert).
+     *
+     * @param int $id
+     * @return void
+     */
+    public function set_id(int $id): void
+    {
+        $this->id = $id;
+    }
+
+    /**
      * Get the user name.
      *
      * @return string
@@ -75,6 +95,17 @@ class User
     public function get_name(): string
     {
         return $this->name;
+    }
+
+    /**
+     * Set the user name.
+     *
+     * @param string $name
+     * @return void
+     */
+    public function set_name(string $name): void
+    {
+        $this->name = $name;
     }
 
     /**
@@ -88,6 +119,17 @@ class User
     }
 
     /**
+     * Set the user email.
+     *
+     * @param Email $email
+     * @return void
+     */
+    public function set_email(Email $email): void
+    {
+        $this->email = $email;
+    }
+
+    /**
      * Get the hashed password.
      *
      * @return string
@@ -98,13 +140,77 @@ class User
     }
 
     /**
-     * Get the user role.
+     * Check if the user is active.
+     *
+     * @return bool
+     */
+    public function is_active(): bool
+    {
+        return $this->is_active;
+    }
+
+    /**
+     * Set the active status.
+     *
+     * @param bool $active
+     * @return void
+     */
+    public function set_active(bool $active): void
+    {
+        $this->is_active = $active;
+    }
+
+    /**
+     * Get the primary role slug.
      *
      * @return string|null
      */
     public function get_role(): ?string
     {
         return $this->role;
+    }
+
+    /**
+     * Set the primary role slug.
+     *
+     * @param string|null $role
+     * @return void
+     */
+    public function set_role(?string $role): void
+    {
+        $this->role = $role;
+    }
+
+    /**
+     * Get all role IDs assigned to the user.
+     *
+     * @return array
+     */
+    public function get_role_ids(): array
+    {
+        return $this->role_ids;
+    }
+
+    /**
+     * Set the role IDs assigned to the user.
+     *
+     * @param array $role_ids
+     * @return void
+     */
+    public function set_role_ids(array $role_ids): void
+    {
+        $this->role_ids = $role_ids;
+    }
+
+    /**
+     * Check if the user has a specific role by slug.
+     *
+     * @param string $slug Role slug (e.g. 'admin', 'student')
+     * @return bool
+     */
+    public function has_role(string $slug): bool
+    {
+        return $this->role === $slug;
     }
 
     /**
@@ -180,5 +286,15 @@ class User
     public function delete(): void
     {
         $this->deleted_at = new \DateTime();
+    }
+
+    /**
+     * Restore a soft-deleted user.
+     *
+     * @return void
+     */
+    public function restore(): void
+    {
+        $this->deleted_at = null;
     }
 }

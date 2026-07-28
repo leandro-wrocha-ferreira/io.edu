@@ -12,15 +12,10 @@ class Auth extends CI_Controller
 {
     /**
      * Constructor.
-     *
-     * Loads helpers, libraries, and session for authentication flow.
      */
     public function __construct()
     {
         parent::__construct();
-        $this->load->helper('url');
-        $this->load->helper('form');
-        $this->load->library('session');
     }
 
     /**

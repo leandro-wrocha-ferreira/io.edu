@@ -38,7 +38,7 @@ namespace app\usecases\identity;
 
 use app\domain\identity\Email;
 use app\domain\identity\User;
-use app\Factories\Model_factory;
+use app\factories\Model_factory;
 
 /**
  * Use case for authenticating a user in the system.
@@ -96,10 +96,10 @@ class AuthenticateUserUseCase
 Use cases load models via `Model_factory` instead of `get_instance()`:
 
 ```php
-use app\Factories\Model_factory;
+use app\factories\Model_factory;
 
-// Inside use case constructor:
-$this->user_repository = Model_factory::make('User_model');
+// Inside use case constructor — ALWAYS use lowercase model names:
+$this->user_repository = Model_factory::make('user_model');
 ```
 
 ## Rules
@@ -115,3 +115,5 @@ $this->user_repository = Model_factory::make('User_model');
 9. Opening braces `{` on the NEXT line for classes and methods (PSR-12)
 10. Directories are lowercase: `usecases/`, `identity/`
 11. Files are PascalCase: `AuthenticateUserUseCase.php`
+12. **ALWAYS use lowercase model names** in `Model_factory::make()` (e.g. `'user_model'`, not `'User_model'`)
+13. **Business logic (counting, filtering, processing) belongs in Use Cases, NOT in Controllers.** Controllers only orchestrate: receive input, call use case, return response.

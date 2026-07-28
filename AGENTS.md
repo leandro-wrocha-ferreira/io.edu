@@ -36,6 +36,10 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
 - **Use Cases** usam `Model_factory` para carregar models (não `get_instance()` direto).
 - **Models** implementam interfaces do domain (`implements UserRepositoryInterface`).
 - **Controllers** delegam lógica para Use Cases, nunca direto para Models.
+- **Controllers** NÃO devem conter regra de negócio — toda lógica de contagem, filtro ou processamento pertence ao Use Case.
+- **Controllers** NÃO devem carregar `session`, `url` ou `form` manualmente — já estão no autoload.
+- **Controllers** carregam models no `__construct()` usando **lowercase** (ex: `$this->load->model('user_model')`).
+- **Models** NÃO devem setar `created_at`/`updated_at` — isso é responsabilidade do banco via triggers.
 - **Models** ficam em `application/models/` (lowercase) — CI3 requer esta convenção.
 - **Controllers** ficam em `application/controllers/` com subdiretórios (`auth/`, `admin/`, `student/`).
 - Controllers NÃO devem usar namespaces — CI3 carrega por path discovery.
@@ -75,7 +79,7 @@ O projeto usa Composer PSR-4 para autoloading:
 |--------|-----------|---------|
 | Domain | `app\domain\<context>` | `app\domain\identity\User` |
 | Use Cases | `app\usecases\<context>` | `app\usecases\identity\AuthenticateUserUseCase` |
-| Factories | `app\Factories` | `app\Factories\Model_factory` |
+| Factories | `app\factories` | `app\factories\Model_factory` |
 | Tests | `Tests\<Type>` | `Tests\Acceptance\LoginCest` |
 
 ### Notas Importantes
@@ -194,7 +198,7 @@ interface UserRepositoryInterface
 
 ```php
 // application/factories/Model_factory.php
-namespace app\Factories;
+namespace app\factories;
 
 class Model_factory
 {
@@ -215,7 +219,7 @@ namespace app\usecases\identity;
 
 use app\domain\identity\Email;
 use app\domain\identity\User;
-use app\Factories\Model_factory;
+use app\factories\Model_factory;
 
 /**
  * Use case for authenticating a user in the system.
@@ -235,7 +239,7 @@ class AuthenticateUserUseCase
         if ($repository !== null) {
             $this->user_repository = $repository;
         } else {
-            $this->user_repository = Model_factory::make('User_model');
+            $this->user_repository = Model_factory::make('user_model');
         }
     }
 
@@ -331,6 +335,7 @@ $route['aluno/painel'] = 'student/dashboard/index';
 
 - **Tabelas:** plural, snake_case, sem prefixo (`users`, `courses`, `lessons`)
 - **Colunas padrão:** `id` (INT unsigned AI), `created_at`, `updated_at`, `deleted_at` (soft delete)
+- **Timestamps:** `created_at` e `updated_at` são gerenciados por **triggers do banco** (INSERT/UPDATE). Models NÃO devem setar essas colunas.
 - **Migrations:** timestamp `YYYYMMDDHHIISS_name`, classe `Migration_Create_<table>`
 - **Foreign keys:** migration separada, naming `fk_table_column`
 - **Driver:** `mysqli`, Query Builder habilitado
@@ -394,7 +399,7 @@ vendor/bin/codecept run acceptance           # e2e
 - **Line endings:** LF
 - **Charset:** UTF-8
 - **Database:** `mysqli` driver, Query Builder enabled; credentials read from env vars (`DB_HOSTNAME`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, `DB_DRIVER`) with localhost fallback
-- **Autoloads:** database and migration libraries auto-loaded (`application/config/autoload.php`)
+- **Autoloads:** database, migration, form_validation, and session libraries auto-loaded; url and form helpers auto-loaded (`application/config/autoload.php`)
 - **Composer PSR-4:** `app\` → `application/`, `Tests\` → `tests/`
 - **Routing:** `translate_uri_dashes` is OFF; controller methods map directly to URL segments
 - **Frontend:** Bootstrap 5.3.8 (via composer); CSS/JS copied to `public/assets/` on install/update
