@@ -76,15 +76,15 @@ class Users extends CI_Controller
         $data = [];
         foreach ($result['data'] as $row) {
             $role_badge = match ($row['role']) {
-                'admin' => '<span class="badge bg-danger">Admin</span>',
-                'student' => '<span class="badge bg-primary">Aluno</span>',
-                default => '<span class="badge bg-secondary">-</span>',
+                'admin'   => '<span class="badge-role badge-role-admin"><i class="bi bi-shield-fill" aria-hidden="true"></i> Admin</span>',
+                'student' => '<span class="badge-role badge-role-student"><i class="bi bi-mortarboard-fill" aria-hidden="true"></i> Aluno</span>',
+                default   => '<span class="badge-role badge-role-default">—</span>',
             };
 
             $is_active = !empty($row['is_active']);
             $status_badge = $is_active
-                ? '<span class="badge bg-success">Ativo</span>'
-                : '<span class="badge bg-warning text-dark">Inativo</span>';
+                ? '<span class="badge-status-active"><i class="bi bi-circle-fill" style="font-size:0.5rem" aria-hidden="true"></i> Ativo</span>'
+                : '<span class="badge-status-inactive"><i class="bi bi-circle" style="font-size:0.5rem" aria-hidden="true"></i> Inativo</span>';
 
             $edit_url = site_url('admin/usuarios/editar/' . $row['id']);
             $toggle_url = $is_active ? site_url('admin/usuarios/desativar/' . $row['id']) : site_url('admin/usuarios/ativar/' . $row['id']);

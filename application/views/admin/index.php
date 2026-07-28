@@ -5,85 +5,102 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title><?= $title ?? 'Inverta Admin' ?></title>
-	
+	<meta name="description" content="Painel Administrativo da Plataforma de Educação Inverta">
+
 	<!-- Fonts -->
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-	
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
 	<!-- Theme Logic (Before CSS to prevent FOUC) -->
 	<script src="<?= base_url('public/assets/js/theme.js') ?>"></script>
 
 	<!-- Styles -->
 	<link rel="stylesheet" href="<?= base_url('public/assets/css/bootstrap.min.css') ?>">
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 	<link rel="stylesheet" href="//cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" href="<?= base_url('public/assets/css/theme.css') ?>">
 	<link rel="stylesheet" href="<?= base_url('public/assets/css/admin.css') ?>">
 </head>
 <body>
 	<div class="admin-wrapper">
+		<!-- Sidebar Backdrop (Mobile) -->
+		<div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
+
 		<!-- Sidebar -->
-		<aside class="admin-sidebar">
+		<aside class="admin-sidebar" id="admin-sidebar" role="navigation" aria-label="Menu principal">
 			<div class="sidebar-header">
-				<div class="brand-logo">
-					<i class="bi bi-box-fill text-primary"></i> <span>Inverta</span>
-				</div>
+				<a href="<?= base_url('admin/painel') ?>" class="brand-logo">
+					<div class="brand-logo-icon" aria-hidden="true">
+						<i class="bi bi-lightning-fill"></i>
+					</div>
+					<span class="brand-logo-text">Inver<span>ta</span></span>
+				</a>
 			</div>
-			
+
 			<div class="sidebar-menu">
-				<ul class="nav flex-column">
-					<li class="nav-item">
-						<a class="nav-link <?= $this->uri->segment(2) == 'painel' ? 'active' : '' ?>" href="<?= base_url('admin/painel') ?>">
-							<i class="bi bi-grid-1x2"></i> Dashboard
+				<ul class="nav flex-column" role="menubar">
+					<li class="nav-item" role="none">
+						<a class="nav-link <?= $this->uri->segment(2) == 'painel' ? 'active' : '' ?>"
+						   href="<?= base_url('admin/painel') ?>"
+						   role="menuitem"
+						   <?= $this->uri->segment(2) == 'painel' ? 'aria-current="page"' : '' ?>>
+							<i class="bi bi-grid-1x2" aria-hidden="true"></i> Dashboard
 						</a>
 					</li>
-					
-					<li class="nav-item mt-4 mb-2">
-						<span class="nav-section-title">ADMINISTRAÇÃO</span>
+
+					<li class="nav-item nav-section" role="none">
+						<span class="nav-section-title">Administração</span>
 					</li>
-					<li class="nav-item">
-						<a class="nav-link <?= $this->uri->segment(2) == 'usuarios' ? 'active' : '' ?>" href="<?= base_url('admin/usuarios') ?>">
-							<i class="bi bi-people"></i> Gestão de Usuários
+
+					<li class="nav-item" role="none">
+						<a class="nav-link <?= $this->uri->segment(2) == 'usuarios' ? 'active' : '' ?>"
+						   href="<?= base_url('admin/usuarios') ?>"
+						   role="menuitem"
+						   <?= $this->uri->segment(2) == 'usuarios' ? 'aria-current="page"' : '' ?>>
+							<i class="bi bi-people" aria-hidden="true"></i> Gestão de Usuários
 						</a>
 					</li>
-					<li class="nav-item">
-						<a class="nav-link <?= $this->uri->segment(2) == 'perfis' ? 'active' : '' ?>" href="<?= base_url('admin/perfis') ?>">
-							<i class="bi bi-shield-lock"></i> Perfis e Permissões
+					<li class="nav-item" role="none">
+						<a class="nav-link <?= $this->uri->segment(2) == 'perfis' ? 'active' : '' ?>"
+						   href="<?= base_url('admin/perfis') ?>"
+						   role="menuitem"
+						   <?= $this->uri->segment(2) == 'perfis' ? 'aria-current="page"' : '' ?>>
+							<i class="bi bi-shield-check" aria-hidden="true"></i> Perfis e Permissões
 						</a>
 					</li>
-					
-					<li class="nav-item mt-4 mb-2">
-						<span class="nav-section-title">ACADÊMICO</span>
+
+					<li class="nav-item nav-section" role="none">
+						<span class="nav-section-title">Acadêmico</span>
 					</li>
-					<li class="nav-item">
-						<a class="nav-link disabled-link" href="#" title="Em desenvolvimento">
-							<i class="bi bi-journal-bookmark"></i> Gestão de Cursos 
-							<span class="badge badge-dev ms-auto">Em dev</span>
+					<li class="nav-item" role="none">
+						<a class="nav-link disabled-link" href="#" role="menuitem" aria-disabled="true" tabindex="-1">
+							<i class="bi bi-journal-bookmark" aria-hidden="true"></i> Gestão de Cursos
+							<span class="badge badge-dev">Em dev</span>
 						</a>
 					</li>
-					<li class="nav-item">
-						<a class="nav-link disabled-link" href="#" title="Em desenvolvimento">
-							<i class="bi bi-star"></i> Gestão de Avaliações 
-							<span class="badge badge-dev ms-auto">Em dev</span>
+					<li class="nav-item" role="none">
+						<a class="nav-link disabled-link" href="#" role="menuitem" aria-disabled="true" tabindex="-1">
+							<i class="bi bi-star" aria-hidden="true"></i> Gestão de Avaliações
+							<span class="badge badge-dev">Em dev</span>
 						</a>
 					</li>
-					
-					<li class="nav-item mt-4 mb-2">
-						<span class="nav-section-title">INSIGHTS</span>
+
+					<li class="nav-item nav-section" role="none">
+						<span class="nav-section-title">Insights</span>
 					</li>
-					<li class="nav-item">
-						<a class="nav-link disabled-link" href="#" title="Em desenvolvimento">
-							<i class="bi bi-bar-chart"></i> Relatórios 
-							<span class="badge badge-dev ms-auto">Em dev</span>
+					<li class="nav-item" role="none">
+						<a class="nav-link disabled-link" href="#" role="menuitem" aria-disabled="true" tabindex="-1">
+							<i class="bi bi-bar-chart-line" aria-hidden="true"></i> Relatórios
+							<span class="badge badge-dev">Em dev</span>
 						</a>
 					</li>
 				</ul>
 			</div>
-			
+
 			<div class="sidebar-footer">
 				<div class="user-info">
-					<div class="avatar">
+					<div class="avatar" aria-hidden="true">
 						<?= strtoupper(substr($this->session->userdata('user_name') ?? 'U', 0, 1)) ?>
 					</div>
 					<div class="details">
@@ -91,28 +108,34 @@
 						<span class="role">Administrador</span>
 					</div>
 				</div>
-				<a href="<?= base_url('sair') ?>" class="logout-btn" title="Sair">
-					<i class="bi bi-box-arrow-right"></i>
+				<a href="<?= base_url('sair') ?>" class="logout-btn" title="Sair da conta" aria-label="Sair da conta">
+					<i class="bi bi-box-arrow-right" aria-hidden="true"></i>
 				</a>
 			</div>
 		</aside>
 
 		<!-- Main Content -->
-		<main class="admin-main">
+		<main class="admin-main" id="main-content">
 			<!-- Topbar -->
-			<header class="admin-header d-flex justify-content-between align-items-center">
-				<div class="d-flex align-items-center">
-					<button class="btn btn-link btn-toggle-sidebar d-md-none text-theme-main p-0 me-3">
-						<i class="bi bi-list fs-3"></i>
+			<header class="admin-header" role="banner">
+				<div class="d-flex align-items-center gap-3 flex-1">
+					<button class="btn btn-link btn-toggle-sidebar d-md-none p-0"
+					        id="btn-toggle-sidebar"
+					        aria-label="Abrir menu de navegação"
+					        aria-expanded="false"
+					        aria-controls="admin-sidebar"
+					        style="color: var(--text-muted);">
+						<i class="bi bi-list fs-4" aria-hidden="true"></i>
 					</button>
-					<div class="header-breadcrumb text-theme-muted">
-						<i class="bi bi-house-door me-1"></i> Painel Administrativo
+					<div class="header-breadcrumb" aria-label="Localização atual">
+						<i class="bi bi-house-door" aria-hidden="true"></i>
+						<span>Painel Administrativo</span>
 					</div>
 				</div>
 				<div class="header-actions">
 					<!-- Theme Toggler -->
-					<button class="btn btn-link text-theme-main p-0 me-3" id="theme-toggle" title="Alternar Tema">
-						<i class="bi bi-moon-stars fs-5"></i>
+					<button class="btn btn-link p-0" id="theme-toggle" aria-label="Alternar entre tema claro e escuro" title="Alternar Tema">
+						<i class="bi bi-moon-stars fs-5" aria-hidden="true"></i>
 					</button>
 				</div>
 			</header>

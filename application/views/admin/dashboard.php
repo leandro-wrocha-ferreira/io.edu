@@ -1,67 +1,59 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0 text-theme-heading">Dashboard</h1>
+<!-- Page Header -->
+<div class="page-header animate-fade-up">
+	<div class="page-header-info">
+		<p class="page-header-breadcrumb">
+			<i class="bi bi-house-door" aria-hidden="true"></i>
+			<span class="sep">›</span>
+			<span>Dashboard</span>
+		</p>
+		<h1 class="page-header-title">Bem-vindo, <?= htmlspecialchars($user_name ?? $this->session->userdata('user_name')) ?>!</h1>
+		<p class="page-header-subtitle">Acompanhe os números da sua plataforma de educação.</p>
+	</div>
 </div>
 
-<div class="alert alert-primary bg-theme-card border-0 shadow-sm border-start border-primary border-4 mb-4 py-3">
-    <div class="d-flex align-items-center">
-        <i class="bi bi-info-circle-fill text-primary fs-4 me-3"></i>
-        <div class="text-theme-main">
-            Olá, <strong><?= htmlspecialchars($user_name ?? $this->session->userdata('user_name')) ?></strong>! Bem-vindo ao novo painel administrativo da Plataforma de Educação.
-        </div>
-    </div>
-</div>
+<!-- Stats Row -->
+<div class="row g-4 mb-4">
+	<!-- Total Alunos -->
+	<div class="col-xl-4 col-md-6">
+		<div class="dashboard-stat-card animate-fade-up animate-delay-1">
+			<div class="stat-icon-wrap stat-icon-primary">
+				<i class="bi bi-people-fill" aria-hidden="true"></i>
+			</div>
+			<div class="stat-body">
+				<div class="stat-label">Alunos</div>
+				<div class="stat-value"><?= number_format($total_students) ?></div>
+				<div class="stat-meta">Total de alunos ativos</div>
+			</div>
+		</div>
+	</div>
 
-<div class="row">
-    <!-- Alunos (Total) Card -->
-    <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card bg-theme-card border-theme shadow-sm h-100 dashboard-card border-left-primary">
-            <div class="card-body py-4">
-                <div class="row align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">Alunos (Total)</div>
-                        <div class="h3 mb-0 fw-bold text-theme-heading"><?= $total_students ?></div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-people text-theme-muted fs-1 opacity-25"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+	<!-- Cursos Ativos -->
+	<div class="col-xl-4 col-md-6">
+		<div class="dashboard-stat-card animate-fade-up animate-delay-2">
+			<div class="stat-icon-wrap stat-icon-success">
+				<i class="bi bi-journal-bookmark-fill" aria-hidden="true"></i>
+			</div>
+			<div class="stat-body">
+				<div class="stat-label">Cursos Ativos</div>
+				<div class="stat-value">—</div>
+				<div class="stat-meta">Em desenvolvimento</div>
+			</div>
+		</div>
+	</div>
 
-    <!-- Cursos Card -->
-    <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card bg-theme-card border-theme shadow-sm h-100 dashboard-card border-left-success">
-            <div class="card-body py-4">
-                <div class="row align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs fw-bold text-success text-uppercase mb-1">Cursos Ativos</div>
-                        <div class="h3 mb-0 fw-bold text-theme-heading">-</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-journal-bookmark text-theme-muted fs-1 opacity-25"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Matrículas Card -->
-    <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card bg-theme-card border-theme shadow-sm h-100 dashboard-card border-left-warning">
-            <div class="card-body py-4">
-                <div class="row align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">Matrículas Recentes</div>
-                        <div class="h3 mb-0 fw-bold text-theme-heading">-</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-mortarboard text-theme-muted fs-1 opacity-25"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+	<!-- Matrículas -->
+	<div class="col-xl-4 col-md-6">
+		<div class="dashboard-stat-card animate-fade-up animate-delay-3">
+			<div class="stat-icon-wrap stat-icon-warning">
+				<i class="bi bi-mortarboard-fill" aria-hidden="true"></i>
+			</div>
+			<div class="stat-body">
+				<div class="stat-label">Matrículas Recentes</div>
+				<div class="stat-value">—</div>
+				<div class="stat-meta">Em desenvolvimento</div>
+			</div>
+		</div>
+	</div>
 </div>
