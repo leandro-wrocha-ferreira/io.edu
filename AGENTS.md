@@ -38,6 +38,7 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
 - **Controllers** delegam lógica para Use Cases, nunca direto para Models.
 - **Controllers** NÃO devem conter regra de negócio — toda lógica de contagem, filtro ou processamento pertence ao Use Case.
 - **Controllers** NÃO devem carregar `session`, `url` ou `form` manualmente — já estão no autoload.
+- **Controllers** NÃO devem carregar idiomas (`$this->lang->load()`) nem checar `HTTP_ACCEPT_LANGUAGE` manualmente — a detecção e carregamento de idioma é gerenciada globalmente via hook `Language_check` no `post_controller_constructor` com fallback para `english`.
 - **Controllers** carregam models no `__construct()` usando **lowercase** (ex: `$this->load->model('user_model')`).
 - **Models** NÃO devem setar `created_at`/`updated_at` — isso é responsabilidade do banco via triggers.
 - **Models** ficam em `application/models/` (lowercase) — CI3 requer esta convenção.
@@ -276,6 +277,13 @@ class AuthenticateUserUseCase
 
 ```php
 // application/config/hooks.php
+$hook['post_controller_constructor'][] = [
+    'class'    => 'Language_check',
+    'function' => 'detect',
+    'filename' => 'Language_check.php',
+    'filepath' => 'hooks'
+];
+
 $hook['post_controller_constructor'][] = [
     'class'    => 'Auth_check',
     'function' => 'check',
