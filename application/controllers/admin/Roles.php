@@ -2,6 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use app\usecases\admin\ListRolesUseCase;
+use app\usecases\admin\ListPaginatedRolesUseCase;
 use app\usecases\admin\GetRoleUseCase;
 use app\usecases\admin\CreateRoleUseCase;
 use app\usecases\admin\UpdateRoleUseCase;
@@ -21,7 +22,6 @@ class Roles extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('role_model');
     }
 
     /**
@@ -61,8 +61,8 @@ class Roles extends MY_Controller
         $col_map = ['id', 'name', 'slug', 'description', 'created_at'];
         $order_col = isset($col_map[$order_col_index]) ? $col_map[$order_col_index] : 'name';
 
-        $result = $this->role_model->find_paginated($start, $length, $search_value, $order_col, $order_dir);
-        $total = $this->role_model->count_all();
+        $use_case = new ListPaginatedRolesUseCase();
+        $result = $use_case->execute($start, $length, $search_value, $order_col, $order_dir);
 
         $data = [];
         foreach ($result['data'] as $row) {
@@ -82,7 +82,7 @@ class Roles extends MY_Controller
 
         json_response([
             'draw' => $draw,
-            'recordsTotal' => $total,
+            'recordsTotal' => $result['recordsTotal'],
             'recordsFiltered' => $result['recordsFiltered'],
             'data' => $data,
         ]);

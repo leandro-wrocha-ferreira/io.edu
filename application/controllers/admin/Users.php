@@ -2,6 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use app\usecases\admin\ListUsersUseCase;
+use app\usecases\admin\ListPaginatedUsersUseCase;
 use app\usecases\admin\GetUserUseCase;
 use app\usecases\admin\CreateUserUseCase;
 use app\usecases\admin\UpdateUserUseCase;
@@ -24,7 +25,6 @@ class Users extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('user_model');
     }
 
     /**
@@ -64,8 +64,8 @@ class Users extends MY_Controller
         $col_map = ['id', 'name', 'email', 'role', 'created_at'];
         $order_col = isset($col_map[$order_col_index]) ? $col_map[$order_col_index] : 'created_at';
 
-        $result = $this->user_model->find_paginated($start, $length, $search_value, $order_col, $order_dir);
-        $total = $this->user_model->count_all();
+        $use_case = new ListPaginatedUsersUseCase();
+        $result = $use_case->execute($start, $length, $search_value, $order_col, $order_dir);
 
         $data = [];
         foreach ($result['data'] as $row) {
@@ -107,7 +107,7 @@ class Users extends MY_Controller
 
         json_response([
             'draw' => $draw,
-            'recordsTotal' => $total,
+            'recordsTotal' => $result['recordsTotal'],
             'recordsFiltered' => $result['recordsFiltered'],
             'data' => $data,
         ]);
