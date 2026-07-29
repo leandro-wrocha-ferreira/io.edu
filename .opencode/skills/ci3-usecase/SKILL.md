@@ -8,7 +8,7 @@ description: Use when creating use cases (application layer) for CodeIgniter 3 p
 ## When to Use
 
 Use this skill when creating:
-- Use Case classes (e.g., CreateUserUseCase.php, AuthenticateUserUseCase.php)
+- Use Case classes (e.g., CreateUserUseCase.php, AuthenticateUserUseCase.php, GetUserUseCase.php)
 - Application services that orchestrate domain logic
 
 ## Location
@@ -19,14 +19,16 @@ Example:
 ```
 application/usecases/identity/CreateUserUseCase.php
 application/usecases/identity/AuthenticateUserUseCase.php
+application/usecases/admin/GetUserUseCase.php
 ```
 
 ## Namespace
 
-All use case classes use the `app\usecases\identity` namespace (PSR-4).
+All use case classes use the `app\usecases\<BoundedContext>` namespace (PSR-4).
 
 ```php
 namespace app\usecases\identity;
+namespace app\usecases\admin;
 ```
 
 ## Use Case Pattern
@@ -38,10 +40,12 @@ namespace app\usecases\identity;
 
 use app\domain\identity\Email;
 use app\domain\identity\User;
+use app\domain\exceptions\UnauthorizedException;
+use app\domain\exceptions\ForbiddenException;
 use app\factories\Model_factory;
 
 /**
- * Use case for authenticating a user in the system.
+ * Caso de uso para autenticar um usuário no sistema.
  */
 class AuthenticateUserUseCase
 {
@@ -49,41 +53,42 @@ class AuthenticateUserUseCase
     private $user_repository;
 
     /**
-     * Constructor.
+     * Construtor.
      *
-     * @param \app\domain\identity\UserRepositoryInterface|null $repository Repository for testing (optional)
+     * @param \app\domain\identity\UserRepositoryInterface|null $repository Repository para testes (opcional)
      */
     public function __construct($repository = null)
     {
         if ($repository !== null) {
             $this->user_repository = $repository;
         } else {
-            $this->user_repository = Model_factory::make('User_model');
+            $this->user_repository = Model_factory::make('user_model');
         }
     }
 
     /**
-     * Execute authentication.
+     * Executa a autenticação.
      *
-     * @param string $email User email
-     * @param string $password Plain text password
-     * @return User Authenticated user
-     * @throws \RuntimeException When invalid credentials or deactivated account
+     * @param string $email Email do usuário
+     * @param string $password Senha em texto plano
+     * @return User Usuário autenticado
+     * @throws UnauthorizedException Quando credenciais são inválidas
+     * @throws ForbiddenException Quando conta estiver desativada
      */
     public function execute(string $email, string $password): User
     {
         $user = $this->user_repository->find_by_email(new Email($email));
 
         if ($user === null) {
-            throw new \RuntimeException("Invalid credentials");
+            throw new UnauthorizedException("Credenciais inválidas");
         }
 
         if ($user->is_deleted()) {
-            throw new \RuntimeException("Deactivated account");
+            throw new ForbiddenException("Conta desativada");
         }
 
         if (!$user->verify_password($password)) {
-            throw new \RuntimeException("Invalid credentials");
+            throw new UnauthorizedException("Credenciais inválidas");
         }
 
         return $user;
@@ -98,7 +103,7 @@ Use cases load models via `Model_factory` instead of `get_instance()`:
 ```php
 use app\factories\Model_factory;
 
-// Inside use case constructor — ALWAYS use lowercase model names:
+// Inside use case constructor:
 $this->user_repository = Model_factory::make('user_model');
 ```
 
@@ -109,11 +114,9 @@ $this->user_repository = Model_factory::make('user_model');
 3. Use Cases orchestrate domain logic, NOT implement it
 4. One Use Case per business action (Single Responsibility)
 5. Method name: `execute()` (consistent across all use cases)
-6. Throw exceptions for business rule violations (never return false/null for errors)
-7. Return entities, not arrays or objects
-8. All classes and methods MUST have docblocks with `@param` and `@return` — **always in English**
+6. **Throw Semantic Domain Exceptions**: Use specific exception classes from `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`). Never throw generic `\RuntimeException` or return `false`/`null` for errors.
+7. Return entities, not arrays or raw objects
+8. All classes and methods MUST have docblocks with `@param` and `@return`
 9. Opening braces `{` on the NEXT line for classes and methods (PSR-12)
-10. Directories are lowercase: `usecases/`, `identity/`
-11. Files are PascalCase: `AuthenticateUserUseCase.php`
-12. **ALWAYS use lowercase model names** in `Model_factory::make()` (e.g. `'user_model'`, not `'User_model'`)
-13. **Business logic (counting, filtering, processing) belongs in Use Cases, NOT in Controllers.** Controllers only orchestrate: receive input, call use case, return response.
+10. Directories are lowercase: `usecases/`, `identity/`, `admin/`
+11. Files are PascalCase: `AuthenticateUserUseCase.php`, `GetUserUseCase.php`

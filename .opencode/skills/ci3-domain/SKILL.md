@@ -1,6 +1,6 @@
 ---
 name: ci3-domain
-description: Use when creating domain entities, value objects, or repository interfaces for CodeIgniter 3 projects following DDD-lite architecture.
+description: Use when creating domain entities, value objects, domain exceptions, or repository interfaces for CodeIgniter 3 projects following DDD-lite architecture.
 ---
 
 # CI3 Domain Layer
@@ -10,26 +10,71 @@ description: Use when creating domain entities, value objects, or repository int
 Use this skill when creating:
 - Entity classes (e.g., User.php, Course.php)
 - Value Objects (e.g., Email.php, Role.php)
+- Domain Exception classes (e.g., AppException.php, NotFoundException.php)
 - Repository Interfaces (e.g., UserRepositoryInterface.php)
 
 ## Location
 
-Domain files go in `application/domain/<BoundedContext>/`
+Domain files go in `application/domain/<BoundedContext>/` or `application/domain/exceptions/`
 
 Example:
 ```
 application/domain/identity/User.php
 application/domain/identity/Email.php
-application/domain/identity/UserRepositoryInterface.php
+application/domain/exceptions/AppException.php
+application/domain/exceptions/NotFoundException.php
+application/domain/exceptions/ValidationException.php
+application/domain/exceptions/ConflictException.php
 ```
 
 ## Namespace
 
-All domain classes use the `app\domain\identity` namespace (PSR-4).
+Domain classes use `app\domain\<BoundedContext>` or `app\domain\exceptions` namespace (PSR-4).
 
 ```php
 namespace app\domain\identity;
+namespace app\domain\exceptions;
 ```
+
+## Domain Exception Pattern
+
+All custom exceptions inherit from `AppException`:
+
+```php
+<?php
+
+namespace app\domain\exceptions;
+
+class AppException extends \DomainException
+{
+    protected int $statusCode;
+    protected array $errors;
+
+    public function __construct(string $message = "", int $statusCode = 400, array $errors = [], ?\Throwable $previous = null)
+    {
+        parent::__construct($message, $statusCode, $previous);
+        $this->statusCode = $statusCode;
+        $this->errors = $errors;
+    }
+
+    public function getStatusCode(): int
+    {
+        return $this->statusCode;
+    }
+
+    public function getErrors(): array
+    {
+        return $this->errors;
+    }
+}
+```
+
+Derived semantic exceptions:
+- `NotFoundException`: status 404
+- `ValidationException`: status 422
+- `ConflictException`: status 409
+- `UnauthorizedException`: status 401
+- `ForbiddenException`: status 403
 
 ## Entity Pattern
 
@@ -38,30 +83,21 @@ namespace app\domain\identity;
 
 namespace app\domain\identity;
 
-use DateTime;
-
 /**
- * Entity representing a system user.
+ * Entity que representa um usuário do sistema.
  */
 class User
 {
-    private ?int $id = null;
-    private string $name;
-    private Email $email;
-    private string $password;
-    private bool $is_active = true;
-    private array $role_ids = [];
-    private ?string $role = null;
-    private ?DateTime $created_at = null;
-    private ?DateTime $updated_at = null;
-    private ?DateTime $deleted_at = null;
+    private $id;
+    private $name;
+    private $email;  // Value Object
 
     /**
-     * Create a new user.
+     * Cria um novo usuário.
      *
-     * @param string $name User's name
-     * @param Email $email User's email (Value Object)
-     * @param string $password Plain text password
+     * @param string $name Nome do usuário
+     * @param Email $email Email do usuário (Value Object)
+     * @param string $password Senha em texto plano
      * @return self
      */
     public static function create(string $name, Email $email, string $password): self
@@ -70,13 +106,14 @@ class User
         $user->name = $name;
         $user->email = $email;
         $user->password = password_hash($password, PASSWORD_BCRYPT);
+        $user->created_at = new \DateTime();
         return $user;
     }
 
     /**
-     * Hydrate a user from a database record.
+     * Hidrata um usuário a partir de um registro do banco.
      *
-     * @param array $row Database record
+     * @param array $row Registro do banco de dados
      * @return self
      */
     public static function from_database(array $row): self
@@ -85,12 +122,11 @@ class User
         $user->id = (int) $row['id'];
         $user->name = $row['name'];
         $user->email = new Email($row['email']);
-        // ...
         return $user;
     }
 
     /**
-     * Get the user ID.
+     * Obtém o ID do usuário.
      *
      * @return int|null
      */
@@ -101,8 +137,6 @@ class User
 }
 ```
 
-> **Note:** Entity `create()` methods MUST NOT set `created_at` or `updated_at`. Timestamps are managed by database triggers.
-
 ## Value Object Pattern
 
 ```php
@@ -110,18 +144,20 @@ class User
 
 namespace app\domain\identity;
 
+use app\domain\exceptions\ValidationException;
+
 /**
- * Value Object representing an email address.
+ * Value Object que representa um endereço de email.
  */
 class Email
 {
-    private string $value;
+    private $value;
 
     public function __construct(string $email)
     {
         $trimmed = trim($email);
         if (!filter_var($trimmed, FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException("Invalid email: {$email}");
+            throw new ValidationException("Email inválido: {$email}");
         }
         $this->value = strtolower($trimmed);
     }
@@ -160,15 +196,13 @@ interface UserRepositoryInterface
 ## Rules
 
 1. Domain classes MUST NOT depend on CI3 (no `get_instance()`, no `CI_Model`)
-2. Use `private` properties with getters (no setters for immutable fields)
-3. **All properties MUST use PHP 8.2 strict types** (e.g., `private int $id`, `private ?string $role = null`). Nullable properties that may be uninitialized must have `= null` default.
+2. Domain exceptions inherit from `app\domain\exceptions\AppException`
+3. Use `private` properties with getters (no setters for immutable fields)
 4. Factory methods: `create()` for new entities, `from_database()` for hydration
 5. Value Objects must be immutable and implement `__toString()`
 6. Repository Interfaces define contracts, NOT implementations
-7. All classes and methods MUST have docblocks with `@param` and `@return` — **always in English**
+7. All classes and methods MUST have docblocks with `@param` and `@return`
 8. Opening braces `{` on the NEXT line for classes and methods (PSR-12)
 9. Use PSR-4 namespaces: `app\domain\<BoundedContext>\`
-10. Directories are lowercase: `domain/`, `identity/`
-11. Files are PascalCase: `User.php`, `Email.php`
-12. **Entity `create()` methods MUST NOT set `created_at` or `updated_at`** — timestamps are managed by database triggers.
-13. Typed properties that are nullable and not set in `create()` MUST default to `null` (e.g., `private ?int $id = null`).
+10. Directories are lowercase: `domain/`, `identity/`, `exceptions/`
+11. Files are PascalCase: `User.php`, `Email.php`, `AppException.php`

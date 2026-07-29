@@ -35,8 +35,14 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
 - **Domain** NÃO depende de CI3. Sem `get_instance()`, sem `CI_Model`.
 - **Use Cases** usam `Model_factory` para carregar models (não `get_instance()` direto).
 - **Models** implementam interfaces do domain (`implements UserRepositoryInterface`).
+- **Controllers** extend `MY_Controller` (in `application/core/MY_Controller.php`).
 - **Controllers** delegam lógica para Use Cases, nunca direto para Models.
 - **Controllers** NÃO devem conter regra de negócio — toda lógica de contagem, filtro ou processamento pertence ao Use Case.
+- **Controllers (Form Flow)**: NO private `_handle_*()` helper methods duplicating view loading. Check `$this->form_validation->run() === TRUE` directly in the action method. Data assembly (`$data`) and `$this->load->view()` occur ONCE at the end of the method body (serving GET, failed POST, and exception fall-through).
+- **Global Exception Handling**: `MY_Controller::_remap()` intercepts all action calls. Uncaught exceptions are handled automatically:
+  - **AJAX Requests**: Returns JSON via `json_response()` with matching HTTP status code (404, 409, 422, 500).
+  - **HTML Requests**: Flashdata notification / 404 page.
+- **Domain Exceptions**: Throw semantic exceptions from `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`) instead of generic `\RuntimeException`.
 - **Controllers** NÃO devem carregar `session`, `url` ou `form` manualmente — já estão no autoload.
 - **Controllers** NÃO devem carregar idiomas (`$this->lang->load()`) nem checar `HTTP_ACCEPT_LANGUAGE` manualmente — a detecção e carregamento de idioma é gerenciada globalmente via hook `Language_check` no `post_controller_constructor` com fallback para `english`.
 - **Controllers** carregam models no `__construct()` usando **lowercase** (ex: `$this->load->model('user_model')`).
