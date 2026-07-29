@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
 <!-- Page Header -->
-<div class="page-header">
+<div class="page-header animate-fade-up">
 	<div class="page-header-info">
 		<p class="page-header-breadcrumb">
 			<i class="bi bi-house-door" aria-hidden="true"></i>
@@ -21,7 +21,7 @@
 </div>
 
 <?php if (isset($error)): ?>
-	<div class="alert-flash alert-flash-danger alert-dismissible fade show mb-4" role="alert" aria-live="polite">
+	<div class="alert-flash alert-flash-danger alert-dismissible fade show mb-4 animate-fade-up" role="alert" aria-live="polite">
 		<i class="bi bi-exclamation-circle-fill alert-flash-icon" aria-hidden="true"></i>
 		<div class="alert-flash-body"><?= htmlspecialchars($error) ?></div>
 		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
@@ -29,7 +29,7 @@
 <?php endif; ?>
 
 <?php if (validation_errors()): ?>
-	<div class="alert-flash alert-flash-danger alert-dismissible fade show mb-4" role="alert" aria-live="polite">
+	<div class="alert-flash alert-flash-danger alert-dismissible fade show mb-4 animate-fade-up" role="alert" aria-live="polite">
 		<i class="bi bi-exclamation-circle-fill alert-flash-icon" aria-hidden="true"></i>
 		<div class="alert-flash-body"><?= validation_errors() ?></div>
 		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
@@ -37,7 +37,7 @@
 <?php endif; ?>
 
 <form method="post" action="<?= $user ? base_url('admin/usuarios/editar/' . $user->get_id()) : base_url('admin/usuarios/novo') ?>">
-	<div class="card-theme-form">
+	<div class="card-theme-form animate-fade-up animate-delay-1">
 
 		<!-- Seção: Dados do Usuário -->
 		<div class="form-section">

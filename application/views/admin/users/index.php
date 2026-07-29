@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
 <!-- Page Header -->
-<div class="page-header">
+<div class="page-header animate-fade-up">
 	<div class="page-header-info">
 		<p class="page-header-breadcrumb">
 			<i class="bi bi-house-door" aria-hidden="true"></i>
@@ -21,7 +21,7 @@
 </div>
 
 <?php if ($this->session->flashdata('success')): ?>
-	<div class="alert-flash alert-flash-success alert-dismissible fade show" role="alert" aria-live="polite">
+	<div class="alert-flash alert-flash-success alert-dismissible fade show animate-fade-up" role="alert" aria-live="polite">
 		<i class="bi bi-check-circle-fill alert-flash-icon" aria-hidden="true"></i>
 		<div class="alert-flash-body"><?= htmlspecialchars($this->session->flashdata('success')) ?></div>
 		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
@@ -29,14 +29,14 @@
 <?php endif; ?>
 
 <?php if ($this->session->flashdata('error')): ?>
-	<div class="alert-flash alert-flash-danger alert-dismissible fade show" role="alert" aria-live="polite">
+	<div class="alert-flash alert-flash-danger alert-dismissible fade show animate-fade-up" role="alert" aria-live="polite">
 		<i class="bi bi-exclamation-circle-fill alert-flash-icon" aria-hidden="true"></i>
 		<div class="alert-flash-body"><?= htmlspecialchars($this->session->flashdata('error')) ?></div>
 		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
 	</div>
 <?php endif; ?>
 
-<div class="card card-theme">
+<div class="card card-theme animate-fade-up animate-delay-1">
 	<div class="card-body">
 		<table class="table table-hover align-middle w-100" id="users-table" aria-label="Lista de usuários">
 			<thead class="table-head-brand">
