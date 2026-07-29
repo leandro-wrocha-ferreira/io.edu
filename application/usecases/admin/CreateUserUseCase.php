@@ -4,6 +4,7 @@ namespace app\usecases\admin;
 
 use app\domain\identity\Email;
 use app\domain\identity\User;
+use app\domain\exceptions\ValidationException;
 use app\factories\Model_factory;
 
 /**
@@ -46,7 +47,7 @@ class CreateUserUseCase
      * @param string $password Plain text password
      * @param array $role_ids Role IDs to assign
      * @return User Created user entity
-     * @throws \RuntimeException When email already exists or invalid role
+     * @throws ValidationException When email already in use
      */
     public function execute(string $name, string $email, string $password, array $role_ids = []): User
     {
@@ -54,7 +55,7 @@ class CreateUserUseCase
 
         $existing = $this->user_repository->find_by_email($email_vo);
         if ($existing !== null) {
-            throw new \RuntimeException("Email already in use");
+            throw new ValidationException("E-mail já está em uso");
         }
 
         $user = User::create($name, $email_vo, $password);

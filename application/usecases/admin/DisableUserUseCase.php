@@ -2,6 +2,7 @@
 
 namespace app\usecases\admin;
 
+use app\domain\exceptions\NotFoundException;
 use app\factories\Model_factory;
 
 /**
@@ -31,13 +32,13 @@ class DisableUserUseCase
      *
      * @param int $user_id User ID
      * @return void
-     * @throws \RuntimeException When user not found
+     * @throws NotFoundException When user not found
      */
     public function execute(int $user_id): void
     {
         $user = $this->user_repository->find_by_id($user_id);
         if ($user === null) {
-            throw new \RuntimeException("User not found");
+            throw new NotFoundException("Usuário não encontrado");
         }
 
         $user->set_active(false);

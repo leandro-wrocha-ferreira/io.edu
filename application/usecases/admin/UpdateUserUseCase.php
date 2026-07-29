@@ -4,6 +4,8 @@ namespace app\usecases\admin;
 
 use app\domain\identity\Email;
 use app\domain\identity\User;
+use app\domain\exceptions\NotFoundException;
+use app\domain\exceptions\ValidationException;
 use app\factories\Model_factory;
 
 /**
@@ -38,20 +40,20 @@ class UpdateUserUseCase
      * @param string $email New email
      * @param array $role_ids Role IDs to assign
      * @return User Updated user entity
-     * @throws \RuntimeException When user not found or email already in use
+     * @throws NotFoundException|ValidationException When user not found or email already in use
      */
     public function execute(int $user_id, string $name, string $email, array $role_ids = []): User
     {
         $user = $this->user_repository->find_by_id($user_id);
         if ($user === null) {
-            throw new \RuntimeException("User not found");
+            throw new NotFoundException("Usuário não encontrado");
         }
 
         $email_vo = new Email($email);
 
         $existing = $this->user_repository->find_by_email($email_vo);
         if ($existing !== null && $existing->get_id() !== $user_id) {
-            throw new \RuntimeException("Email already in use");
+            throw new ValidationException("E-mail já está em uso");
         }
 
         $user->set_name($name);

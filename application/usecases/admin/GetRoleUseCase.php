@@ -7,9 +7,9 @@ use app\domain\exceptions\NotFoundException;
 use app\factories\Model_factory;
 
 /**
- * Use case for updating an existing role.
+ * Use case for retrieving a single role by ID.
  */
-class UpdateRoleUseCase
+class GetRoleUseCase
 {
     /** @var \app\domain\admin\RoleRepositoryInterface */
     private $role_repository;
@@ -32,26 +32,15 @@ class UpdateRoleUseCase
      * Execute the use case.
      *
      * @param int $role_id Role ID
-     * @param string $name Display name
-     * @param string $slug Unique slug
-     * @param string|null $description Optional description
-     * @param array $permission_ids Permission IDs to assign
-     * @return Role Updated role entity
+     * @return Role Role entity
      * @throws NotFoundException When role not found
      */
-    public function execute(int $role_id, string $name, string $slug, ?string $description = null, array $permission_ids = []): Role
+    public function execute(int $role_id): Role
     {
         $role = $this->role_repository->find_by_id($role_id);
         if ($role === null) {
             throw new NotFoundException("Perfil não encontrado");
         }
-
-        $role->set_name($name);
-        $role->set_slug($slug);
-        $role->set_description($description);
-        $role->set_permission_ids($permission_ids);
-
-        $this->role_repository->save($role);
 
         return $role;
     }

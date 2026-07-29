@@ -2,13 +2,14 @@
 
 namespace app\usecases\admin;
 
+use app\domain\identity\User;
 use app\domain\exceptions\NotFoundException;
 use app\factories\Model_factory;
 
 /**
- * Use case for activating a user.
+ * Use case for retrieving a single user by ID.
  */
-class ActivateUserUseCase
+class GetUserUseCase
 {
     /** @var \app\domain\identity\UserRepositoryInterface */
     private $user_repository;
@@ -28,20 +29,19 @@ class ActivateUserUseCase
     }
 
     /**
-     * Activate the user.
+     * Execute the use case.
      *
      * @param int $user_id User ID
-     * @return void
+     * @return User User entity
      * @throws NotFoundException When user not found
      */
-    public function execute(int $user_id): void
+    public function execute(int $user_id): User
     {
         $user = $this->user_repository->find_by_id($user_id);
         if ($user === null) {
             throw new NotFoundException("Usuário não encontrado");
         }
 
-        $user->set_active(true);
-        $this->user_repository->save($user);
+        return $user;
     }
 }

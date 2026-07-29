@@ -3,6 +3,7 @@
 namespace app\usecases\admin;
 
 use app\domain\admin\Role;
+use app\domain\exceptions\NotFoundException;
 use app\factories\Model_factory;
 
 /**
@@ -32,13 +33,13 @@ class DeleteRoleUseCase
      *
      * @param int $role_id Role ID
      * @return void
-     * @throws \RuntimeException When role not found
+     * @throws NotFoundException When role not found
      */
     public function execute(int $role_id): void
     {
         $role = $this->role_repository->find_by_id($role_id);
         if ($role === null) {
-            throw new \RuntimeException("Role not found");
+            throw new NotFoundException("Perfil não encontrado");
         }
 
         $this->role_repository->delete($role_id);
