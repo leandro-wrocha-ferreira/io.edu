@@ -418,6 +418,7 @@ vendor/bin/codecept run acceptance           # e2e
 - **Composer PSR-4:** `app\` → `application/`, `Tests\` → `tests/`
 - **Routing:** `translate_uri_dashes` is OFF; controller methods map directly to URL segments
 - **Frontend:** Bootstrap 5.3.8 (via composer); CSS/JS copied to `public/assets/` on install/update
+- **UI Animations**: All page views MUST apply entry animation classes (`animate-fade-up` on `.page-header` and `.animate-fade-up.animate-delay-1` on main card/form containers).
 - **Hooks:** enabled for auth middleware via `post_controller_constructor`
 - **PSR-12:** `{` on next line for classes and methods
 - **Docblocks:** mandatory on all classes and methods — **always in English**

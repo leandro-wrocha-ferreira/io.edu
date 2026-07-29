@@ -77,6 +77,7 @@ For each modified file, check:
 - [ ] **Use Semantic Domain Exceptions**: Use Cases MUST throw semantic exceptions from `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`) instead of generic `\RuntimeException`
 - [ ] **NO manual language loading in Controllers**: Language detection is managed globally by `Language_check` hook
 - [ ] **Standardized Responses**: Use `json_response($data, $status_code)` for JSON output
+- [ ] **UI Entry Animations**: Views MUST use `animate-fade-up` on headers (`.page-header.animate-fade-up`) and main cards/forms (`.animate-fade-up.animate-delay-1`)
 - [ ] Models in `application/models/` (lowercase)
 - [ ] Routes kebab-case Portuguese
 
