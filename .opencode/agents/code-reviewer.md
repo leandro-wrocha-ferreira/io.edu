@@ -36,9 +36,11 @@ Always check `AGENTS.md` for current conventions. Summary:
 
 ### Architecture
 - **Domain**: `app\domain\context` — Entities, Value Objects, Interfaces
-- **Use Cases**: `app\usecases\context` — Business rule orchestration
-- **Models**: `application/models/` — Interface implementations (no namespace)
-- **Controllers**: `application/controllers/` — No namespace, subdirectories (`auth/`, `admin/`, `student/`)
+- **Domain Exceptions**: `app\domain\exceptions` — `AppException`, `NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`
+- **Use Cases**: `app\usecases\context` — Business rule orchestration & query execution
+- **Models**: `application/models/` — Interface implementations (no namespace, never called directly from Controllers)
+- **Controllers**: `application/controllers/` — Must extend `MY_Controller`, no namespace, subdirectories (`auth/`, `admin/`, `student/`)
+- **Base Controller**: `application/core/MY_Controller.php` — Global exception handling via `_remap()`
 - **Factories**: `app\factories` — Factory pattern for models
 
 ### Code Style
@@ -64,11 +66,17 @@ git diff --cached
 
 For each modified file, check:
 
-- [ ] Correct namespaces (`app\domain\...`, `app\usecases\...`)
-- [ ] PSR-12 (braces on next line)
+- [ ] Correct namespaces (`app\domain\...`, `app\usecases\...`, `app\domain\exceptions\...`)
+- [ ] PSR-12 (braces on next line for classes and methods)
 - [ ] Docblocks present (in **English**)
 - [ ] Correct use statements
-- [ ] Controllers without namespace
+- [ ] Controllers without namespace and **MUST extend `MY_Controller`**
+- [ ] **NO direct Model calls in Controllers**: Controllers MUST delegate logic and queries to Use Cases (no `$this->*_model` direct calls in controllers)
+- [ ] **NO private `_handle_*()` helper methods in Controllers**: Check `$this->form_validation->run() === TRUE` directly in the action with a single `$this->load->view()` call at the end of the method
+- [ ] **NO redundant local `try/catch` in Controllers**: Exceptions MUST be allowed to bubble up to `MY_Controller::_remap()` unless local recovery is required and explicitly justified in a comment
+- [ ] **Use Semantic Domain Exceptions**: Use Cases MUST throw semantic exceptions from `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`) instead of generic `\RuntimeException`
+- [ ] **NO manual language loading in Controllers**: Language detection is managed globally by `Language_check` hook
+- [ ] **Standardized Responses**: Use `json_response($data, $status_code)` for JSON output
 - [ ] Models in `application/models/` (lowercase)
 - [ ] Routes kebab-case Portuguese
 
