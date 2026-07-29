@@ -2,19 +2,21 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use app\usecases\admin\ListUsersUseCase;
+use app\usecases\admin\GetUserUseCase;
 use app\usecases\admin\CreateUserUseCase;
 use app\usecases\admin\UpdateUserUseCase;
 use app\usecases\admin\ActivateUserUseCase;
 use app\usecases\admin\DisableUserUseCase;
 use app\usecases\admin\DeleteUserUseCase;
 use app\usecases\admin\ListRolesUseCase;
+use app\domain\exceptions\ConflictException;
 
 /**
  * Users Controller (Admin)
  *
  * Manages user CRUD and status toggle in the admin panel.
  */
-class Users extends CI_Controller
+class Users extends MY_Controller
 {
     /**
      * Constructor.
@@ -59,7 +61,6 @@ class Users extends CI_Controller
         $order_col_index = is_array($order) && isset($order[0]['column']) ? (int) $order[0]['column'] : 0;
         $order_dir = is_array($order) && isset($order[0]['dir']) ? $order[0]['dir'] : 'desc';
 
-        $columns = $this->input->get('columns', TRUE);
         $col_map = ['id', 'name', 'email', 'role', 'created_at'];
         $order_col = isset($col_map[$order_col_index]) ? $col_map[$order_col_index] : 'created_at';
 
@@ -119,19 +120,32 @@ class Users extends CI_Controller
      */
     public function create()
     {
-        $roles_use_case = new ListRolesUseCase();
+        $this->form_validation->set_rules('name', 'Name', 'required|trim|min_length[3]');
+        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
+        $this->form_validation->set_rules('password', 'Password', 'required|min_length[6]');
 
+        if ($this->form_validation->run() === TRUE) {
+            $use_case = new CreateUserUseCase();
+            $role_ids = $this->input->post('role_ids', TRUE) ? (array) $this->input->post('role_ids', TRUE) : [];
+
+            $use_case->execute(
+                $this->input->post('name', TRUE),
+                $this->input->post('email', TRUE),
+                $this->input->post('password', TRUE),
+                array_map('intval', $role_ids)
+            );
+
+            $this->session->set_flashdata('success', $this->lang->line('user_created_success'));
+            redirect('admin/usuarios');
+        }
+
+        $roles_use_case = new ListRolesUseCase();
         $data = [
             'page_name' => 'admin/users/form',
             'title' => 'Novo Usuário',
             'roles' => $roles_use_case->execute(),
             'user' => null,
         ];
-
-        if ($this->input->server('REQUEST_METHOD') === 'POST') {
-            $this->_handle_create();
-            return;
-        }
 
         $this->load->view('admin/index', $data);
     }
@@ -144,41 +158,38 @@ class Users extends CI_Controller
      */
     public function update(int $id)
     {
-        $list_use_case = new ListUsersUseCase();
-        $roles_use_case = new ListRolesUseCase();
+        $get_use_case = new GetUserUseCase();
+        $user = $get_use_case->execute($id);
 
-        $users = $list_use_case->execute();
-        $user = null;
-        foreach ($users as $u) {
-            if ($u->get_id() === $id) {
-                $user = $u;
-                break;
-            }
-        }
-
-        if ($user === null) {
-            show_404();
-            return;
-        }
-
-        // Prevent modification of admin users
         if ($user->is_admin()) {
-            $this->session->set_flashdata('error', $this->lang->line('user_admin_modify_error'));
-            redirect('admin/usuarios');
-            return;
+            throw new ConflictException($this->lang->line('user_admin_modify_error'));
         }
 
+        $this->form_validation->set_rules('name', 'Name', 'required|trim|min_length[3]');
+        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
+
+        if ($this->form_validation->run() === TRUE) {
+            $use_case = new UpdateUserUseCase();
+            $role_ids = $this->input->post('role_ids', TRUE) ? (array) $this->input->post('role_ids', TRUE) : [];
+
+            $use_case->execute(
+                $id,
+                $this->input->post('name', TRUE),
+                $this->input->post('email', TRUE),
+                array_map('intval', $role_ids)
+            );
+
+            $this->session->set_flashdata('success', $this->lang->line('user_updated_success'));
+            redirect('admin/usuarios');
+        }
+
+        $roles_use_case = new ListRolesUseCase();
         $data = [
             'page_name' => 'admin/users/form',
             'title' => 'Editar Usuário',
             'roles' => $roles_use_case->execute(),
             'user' => $user,
         ];
-
-        if ($this->input->server('REQUEST_METHOD') === 'POST') {
-            $this->_handle_update($id);
-            return;
-        }
 
         $this->load->view('admin/index', $data);
     }
@@ -191,22 +202,17 @@ class Users extends CI_Controller
      */
     public function activate(int $id)
     {
-        $u_data = $this->user_model->find_by_id($id);
-        if ($u_data && $u_data->get_role() === 'admin') {
-            $this->session->set_flashdata('error', $this->lang->line('user_admin_modify_error'));
-            redirect('admin/usuarios');
-            return;
+        $get_use_case = new GetUserUseCase();
+        $user = $get_use_case->execute($id);
+
+        if ($user->is_admin()) {
+            throw new ConflictException($this->lang->line('user_admin_modify_error'));
         }
 
         $use_case = new ActivateUserUseCase();
+        $use_case->execute($id);
 
-        try {
-            $use_case->execute($id);
-            $this->session->set_flashdata('success', $this->lang->line('user_activated_success'));
-        } catch (\RuntimeException $e) {
-            $this->session->set_flashdata('error', $e->getMessage());
-        }
-
+        $this->session->set_flashdata('success', $this->lang->line('user_activated_success'));
         redirect('admin/usuarios');
     }
 
@@ -218,22 +224,17 @@ class Users extends CI_Controller
      */
     public function disable(int $id)
     {
-        $u_data = $this->user_model->find_by_id($id);
-        if ($u_data && $u_data->get_role() === 'admin') {
-            $this->session->set_flashdata('error', $this->lang->line('user_admin_modify_error'));
-            redirect('admin/usuarios');
-            return;
+        $get_use_case = new GetUserUseCase();
+        $user = $get_use_case->execute($id);
+
+        if ($user->is_admin()) {
+            throw new ConflictException($this->lang->line('user_admin_modify_error'));
         }
 
         $use_case = new DisableUserUseCase();
+        $use_case->execute($id);
 
-        try {
-            $use_case->execute($id);
-            $this->session->set_flashdata('success', $this->lang->line('user_deactivated_success'));
-        } catch (\RuntimeException $e) {
-            $this->session->set_flashdata('error', $e->getMessage());
-        }
-
+        $this->session->set_flashdata('success', $this->lang->line('user_deactivated_success'));
         redirect('admin/usuarios');
     }
 
@@ -245,140 +246,17 @@ class Users extends CI_Controller
      */
     public function delete(int $id)
     {
-        $u_data = $this->user_model->find_by_id($id);
-        if ($u_data && $u_data->get_role() === 'admin') {
-            $this->session->set_flashdata('error', $this->lang->line('user_admin_delete_error'));
-            redirect('admin/usuarios');
-            return;
+        $get_use_case = new GetUserUseCase();
+        $user = $get_use_case->execute($id);
+
+        if ($user->is_admin()) {
+            throw new ConflictException($this->lang->line('user_admin_delete_error'));
         }
 
         $use_case = new DeleteUserUseCase();
+        $use_case->execute($id);
 
-        try {
-            $use_case->execute($id);
-            $this->session->set_flashdata('success', $this->lang->line('user_deleted_success'));
-        } catch (\RuntimeException $e) {
-            $this->session->set_flashdata('error', $e->getMessage());
-        }
-
+        $this->session->set_flashdata('success', $this->lang->line('user_deleted_success'));
         redirect('admin/usuarios');
-    }
-
-    /**
-     * Handle create form submission.
-     *
-     * @return void
-     */
-    private function _handle_create(): void
-    {
-        $this->form_validation->set_rules('name', 'Name', 'required|trim|min_length[3]');
-        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
-        $this->form_validation->set_rules('password', 'Password', 'required|min_length[6]');
-
-        if ($this->form_validation->run() === false) {
-            $roles_use_case = new ListRolesUseCase();
-            $data = [
-                'page_name' => 'admin/users/form',
-                'title' => 'Novo Usuário',
-                'roles' => $roles_use_case->execute(),
-                'user' => null,
-            ];
-            $this->load->view('admin/index', $data);
-            return;
-        }
-
-        $use_case = new CreateUserUseCase();
-
-        try {
-            $role_ids = $this->input->post('role_ids') ? (array) $this->input->post('role_ids') : [];
-            $use_case->execute(
-                $this->input->post('name'),
-                $this->input->post('email'),
-                $this->input->post('password'),
-                array_map('intval', $role_ids)
-            );
-            $this->session->set_flashdata('success', $this->lang->line('user_created_success'));
-            redirect('admin/usuarios');
-        } catch (\RuntimeException $e) {
-            $roles_use_case = new ListRolesUseCase();
-            $data = [
-                'page_name' => 'admin/users/form',
-                'title' => 'Novo Usuário',
-                'roles' => $roles_use_case->execute(),
-                'user' => null,
-                'error' => $e->getMessage(),
-            ];
-            $this->load->view('admin/index', $data);
-        }
-    }
-
-    /**
-     * Handle update form submission.
-     *
-     * @param int $id User ID
-     * @return void
-     */
-    private function _handle_update(int $id): void
-    {
-        $this->form_validation->set_rules('name', 'Name', 'required|trim|min_length[3]');
-        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
-
-        if ($this->form_validation->run() === false) {
-            $list_use_case = new ListUsersUseCase();
-            $roles_use_case = new ListRolesUseCase();
-
-            $users = $list_use_case->execute();
-            $user = null;
-            foreach ($users as $u) {
-                if ($u->get_id() === $id) {
-                    $user = $u;
-                    break;
-                }
-            }
-
-            $data = [
-                'page_name' => 'admin/users/form',
-                'title' => 'Editar Usuário',
-                'roles' => $roles_use_case->execute(),
-                'user' => $user,
-            ];
-            $this->load->view('admin/index', $data);
-            return;
-        }
-
-        $use_case = new UpdateUserUseCase();
-
-        try {
-            $role_ids = $this->input->post('role_ids') ? (array) $this->input->post('role_ids') : [];
-            $use_case->execute(
-                $id,
-                $this->input->post('name'),
-                $this->input->post('email'),
-                array_map('intval', $role_ids)
-            );
-            $this->session->set_flashdata('success', $this->lang->line('user_updated_success'));
-            redirect('admin/usuarios');
-        } catch (\RuntimeException $e) {
-            $list_use_case = new ListUsersUseCase();
-            $roles_use_case = new ListRolesUseCase();
-
-            $users = $list_use_case->execute();
-            $user = null;
-            foreach ($users as $u) {
-                if ($u->get_id() === $id) {
-                    $user = $u;
-                    break;
-                }
-            }
-
-            $data = [
-                'page_name' => 'admin/users/form',
-                'title' => 'Editar Usuário',
-                'roles' => $roles_use_case->execute(),
-                'user' => $user,
-                'error' => $e->getMessage(),
-            ];
-            $this->load->view('admin/index', $data);
-        }
     }
 }
