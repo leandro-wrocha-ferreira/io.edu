@@ -2,7 +2,8 @@
 
 namespace app\usecases\admin;
 
-use app\domain\admin\Permission;
+use app\domain\admin\permission\Permission;
+use app\domain\admin\permission\PermissionRepositoryInterface;
 use app\factories\Model_factory;
 
 /**
@@ -10,13 +11,13 @@ use app\factories\Model_factory;
  */
 class CreatePermissionUseCase
 {
-    /** @var \app\domain\admin\PermissionRepositoryInterface */
+    /** @var PermissionRepositoryInterface */
     private $permission_repository;
 
     /**
      * Constructor.
      *
-     * @param \app\domain\admin\PermissionRepositoryInterface|null $repository Repository for testing (optional)
+     * @param PermissionRepositoryInterface|null $repository Repository for testing (optional)
      */
     public function __construct($repository = null)
     {

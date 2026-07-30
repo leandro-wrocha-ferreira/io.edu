@@ -2,7 +2,8 @@
 
 namespace app\usecases\admin;
 
-use app\domain\admin\Role;
+use app\domain\admin\role\Role;
+use app\domain\admin\role\RoleRepositoryInterface;
 use app\factories\Model_factory;
 
 /**
@@ -10,13 +11,13 @@ use app\factories\Model_factory;
  */
 class CreateRoleUseCase
 {
-    /** @var \app\domain\admin\RoleRepositoryInterface */
+    /** @var RoleRepositoryInterface */
     private $role_repository;
 
     /**
      * Constructor.
      *
-     * @param \app\domain\admin\RoleRepositoryInterface|null $repository Repository for testing (optional)
+     * @param RoleRepositoryInterface|null $repository Repository for testing (optional)
      */
     public function __construct($repository = null)
     {

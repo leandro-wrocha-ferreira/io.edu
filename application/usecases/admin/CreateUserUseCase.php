@@ -2,6 +2,7 @@
 
 namespace app\usecases\admin;
 
+use app\domain\admin\role\RoleRepositoryInterface;
 use app\domain\identity\Email;
 use app\domain\identity\User;
 use app\domain\exceptions\ValidationException;
@@ -15,14 +16,14 @@ class CreateUserUseCase
     /** @var \app\domain\identity\UserRepositoryInterface */
     private $user_repository;
 
-    /** @var \app\domain\admin\RoleRepositoryInterface */
+    /** @var RoleRepositoryInterface */
     private $role_repository;
 
     /**
      * Constructor.
      *
      * @param \app\domain\identity\UserRepositoryInterface|null $user_repo User repository for testing (optional)
-     * @param \app\domain\admin\RoleRepositoryInterface|null $role_repo Role repository for testing (optional)
+     * @param RoleRepositoryInterface|null $role_repo Role repository for testing (optional)
      */
     public function __construct($user_repo = null, $role_repo = null)
     {

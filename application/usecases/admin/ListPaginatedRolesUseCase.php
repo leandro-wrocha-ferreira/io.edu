@@ -2,6 +2,7 @@
 
 namespace app\usecases\admin;
 
+use app\domain\admin\role\RoleRepositoryInterface;
 use app\factories\Model_factory;
 
 /**
@@ -9,7 +10,7 @@ use app\factories\Model_factory;
  */
 class ListPaginatedRolesUseCase
 {
-    /** @var \app\domain\admin\RoleRepositoryInterface|\Role_model */
+    /** @var RoleRepositoryInterface|\Role_model */
     private $role_repository;
 
     /**
