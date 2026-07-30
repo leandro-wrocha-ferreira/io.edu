@@ -1,0 +1,127 @@
+/* ==============================================
+ * Buttons Component
+ * ============================================== */
+.btn-theme-primary {
+	background: var(--brand-gradient);
+	color: white;
+	border: none;
+	padding: 0.6rem 1.35rem;
+	border-radius: 0.5rem;
+	font-weight: 600;
+	font-size: 0.875rem;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	transition: box-shadow var(--transition-fast), transform var(--transition-fast), opacity var(--transition-fast);
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.btn-theme-primary:hover {
+	color: white;
+	box-shadow: var(--shadow-brand);
+	transform: translateY(-1px);
+	opacity: 0.92;
+}
+
+.btn-theme-primary:active {
+	transform: translateY(0);
+	box-shadow: none;
+}
+
+/* Versão clara (para usar dentro do page-header) */
+.btn-theme-primary-outline {
+	background: rgba(255, 255, 255, 0.15);
+	color: white;
+	border: 1px solid rgba(255, 255, 255, 0.35);
+	padding: 0.55rem 1.25rem;
+	border-radius: 0.5rem;
+	font-weight: 600;
+	font-size: 0.875rem;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	transition: background var(--transition-fast), box-shadow var(--transition-fast);
+	cursor: pointer;
+	white-space: nowrap;
+	backdrop-filter: blur(4px);
+}
+
+.btn-theme-primary-outline:hover {
+	background: rgba(255, 255, 255, 0.25);
+	color: white;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-theme-secondary {
+	background-color: var(--bg-card);
+	color: var(--text-main);
+	border: 1px solid var(--border-color);
+	padding: 0.55rem 1.1rem;
+	border-radius: 0.5rem;
+	font-weight: 500;
+	font-size: 0.875rem;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+	cursor: pointer;
+}
+
+.btn-theme-secondary:hover {
+	background-color: var(--bg-subtle);
+	border-color: var(--border-color-strong);
+	color: var(--text-heading);
+}
+
+/* ==============================================
+ * Action Buttons (Tables)
+ * ============================================== */
+.btn-action {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 0.4rem;
+	border: none;
+	background-color: transparent;
+	transition: background-color var(--transition-fast), transform var(--transition-fast);
+	text-decoration: none;
+	margin-right: 0.2rem;
+	cursor: pointer;
+}
+
+.btn-action:last-child { margin-right: 0; }
+
+.btn-action:hover { transform: scale(1.1); }
+
+.btn-action-edit {
+	color: var(--brand-primary);
+	background-color: var(--brand-primary-ghost);
+}
+.btn-action-edit:hover {
+	background-color: rgba(26, 86, 219, 0.16);
+	color: var(--brand-primary);
+}
+
+.btn-action-toggle {
+	color: var(--brand-warning);
+	background-color: var(--brand-warning-ghost);
+}
+.btn-action-toggle:hover {
+	background-color: rgba(217, 119, 6, 0.18);
+	color: var(--brand-warning);
+}
+
+.btn-action-delete {
+	color: var(--brand-danger);
+	background-color: var(--brand-danger-ghost);
+}
+.btn-action-delete:hover {
+	background-color: rgba(220, 38, 38, 0.16);
+	color: var(--brand-danger);
+}

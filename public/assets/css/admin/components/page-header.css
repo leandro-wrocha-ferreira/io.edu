@@ -1,0 +1,115 @@
+/* ==============================================
+ * Page Header — Banner topo de página
+ * ============================================== */
+.page-header {
+	background: var(--brand-gradient);
+	border-radius: 0.875rem;
+	padding: 1.5rem 2rem;
+	margin-bottom: 1.75rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	position: relative;
+	overflow: hidden;
+}
+
+.page-header::before {
+	content: '';
+	position: absolute;
+	top: -40px;
+	right: -40px;
+	width: 180px;
+	height: 180px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.05);
+	pointer-events: none;
+}
+
+.page-header::after {
+	content: '';
+	position: absolute;
+	bottom: -60px;
+	right: 80px;
+	width: 220px;
+	height: 220px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.03);
+	pointer-events: none;
+}
+
+.page-header-info {
+	position: relative;
+	z-index: 1;
+}
+
+.page-header-breadcrumb {
+	font-size: 0.8rem;
+	color: rgba(255, 255, 255, 0.65);
+	margin-bottom: 0.35rem;
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+}
+
+.page-header-breadcrumb a {
+	color: rgba(255, 255, 255, 0.65);
+	text-decoration: none;
+	transition: color var(--transition-fast);
+}
+
+.page-header-breadcrumb a:hover {
+	color: rgba(255, 255, 255, 0.95);
+}
+
+.page-header-breadcrumb .sep {
+	opacity: 0.5;
+}
+
+.page-header-title {
+	font-size: 1.5rem;
+	font-weight: 700;
+	color: #ffffff;
+	margin: 0;
+	line-height: 1.2;
+	text-wrap: balance;
+}
+
+.page-header-subtitle {
+	font-size: 0.875rem;
+	color: rgba(255, 255, 255, 0.7);
+	margin-top: 0.25rem;
+	margin-bottom: 0;
+}
+
+.page-header-actions {
+	position: relative;
+	z-index: 1;
+	flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+	.page-header {
+		padding: 1.25rem 1.25rem;
+	}
+
+	.page-header-title {
+		font-size: 1.25rem;
+	}
+}
+
+@media (max-width: 576px) {
+	.page-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.page-header-actions {
+		width: 100%;
+	}
+
+	.page-header-actions .btn-theme-primary-outline {
+		width: 100%;
+		justify-content: center;
+	}
+}

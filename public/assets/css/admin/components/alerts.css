@@ -1,0 +1,43 @@
+/* ==============================================
+ * Alerts Component (Flash messages)
+ * ============================================== */
+.alert-flash {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+	padding: 1rem 1.25rem;
+	border-radius: 0.625rem;
+	border: none;
+	border-left: 4px solid;
+	margin-bottom: 1.25rem;
+}
+
+.alert-flash-success {
+	background-color: var(--brand-success-ghost);
+	border-left-color: var(--brand-success);
+	color: var(--brand-success);
+}
+
+.alert-flash-danger {
+	background-color: var(--brand-danger-ghost);
+	border-left-color: var(--brand-danger);
+	color: var(--brand-danger);
+}
+
+.alert-flash .alert-flash-icon {
+	font-size: 1.1rem;
+	margin-top: 0.05rem;
+	flex-shrink: 0;
+}
+
+.alert-flash .alert-flash-body {
+	flex: 1;
+	font-size: 0.875rem;
+	color: var(--text-main);
+}
+
+.alert-flash .btn-close {
+	opacity: 0.5;
+	flex-shrink: 0;
+}
+.alert-flash .btn-close:hover { opacity: 0.9; }

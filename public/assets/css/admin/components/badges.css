@@ -1,0 +1,58 @@
+/* ==============================================
+ * Badges Component (Roles / Status)
+ * ============================================== */
+.badge-role {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	padding: 0.3rem 0.65rem;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+	white-space: nowrap;
+}
+
+.badge-role-admin {
+	background-color: var(--brand-primary-ghost);
+	color: var(--brand-primary);
+	border: 1px solid rgba(26, 86, 219, 0.2);
+}
+
+.badge-role-student {
+	background-color: var(--brand-success-ghost);
+	color: var(--brand-success);
+	border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.badge-role-default {
+	background-color: rgba(107, 114, 128, 0.1);
+	color: var(--text-muted);
+	border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.badge-status-active {
+	background-color: var(--brand-success-ghost);
+	color: var(--brand-success);
+	border: 1px solid rgba(5, 150, 105, 0.2);
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	padding: 0.3rem 0.65rem;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	font-weight: 600;
+}
+
+.badge-status-inactive {
+	background-color: rgba(107, 114, 128, 0.1);
+	color: var(--text-muted);
+	border: 1px solid rgba(107, 114, 128, 0.2);
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	padding: 0.3rem 0.65rem;
+	border-radius: 999px;
+	font-size: 0.72rem;
+	font-weight: 600;
+}

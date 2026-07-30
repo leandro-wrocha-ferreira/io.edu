@@ -1,0 +1,32 @@
+/* ================================================
+ * Form Component & Control Styles
+ * ================================================ */
+.form-label {
+	font-weight: 500;
+	font-size: 0.875rem;
+	color: var(--text-heading);
+}
+
+.form-control,
+.form-select {
+	background-color: var(--bg-card);
+	color: var(--text-main);
+	border: 1px solid var(--border-color);
+	border-radius: 0.5rem;
+	font-size: 0.875rem;
+	transition: border-color var(--transition-fast), box-shadow var(--transition-fast),
+	            background-color var(--transition-theme), color var(--transition-theme);
+}
+
+.form-control:focus,
+.form-select:focus {
+	background-color: var(--bg-card);
+	color: var(--text-main);
+	border-color: var(--brand-primary);
+	box-shadow: 0 0 0 0.2rem rgba(26, 86, 219, 0.18);
+}
+
+.form-check-input:checked {
+	background-color: var(--brand-primary);
+	border-color: var(--brand-primary);
+}

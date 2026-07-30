@@ -1,0 +1,60 @@
+/* ==============================================
+ * Card Component
+ * ============================================== */
+.card-theme {
+	background-color: var(--bg-card);
+	border: 1px solid var(--border-color);
+	border-radius: 0.75rem;
+	box-shadow: var(--shadow-sm);
+	transition: background-color var(--transition-theme), border-color var(--transition-theme);
+}
+
+/* ==============================================
+ * Card com Header Interno (Forms)
+ * ============================================== */
+.card-theme-form {
+	background-color: var(--bg-card);
+	border: 1px solid var(--border-color);
+	border-radius: 0.875rem;
+	box-shadow: var(--shadow-sm);
+	overflow: hidden;
+	transition: background-color var(--transition-theme), border-color var(--transition-theme);
+}
+
+.card-theme-form .form-section {
+	padding: 1.5rem 2rem;
+}
+
+.card-theme-form .form-section + .form-section {
+	border-top: 1px solid var(--border-color);
+}
+
+.card-theme-form .form-section-header {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	margin-bottom: 1.25rem;
+}
+
+.card-theme-form .form-section-header i {
+	color: var(--brand-primary);
+	font-size: 1rem;
+}
+
+.card-theme-form .form-section-title {
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: var(--text-heading);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin: 0;
+}
+
+.card-theme-form .form-actions {
+	padding: 1.25rem 2rem;
+	background-color: var(--bg-subtle);
+	border-top: 1px solid var(--border-color);
+	display: flex;
+	gap: 0.75rem;
+	align-items: center;
+}

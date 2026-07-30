@@ -15,12 +15,30 @@
 	<!-- Theme Logic (Before CSS to prevent FOUC) -->
 	<script src="<?= base_url('public/assets/js/theme.js') ?>"></script>
 
-	<!-- Styles -->
+	<!-- Base Styles & Theme Tokens -->
 	<link rel="stylesheet" href="<?= base_url('public/assets/css/bootstrap.min.css') ?>">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 	<link rel="stylesheet" href="//cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 	<link rel="stylesheet" href="<?= base_url('public/assets/css/theme.css') ?>">
 	<link rel="stylesheet" href="<?= base_url('public/assets/css/admin.css') ?>">
+
+	<!-- Component Styles -->
+	<link rel="stylesheet" href="<?= base_url('public/assets/css/admin/components/sidebar.css') ?>">
+	<link rel="stylesheet" href="<?= base_url('public/assets/css/admin/components/page-header.css') ?>">
+	<link rel="stylesheet" href="<?= base_url('public/assets/css/admin/components/card.css') ?>">
+	<link rel="stylesheet" href="<?= base_url('public/assets/css/admin/components/buttons.css') ?>">
+	<link rel="stylesheet" href="<?= base_url('public/assets/css/admin/components/datatable.css') ?>">
+	<link rel="stylesheet" href="<?= base_url('public/assets/css/admin/components/form.css') ?>">
+	<link rel="stylesheet" href="<?= base_url('public/assets/css/admin/components/badges.css') ?>">
+	<link rel="stylesheet" href="<?= base_url('public/assets/css/admin/components/alerts.css') ?>">
+	<link rel="stylesheet" href="<?= base_url('public/assets/css/admin/components/dashboard.css') ?>">
+
+	<!-- Page-Specific Styles -->
+	<?php if (!empty($page_css)): ?>
+		<?php foreach ((array)$page_css as $css): ?>
+			<link rel="stylesheet" href="<?= base_url('public/assets/css/pages/' . $css) ?>">
+		<?php endforeach; ?>
+	<?php endif; ?>
 </head>
 <body>
 	<div class="admin-wrapper">
@@ -152,5 +170,12 @@
 	<script src="//cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 	<script src="//cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 	<script src="<?= base_url('public/assets/js/admin/layout.js') ?>"></script>
+
+	<!-- Page-Specific Scripts -->
+	<?php if (!empty($page_js)): ?>
+		<?php foreach ((array)$page_js as $js): ?>
+			<script src="<?= base_url('public/assets/js/pages/' . $js) ?>"></script>
+		<?php endforeach; ?>
+	<?php endif; ?>
 </body>
 </html>
