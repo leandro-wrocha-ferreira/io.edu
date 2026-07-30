@@ -34,6 +34,7 @@ class Roles extends MY_Controller
         $data = [
             'page_name' => 'admin/roles/index',
             'title' => 'Perfis e Permissões',
+            'page_js' => ['admin/roles/index.js'],
         ];
 
         $this->load->view('admin/index', $data);

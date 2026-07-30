@@ -37,6 +37,7 @@ class Users extends MY_Controller
         $data = [
             'page_name' => 'admin/users/index',
             'title' => 'Gestão de Usuários',
+            'page_js' => ['admin/users/index.js'],
         ];
 
         $this->load->view('admin/index', $data);
