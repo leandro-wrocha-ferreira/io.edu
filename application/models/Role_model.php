@@ -1,8 +1,8 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-use app\domain\admin\Role;
-use app\domain\admin\RoleRepositoryInterface;
+use app\domain\admin\role\Role;
+use app\domain\admin\role\RoleRepositoryInterface;
 
 /**
  * Role model implementing RoleRepositoryInterface.

@@ -1,8 +1,8 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-use app\domain\admin\Permission;
-use app\domain\admin\PermissionRepositoryInterface;
+use app\domain\admin\permission\Permission;
+use app\domain\admin\permission\PermissionRepositoryInterface;
 
 /**
  * Permission model implementing PermissionRepositoryInterface.
