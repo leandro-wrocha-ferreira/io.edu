@@ -7,7 +7,7 @@ namespace app\domain\admin\permission;
  */
 class Permission
 {
-	private ?int $id;
+	private ?int $id = null;
 	private string $name;
 	private string $slug;
 	private ?string $description;
