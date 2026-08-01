@@ -21,7 +21,7 @@
 </div>
 
 <?php if (isset($error)): ?>
-	<div class="alert-flash alert-flash-danger alert-dismissible fade show mb-4 animate-fade-up" role="alert" aria-live="polite">
+	<div class="alert alert-flash alert-flash-danger alert-dismissible fade show mb-4 animate-fade-up" role="alert" aria-live="polite">
 		<i class="bi bi-exclamation-circle-fill alert-flash-icon" aria-hidden="true"></i>
 		<div class="alert-flash-body"><?= htmlspecialchars($error) ?></div>
 		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
@@ -29,7 +29,7 @@
 <?php endif; ?>
 
 <?php if (validation_errors()): ?>
-	<div class="alert-flash alert-flash-danger alert-dismissible fade show mb-4 animate-fade-up" role="alert" aria-live="polite">
+	<div class="alert alert-flash alert-flash-danger alert-dismissible fade show mb-4 animate-fade-up" role="alert" aria-live="polite">
 		<i class="bi bi-exclamation-circle-fill alert-flash-icon" aria-hidden="true"></i>
 		<div class="alert-flash-body"><?= validation_errors() ?></div>
 		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>

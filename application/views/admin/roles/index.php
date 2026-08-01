@@ -21,15 +21,15 @@
 </div>
 
 <?php if ($this->session->flashdata('success')): ?>
-	<div class="alert-flash alert-flash-success alert-dismissible fade show animate-fade-up" role="alert" aria-live="polite">
+	<div class="alert alert-flash alert-flash-success alert-dismissible fade show animate-fade-up" role="alert" aria-live="polite">
 		<i class="bi bi-check-circle-fill alert-flash-icon" aria-hidden="true"></i>
-		<div class="alert-flash-body"><?= htmlspecialchars($this->session->flashdata('success')) ?></div>
+		<div class="alert-flash-body"><?= htmlspecialchars($this->lang->line($this->session->flashdata('success'))) ?></div>
 		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
 	</div>
 <?php endif; ?>
 
 <?php if ($this->session->flashdata('error')): ?>
-	<div class="alert-flash alert-flash-danger alert-dismissible fade show animate-fade-up" role="alert" aria-live="polite">
+	<div class="alert alert-flash alert-flash-danger alert-dismissible fade show animate-fade-up" role="alert" aria-live="polite">
 		<i class="bi bi-exclamation-circle-fill alert-flash-icon" aria-hidden="true"></i>
 		<div class="alert-flash-body"><?= htmlspecialchars($this->session->flashdata('error')) ?></div>
 		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>

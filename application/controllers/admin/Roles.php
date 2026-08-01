@@ -110,7 +110,7 @@ class Roles extends MY_Controller
                 array_map('intval', $permission_ids)
             );
 
-            $this->session->set_flashdata('success', $this->lang->line('role_created_success'));
+            $this->session->set_flashdata('success', 'role_created_success');
             redirect('admin/perfis');
         }
 
@@ -151,7 +151,7 @@ class Roles extends MY_Controller
                 array_map('intval', $permission_ids)
             );
 
-            $this->session->set_flashdata('success', $this->lang->line('role_updated_success'));
+            $this->session->set_flashdata('success', 'role_updated_success');
             redirect('admin/perfis');
         }
 
@@ -177,7 +177,7 @@ class Roles extends MY_Controller
         $use_case = new DeleteRoleUseCase();
         $use_case->execute($id);
 
-        $this->session->set_flashdata('success', $this->lang->line('role_deleted_success'));
+        $this->session->set_flashdata('success', 'role_deleted_success');
         redirect('admin/perfis');
     }
 }

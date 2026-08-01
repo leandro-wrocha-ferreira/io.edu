@@ -136,7 +136,7 @@ class Users extends MY_Controller
                 array_map('intval', $role_ids)
             );
 
-            $this->session->set_flashdata('success', $this->lang->line('user_created_success'));
+            $this->session->set_flashdata('success', 'user_created_success');
             redirect('admin/usuarios');
         }
 
@@ -180,7 +180,7 @@ class Users extends MY_Controller
                 array_map('intval', $role_ids)
             );
 
-            $this->session->set_flashdata('success', $this->lang->line('user_updated_success'));
+            $this->session->set_flashdata('success', 'user_updated_success');
             redirect('admin/usuarios');
         }
 
@@ -213,7 +213,7 @@ class Users extends MY_Controller
         $use_case = new ActivateUserUseCase();
         $use_case->execute($id);
 
-        $this->session->set_flashdata('success', $this->lang->line('user_activated_success'));
+        $this->session->set_flashdata('success', 'user_activated_success');
         redirect('admin/usuarios');
     }
 
@@ -235,7 +235,7 @@ class Users extends MY_Controller
         $use_case = new DisableUserUseCase();
         $use_case->execute($id);
 
-        $this->session->set_flashdata('success', $this->lang->line('user_deactivated_success'));
+        $this->session->set_flashdata('success', 'user_deactivated_success');
         redirect('admin/usuarios');
     }
 
@@ -257,7 +257,7 @@ class Users extends MY_Controller
         $use_case = new DeleteUserUseCase();
         $use_case->execute($id);
 
-        $this->session->set_flashdata('success', $this->lang->line('user_deleted_success'));
+        $this->session->set_flashdata('success', 'user_deleted_success');
         redirect('admin/usuarios');
     }
 }
