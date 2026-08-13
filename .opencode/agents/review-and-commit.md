@@ -4,6 +4,7 @@ mode: primary
 temperature: 0.1
 permission:
   read: allow
+  edit: deny
   bash:
     "*": deny
     "github-leandro-wrocha-ferreira git add *": allow
