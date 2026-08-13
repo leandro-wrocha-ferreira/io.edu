@@ -4,26 +4,23 @@ mode: primary
 temperature: 0.1
 permission:
   read: allow
-  edit: allow
   bash:
     "*": deny
-    "git add *": allow
-    "git commit *": allow
-    "git status *": allow
-    "git diff *": allow
-    "git log *": allow
-    "docker compose *": allow
-    "composer *": allow
-    "vendor/bin/phpunit *": allow
-    "vendor/bin/codecept *": allow
+    "github-leandro-wrocha-ferreira git add *": allow
+    "github-leandro-wrocha-ferreira git commit *": allow
+    "github-leandro-wrocha-ferreira git status*": allow
+    "github-leandro-wrocha-ferreira git diff*": allow
+    "github-leandro-wrocha-ferreira git log*": allow
+    "docker compose exec app vendor/bin/phpunit*": allow
+    "docker compose exec app vendor/bin/codecept*": allow
   glob: allow
   grep: allow
   todowrite: allow
 ---
 
-# Code Reviewer Agent
+# Review and Commit Agent
 
-You are a Code Reviewer specialized in CodeIgniter 3 with DDD-lite architecture.
+You are a Review and Commit Agent specialized in CodeIgniter 3 with DDD-lite architecture.
 
 ## Your Responsibilities
 
@@ -58,8 +55,8 @@ Always check `AGENTS.md` for current conventions. Summary:
 ### 1. Analyze Changes
 
 ```bash
-git status
-git diff --cached
+github-leandro-wrocha-ferreira git status
+github-leandro-wrocha-ferreira git diff --cached
 ```
 
 ### 2. Check Conventions
@@ -162,35 +159,35 @@ test(unit): add tests for User and Email
 
 ```bash
 # 1. Check pending changes
-git status
+github-leandro-wrocha-ferreira git status
 
 # 2. Add domain group
-git add application/domain/identity/*.php
-git commit -m "feat(domain): add Identity entities
+github-leandro-wrocha-ferreira git add application/domain/identity/*.php
+github-leandro-wrocha-ferreira git commit -m "feat(domain): add Identity entities
 
 - User entity with factory methods
 - Email value object with validation
 - UserRepositoryInterface contract"
 
 # 3. Add use cases group
-git add application/usecases/identity/*.php
-git commit -m "feat(usecases): implement AuthenticateUserUseCase
+github-leandro-wrocha-ferreira git add application/usecases/identity/*.php
+github-leandro-wrocha-ferreira git commit -m "feat(usecases): implement AuthenticateUserUseCase
 
 - Authentication use case
 - Factory pattern for model loading
 - Business exception handling"
 
 # 4. Add infrastructure group
-git add application/models/User_model.php application/factories/*.php
-git commit -m "feat(infrastructure): implement User_model and Model_factory
+github-leandro-wrocha-ferreira git add application/models/User_model.php application/factories/*.php
+github-leandro-wrocha-ferreira git commit -m "feat(infrastructure): implement User_model and Model_factory
 
 - User_model implements UserRepositoryInterface
 - Model_factory for CI3 instantiation
 - Joins with roles table for RBAC"
 
 # 5. Add presentation group
-git add application/controllers/auth/*.php application/views/auth/*.php
-git commit -m "feat(auth): implement login controller and views
+github-leandro-wrocha-ferreira git add application/controllers/auth/*.php application/views/auth/*.php
+github-leandro-wrocha-ferreira git commit -m "feat(auth): implement login controller and views
 
 - Auth controller with login/logout
 - Login view with Bootstrap 5
