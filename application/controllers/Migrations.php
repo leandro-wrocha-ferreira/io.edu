@@ -37,7 +37,7 @@ class Migrations extends CI_Controller {
 			return '0';
 		}
 
-		$row = $this->db->select('version')->get('migrations')->row();
+		$row = $this->db->select_max('version', 'version')->get('migrations')->row();
 		return $row ? $row->version : '0';
 	}
 
@@ -108,14 +108,25 @@ class Migrations extends CI_Controller {
 			return;
 		}
 
+		$records = array();
+		if ($this->db->field_exists('class', 'migrations'))
+		{
+			foreach ($this->db->get('migrations')->result_array() as $row)
+			{
+				$records[(string) $row['version']] = $row;
+			}
+		}
+
 		echo "Available migrations:\n";
-		echo str_repeat('-', 50)."\n";
+		echo str_repeat('-', 86)."\n";
 
 		foreach ($migrations as $version => $file)
 		{
 			$name = basename($file, '.php');
 			$status = ($version <= $current) ? '[APPLIED]' : '[PENDING]';
-			echo sprintf("%-14s %-30s %s\n", $version, $name, $status);
+			$class = isset($records[(string) $version]['class']) ? $records[(string) $version]['class'] : '-';
+			$created_at = isset($records[(string) $version]['created_at']) ? $records[(string) $version]['created_at'] : '-';
+			echo sprintf("%-14s %-36s %-10s %-34s %s\n", $version, $name, $status, $class, $created_at);
 		}
 	}
 
