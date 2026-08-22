@@ -27,7 +27,10 @@ class Migration_Create_user_roles extends CI_Migration {
 		$this->dbforge->add_key(array('user_id', 'role_id'), FALSE, TRUE);
 		$this->dbforge->create_table('user_roles');
 
-		$this->db->query('INSERT INTO user_roles (user_id, role_id) SELECT id, role_id FROM users WHERE role_id IS NOT NULL');
+		if ($this->db->field_exists('role_id', 'users'))
+		{
+			$this->db->query('INSERT INTO user_roles (user_id, role_id) SELECT id, role_id FROM users WHERE role_id IS NOT NULL');
+		}
 
 		$this->db->query('ALTER TABLE `user_roles` ADD CONSTRAINT `fk_user_roles_user_id` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE');
 		$this->db->query('ALTER TABLE `user_roles` ADD CONSTRAINT `fk_user_roles_role_id` FOREIGN KEY (`role_id`) REFERENCES `roles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE');
