@@ -32,21 +32,15 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
 
 ### Regras
 
-- **Domain** NÃO depende de CI3. Sem `get_instance()`, sem `CI_Model`.
-- **Use Cases** usam `Model_factory` para carregar models (não `get_instance()` direto).
-- **Models** implementam interfaces do domain (`implements UserRepositoryInterface`).
 - **Controllers** extend `MY_Controller` (in `application/core/MY_Controller.php`).
 - **Controllers** delegam lógica para Use Cases, nunca direto para Models.
 - **Controllers** NÃO devem conter regra de negócio — toda lógica de contagem, filtro ou processamento pertence ao Use Case.
-- **Controllers (Form Flow)**: NO private `_handle_*()` helper methods duplicating view loading. Check `$this->form_validation->run() === TRUE` directly in the action method. Data assembly (`$data`) and `$this->load->view()` occur ONCE at the end of the method body (serving GET, failed POST, and exception fall-through).
-- **Global Exception Handling**: `MY_Controller::_remap()` intercepts all action calls. Uncaught exceptions are handled automatically:
-  - **AJAX Requests**: Returns JSON via `json_response()` with matching HTTP status code (404, 409, 422, 500).
-  - **HTML Requests**: Flashdata notification / 404 page.
-- **Domain Exceptions**: Throw semantic exceptions from `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`) instead of generic `\RuntimeException`.
-- **Controllers** NÃO devem carregar `session`, `url` ou `form` manualmente — já estão no autoload.
+- **Controllers (Form Flow)**: Sem métodos privados `_handle_*()` duplicando carregamento de views. Checar `$this->form_validation->run() === TRUE` diretamente na ação. A montagem do `$data` e a renderização da view acontecem em ponto único no final do método.
+- **Tratamento Global de Exceções**: `MY_Controller::_remap()` intercepta todas as chamadas de ações. Exceções não capturadas são tratadas automaticamente:
+  - **Requisições AJAX**: Retornam JSON via `json_response()` com código HTTP equivalente (404, 409, 422, 500).
+  - **Requisições HTML**: Alerta via flashdata / página 404 amigável.
+- **Exceções Semânticas**: Lançar exceções de `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`) nos use cases em vez de `\RuntimeException` genérica.
 - **Controllers** NÃO devem carregar idiomas (`$this->lang->load()`) nem checar `HTTP_ACCEPT_LANGUAGE` manualmente — a detecção e carregamento de idioma é gerenciada globalmente via hook `Language_check` no `post_controller_constructor` com fallback para `english`.
-- **Controllers** carregam models no `__construct()` usando **lowercase** (ex: `$this->load->model('user_model')`).
-- **Models** NÃO devem setar `created_at`/`updated_at` — isso é responsabilidade do banco via triggers.
 - **Models** ficam em `application/models/` (lowercase) — CI3 requer esta convenção.
 - **Controllers** ficam em `application/controllers/` com subdiretórios (`auth/`, `admin/`, `student/`).
 - Controllers NÃO devem usar namespaces — CI3 carrega por path discovery.
@@ -86,7 +80,7 @@ O projeto usa Composer PSR-4 para autoloading:
 |--------|-----------|---------|
 | Domain | `app\domain\<context>` | `app\domain\identity\User` |
 | Use Cases | `app\usecases\<context>` | `app\usecases\identity\AuthenticateUserUseCase` |
-| Factories | `app\factories` | `app\factories\Model_factory` |
+| Factories | `app\Factories` | `app\Factories\Model_factory` |
 | Tests | `Tests\<Type>` | `Tests\Acceptance\LoginCest` |
 
 ### Notas Importantes
@@ -116,15 +110,15 @@ class User
 
 ### Docblocks
 
-All classes, methods and parameters MUST have docblocks — **always in English**:
+Todas as classes, métodos e parâmetros devem ter docblocks:
 
 ```php
 /**
- * Create a new user.
+ * Cria um novo usuário.
  *
- * @param string $name User's name
- * @param Email $email User's email (Value Object)
- * @param string $password Plain text password
+ * @param string $name Nome do usuário
+ * @param Email $email Email do usuário (Value Object)
+ * @param string $password Senha em texto plano
  * @return self
  */
 public static function create(string $name, Email $email, string $password): self
@@ -175,7 +169,7 @@ class Email
     public function __construct(string $email)
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException("Invalid email");
+            throw new \InvalidArgumentException("Email inválido");
         }
         $this->value = $email;
     }
@@ -205,7 +199,7 @@ interface UserRepositoryInterface
 
 ```php
 // application/factories/Model_factory.php
-namespace app\factories;
+namespace app\Factories;
 
 class Model_factory
 {
@@ -226,46 +220,29 @@ namespace app\usecases\identity;
 
 use app\domain\identity\Email;
 use app\domain\identity\User;
-use app\factories\Model_factory;
+use app\Factories\Model_factory;
 
-/**
- * Use case for authenticating a user in the system.
- */
 class AuthenticateUserUseCase
 {
-    /** @var \app\domain\identity\UserRepositoryInterface */
     private $user_repository;
 
-    /**
-     * Constructor.
-     *
-     * @param \app\domain\identity\UserRepositoryInterface|null $repository Repository for testing (optional)
-     */
     public function __construct($repository = null)
     {
         if ($repository !== null) {
             $this->user_repository = $repository;
         } else {
-            $this->user_repository = Model_factory::make('user_model');
+            $this->user_repository = Model_factory::make('User_model');
         }
     }
 
-    /**
-     * Execute authentication.
-     *
-     * @param string $email User email
-     * @param string $password Plain text password
-     * @return User Authenticated user
-     * @throws \RuntimeException When invalid credentials
-     */
     public function execute(string $email, string $password): User
     {
         $user = $this->user_repository->find_by_email(new Email($email));
         if ($user === null) {
-            throw new \RuntimeException("Invalid credentials");
+            throw new \RuntimeException("Credenciais inválidas");
         }
         if (!$user->verify_password($password)) {
-            throw new \RuntimeException("Invalid credentials");
+            throw new \RuntimeException("Credenciais inválidas");
         }
         return $user;
     }
@@ -349,7 +326,6 @@ $route['aluno/painel'] = 'student/dashboard/index';
 
 - **Tabelas:** plural, snake_case, sem prefixo (`users`, `courses`, `lessons`)
 - **Colunas padrão:** `id` (INT unsigned AI), `created_at`, `updated_at`, `deleted_at` (soft delete)
-- **Timestamps:** `created_at` e `updated_at` são gerenciados por **triggers do banco** (INSERT/UPDATE). Models NÃO devem setar essas colunas.
 - **Migrations:** timestamp `YYYYMMDDHHIISS_name`, classe `Migration_Create_<table>`
 - **Foreign keys:** migration separada, naming `fk_table_column`
 - **Driver:** `mysqli`, Query Builder habilitado
@@ -418,14 +394,13 @@ vendor/bin/codecept run acceptance           # e2e
 - **Composer PSR-4:** `app\` → `application/`, `Tests\` → `tests/`
 - **Routing:** `translate_uri_dashes` is OFF; controller methods map directly to URL segments
 - **Frontend:** Bootstrap 5.3.8 (via composer); CSS/JS copied to `public/assets/` on install/update
-- **UI Animations**: All page views MUST apply entry animation classes (`animate-fade-up` on `.page-header` and `.animate-fade-up.animate-delay-1` on main card/form containers).
-- **Hooks:** enabled for auth middleware via `post_controller_constructor`
+- **UI Animations**: Todas as views de página DEVEM aplicar as classes de animação de entrada (`animate-fade-up` no `.page-header` e `.animate-fade-up.animate-delay-1` nos contêineres principais de cards/formulários/tabelas).
+- **Hooks:** habilitados para middleware de autenticação via `post_controller_constructor`
 - **PSR-12:** `{` on next line for classes and methods
-- **Docblocks:** mandatory on all classes and methods — **always in English**
-- **IDE Helper:** `_ide_helper.php` at project root provides type resolution for CI3 core classes. Do NOT add `@property` annotations to individual models or controllers — they are inherited from the base class stubs.
+- **Docblocks:** obrigatórios em todas as classes e métodos
 - **Directories:** lowercase para manter convenção CI3 (`domain/`, `usecases/`, `factories/`)
 - **Files:** PascalCase para classes namespaced (obrigação PSR-4)
-- **Git Commands & Push:** All Git operations (status, add, commit, diff, log, push) MUST ALWAYS be executed using the `git-leandro` command (e.g. `git-leandro push -u origin master`).
+- **Comandos Git & Push:** Todas as operações do Git (status, add, commit, diff, log, push) DEVEM SEMPRE ser executadas utilizando o comando `git-leandro` (ex: `git-leandro push -u origin master`).
 
 ## Gotchas
 
