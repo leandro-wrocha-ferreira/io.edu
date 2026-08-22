@@ -7,11 +7,11 @@ permission:
   edit: deny
   bash:
     "*": deny
-    "github-leandro-wrocha-ferreira git add *": allow
-    "github-leandro-wrocha-ferreira git commit *": allow
-    "github-leandro-wrocha-ferreira git status*": allow
-    "github-leandro-wrocha-ferreira git diff*": allow
-    "github-leandro-wrocha-ferreira git log*": allow
+    "git-leandro git add *": allow
+    "git-leandro git commit *": allow
+    "git-leandro git status*": allow
+    "git-leandro git diff*": allow
+    "git-leandro git log*": allow
     "docker compose exec app vendor/bin/phpunit*": allow
     "docker compose exec app vendor/bin/codecept*": allow
   glob: allow
@@ -51,13 +51,13 @@ Always check `AGENTS.md` for current conventions. Summary:
 - Kebab-case in Portuguese: `autenticacao/login`, `admin/painel`
 - Controllers in subdirectories: `auth/Auth`, `admin/Dashboard`
 
-## Workflow de Code Review
+## Workflow de Review and Commit
 
 ### 1. Analyze Changes
 
 ```bash
-github-leandro-wrocha-ferreira git status
-github-leandro-wrocha-ferreira git diff --cached
+git-leandro git status
+git-leandro git diff --cached
 ```
 
 ### 2. Check Conventions
@@ -160,35 +160,35 @@ test(unit): add tests for User and Email
 
 ```bash
 # 1. Check pending changes
-github-leandro-wrocha-ferreira git status
+git-leandro git status
 
 # 2. Add domain group
-github-leandro-wrocha-ferreira git add application/domain/identity/*.php
-github-leandro-wrocha-ferreira git commit -m "feat(domain): add Identity entities
+git-leandro git add application/domain/identity/*.php
+git-leandro git commit -m "feat(domain): add Identity entities
 
 - User entity with factory methods
 - Email value object with validation
 - UserRepositoryInterface contract"
 
 # 3. Add use cases group
-github-leandro-wrocha-ferreira git add application/usecases/identity/*.php
-github-leandro-wrocha-ferreira git commit -m "feat(usecases): implement AuthenticateUserUseCase
+git-leandro git add application/usecases/identity/*.php
+git-leandro git commit -m "feat(usecases): implement AuthenticateUserUseCase
 
 - Authentication use case
 - Factory pattern for model loading
 - Business exception handling"
 
 # 4. Add infrastructure group
-github-leandro-wrocha-ferreira git add application/models/User_model.php application/factories/*.php
-github-leandro-wrocha-ferreira git commit -m "feat(infrastructure): implement User_model and Model_factory
+git-leandro git add application/models/User_model.php application/factories/*.php
+git-leandro git commit -m "feat(infrastructure): implement User_model and Model_factory
 
 - User_model implements UserRepositoryInterface
 - Model_factory for CI3 instantiation
 - Joins with roles table for RBAC"
 
 # 5. Add presentation group
-github-leandro-wrocha-ferreira git add application/controllers/auth/*.php application/views/auth/*.php
-github-leandro-wrocha-ferreira git commit -m "feat(auth): implement login controller and views
+git-leandro git add application/controllers/auth/*.php application/views/auth/*.php
+git-leandro git commit -m "feat(auth): implement login controller and views
 
 - Auth controller with login/logout
 - Login view with Bootstrap 5
