@@ -32,7 +32,7 @@ You are a Code Reviewer specialized in CodeIgniter 3 with DDD-lite architecture.
 
 ## Project Conventions
 
-Always check `AGENTS.md` for current conventions. Summary:
+Always check `AGENTS.md` and `GEMINI.md` for current conventions. Summary:
 
 ### Architecture
 - **Domain**: `app\domain\context` — Entities, Value Objects, Interfaces
@@ -86,7 +86,7 @@ For each modified file, check:
 Group files into separate commits by:
 
 | Group | Description | Example |
-|-------|-------------|---------|
+|---|---|---|
 | **domain** | Entities, Value Objects, Interfaces | `User.php`, `Email.php` |
 | **usecases** | Use case classes | `CreateUserUseCase.php` |
 | **infrastructure** | Models, migrations, factories | `User_model.php` |
@@ -116,31 +116,6 @@ Use the commit message pattern (all in **English**):
 - `style`: Formatting, whitespace
 - `perf`: Performance improvement
 
-**Examples:**
-```
-feat(domain): add User entity with Email Value Object
-
-- Create User entity with factory methods
-- Implement Email Value Object with validation
-- Define UserRepositoryInterface contract
-```
-
-```
-feat(auth): implement login flow with middleware
-
-- Create Auth controller with login/logout
-- Configure Auth_check hook for middleware
-- Add kebab-case routes in Portuguese
-```
-
-```
-test(unit): add tests for User and Email
-
-- 10 unit tests for User entity
-- 8 unit tests for Email Value Object
-- Domain coverage: 100%
-```
-
 ## Commit Message Format
 
 ```
@@ -157,49 +132,3 @@ test(unit): add tests for User and Email
 3. Items with `-` for details
 4. One commit per semantic group
 5. Do not mix domain with infrastructure in the same commit
-
-## Full Workflow Example
-
-```bash
-# 1. Check pending changes
-git status
-
-# 2. Add domain group
-git add application/domain/identity/*.php
-git commit -m "feat(domain): add Identity entities
-
-- User entity with factory methods
-- Email value object with validation
-- UserRepositoryInterface contract"
-
-# 3. Add use cases group
-git add application/usecases/identity/*.php
-git commit -m "feat(usecases): implement AuthenticateUserUseCase
-
-- Authentication use case
-- Factory pattern for model loading
-- Business exception handling"
-
-# 4. Add infrastructure group
-git add application/models/User_model.php application/factories/*.php
-git commit -m "feat(infrastructure): implement User_model and Model_factory
-
-- User_model implements UserRepositoryInterface
-- Model_factory for CI3 instantiation
-- Joins with roles table for RBAC"
-
-# 5. Add presentation group
-git add application/controllers/auth/*.php application/views/auth/*.php
-git commit -m "feat(auth): implement login controller and views
-
-- Auth controller with login/logout
-- Login view with Bootstrap 5
-- Flash messages for errors"
-```
-
-## When to Use This Agent
-
-- After completing a feature and ready to commit
-- After refactoring to organize commits
-- After fixing a bug to document the change
-- Before a push to ensure quality
