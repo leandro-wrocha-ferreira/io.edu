@@ -374,6 +374,10 @@ vendor/bin/codecept run acceptance  # run Codeception E2E tests
 - Login, navegação, CRUD
 - Pasta: `tests/acceptance/`
 
+### Cobertura de Testes (Coverage)
+
+- Os testes automatizados DEVEM cobrir no mínimo **80%** do código da aplicação (Domain, Use Cases, Core e Models).
+
 ### Comandos
 
 ```bash
@@ -395,6 +399,7 @@ vendor/bin/codecept run acceptance           # e2e
 - **Routing:** `translate_uri_dashes` is OFF; controller methods map directly to URL segments
 - **Frontend:** Bootstrap 5.3.8 (via composer); CSS/JS copied to `public/assets/` on install/update
 - **UI Animations**: Todas as views de página DEVEM aplicar as classes de animação de entrada (`animate-fade-up` no `.page-header` e `.animate-fade-up.animate-delay-1` nos contêineres principais de cards/formulários/tabelas).
+- **Cobertura de Testes:** Mínimo de 80% de cobertura de código em testes automatizados.
 - **Hooks:** habilitados para middleware de autenticação via `post_controller_constructor`
 - **PSR-12:** `{` on next line for classes and methods
 - **Docblocks:** obrigatórios em todas as classes e métodos

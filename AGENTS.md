@@ -398,6 +398,10 @@ vendor/bin/codecept run acceptance  # run Codeception E2E tests
 - Login, navegação, CRUD
 - Pasta: `tests/acceptance/`
 
+### Code Coverage
+
+- Automated tests MUST cover at least **80%** of application code (Domain, Use Cases, Core, Models).
+
 ### Comandos
 
 ```bash
