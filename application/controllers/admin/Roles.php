@@ -136,6 +136,10 @@ class Roles extends MY_Controller
         $get_use_case = new GetRoleUseCase();
         $role = $get_use_case->execute($id);
 
+        if ($id === 1 || $role->get_slug() === 'admin-master') {
+            throw new \app\domain\exceptions\ConflictException("O perfil AdminMaster é protegido e não pode ser alterado.");
+        }
+
         $this->form_validation->set_rules('name', 'Name', 'required|trim|min_length[3]');
         $this->form_validation->set_rules('slug', 'Slug', 'required|trim|alpha_dash');
 
@@ -174,6 +178,13 @@ class Roles extends MY_Controller
      */
     public function delete(int $id)
     {
+        $get_use_case = new GetRoleUseCase();
+        $role = $get_use_case->execute($id);
+
+        if ($id === 1 || $role->get_slug() === 'admin-master') {
+            throw new \app\domain\exceptions\ConflictException("O perfil AdminMaster é protegido e não pode ser excluído.");
+        }
+
         $use_case = new DeleteRoleUseCase();
         $use_case->execute($id);
 

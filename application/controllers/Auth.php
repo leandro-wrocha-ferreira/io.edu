@@ -83,7 +83,7 @@ class Auth extends CI_Controller
     private function _redirect_by_role()
     {
         $role = $this->session->userdata('user_role');
-        if ($role === 'admin') {
+        if ($role === 'admin-master' || $role === 'admin') {
             redirect(base_url('admin/painel'));
         } else {
             redirect(base_url('aluno/painel'));
