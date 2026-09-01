@@ -7,86 +7,82 @@ use app\domain\admin\permission\PermissionRepositoryInterface;
 /**
  * Permission model implementing PermissionRepositoryInterface.
  *
- * Handles persistence for the Permission entity.
+ * Handles persistence for the Permission entity using MY_Model base CRUD methods.
  */
-class Permission_model extends CI_Model implements PermissionRepositoryInterface
+class Permission_model extends MY_Model implements PermissionRepositoryInterface
 {
-    /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
+	/**
+	 * Table name.
+	 *
+	 * @var string
+	 */
+	protected string $table = 'permissions';
 
-    /**
-     * Find all permissions ordered by name.
-     *
-     * @return array Permission entities
-     */
-    public function find_all(): array
-    {
-        $rows = $this->db
-            ->from('permissions')
-            ->order_by('name', 'ASC')
-            ->get()
-            ->result_array();
+	/**
+	 * Constructor.
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+	}
 
-        return array_map(function (array $row) {
-            return Permission::from_database($row);
-        }, $rows);
-    }
+	/**
+	 * Find all permissions ordered by name.
+	 *
+	 * @return array Permission entities
+	 */
+	public function find_all(): array
+	{
+		$this->db->order_by('name', 'ASC');
+		$rows = $this->get_all();
 
-    /**
-     * Find a permission by ID.
-     *
-     * @param int $id Permission ID
-     * @return Permission|null
-     */
-    public function find_by_id(int $id): ?Permission
-    {
-        $row = $this->db
-            ->from('permissions')
-            ->where('id', $id)
-            ->get()
-            ->row_array();
+		return array_map(function (array $row) {
+			return Permission::from_database($row);
+		}, $rows);
+	}
 
-        return $row ? Permission::from_database($row) : null;
-    }
+	/**
+	 * Find a permission by ID.
+	 *
+	 * @param int $id Permission ID
+	 * @return Permission|null
+	 */
+	public function find_by_id(int $id): ?Permission
+	{
+		$row = $this->get_by_id($id);
+		return $row ? Permission::from_database($row) : null;
+	}
 
-    /**
-     * Save (insert or update) a permission.
-     *
-     * @param Permission $permission
-     * @return void
-     */
-    public function save(Permission $permission): void
-    {
-        $data = [
-            'name' => $permission->get_name(),
-            'slug' => $permission->get_slug(),
-            'description' => $permission->get_description(),
-        ];
+	/**
+	 * Save (insert or update) a permission.
+	 *
+	 * @param Permission $permission
+	 * @return void
+	 */
+	public function save(Permission $permission): void
+	{
+		$data = [
+			'name' => $permission->get_name(),
+			'slug' => $permission->get_slug(),
+			'description' => $permission->get_description(),
+		];
 
-        if ($permission->get_id() !== null) {
-            $this->db
-                ->where('id', $permission->get_id())
-                ->update('permissions', $data);
-        } else {
-            $this->db->insert('permissions', $data);
-        }
-    }
+		if ($permission->get_id() !== null) {
+			$this->update_record($permission->get_id(), $data);
+		} else {
+			$new_id = $this->insert($data);
+			$permission->set_name($permission->get_name());
+		}
+	}
 
-    /**
-     * Delete a permission by ID.
-     *
-     * @param int $id
-     * @return void
-     */
-    public function delete(int $id): void
-    {
-        $this->db
-            ->where('id', $id)
-            ->delete('permissions');
-    }
+	/**
+	 * Delete a permission by ID.
+	 *
+	 * @param int $id
+	 * @return void
+	 */
+	public function delete(int $id): void
+	{
+		$this->delete_record($id);
+	}
 }
