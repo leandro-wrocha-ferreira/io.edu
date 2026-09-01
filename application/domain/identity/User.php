@@ -224,6 +224,16 @@ class User
     }
 
     /**
+     * Check if the user has admin-master role.
+     *
+     * @return bool
+     */
+    public function is_admin_master(): bool
+    {
+        return $this->role === 'admin-master';
+    }
+
+    /**
      * Check if the user has admin role.
      *
      * @return bool
