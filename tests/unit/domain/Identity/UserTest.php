@@ -7,7 +7,7 @@ use app\domain\identity\User;
  * Test suite for User entity.
  *
  * Covers creation, password verification, role checks,
- * database hydration, and soft delete lifecycle.
+ * database hydration, getters, setters, and soft delete lifecycle.
  */
 class UserTest extends \PHPUnit\Framework\TestCase
 {
@@ -25,6 +25,8 @@ class UserTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('john@example.com', (string) $user->get_email());
         $this->assertTrue($user->verify_password('password123'));
         $this->assertNull($user->get_id());
+        $this->assertTrue($user->is_active());
+        $this->assertNotNull($user->get_created_at());
     }
 
     /**
@@ -82,6 +84,8 @@ class UserTest extends \PHPUnit\Framework\TestCase
             'email' => 'john@example.com',
             'password' => password_hash('pass', PASSWORD_BCRYPT),
             'role' => 'student',
+            'role_ids' => '[1,2]',
+            'is_active' => 1,
             'created_at' => '2026-01-01 00:00:00',
             'updated_at' => null,
             'deleted_at' => null,
@@ -93,6 +97,9 @@ class UserTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('John', $user->get_name());
         $this->assertEquals('john@example.com', (string) $user->get_email());
         $this->assertEquals('student', $user->get_role());
+        $this->assertEquals([1, 2], $user->get_role_ids());
+        $this->assertTrue($user->is_active());
+        $this->assertNotNull($user->get_password());
     }
 
     /**
@@ -117,6 +124,8 @@ class UserTest extends \PHPUnit\Framework\TestCase
 
         $this->assertTrue($user->is_admin());
         $this->assertFalse($user->is_student());
+        $this->assertFalse($user->is_admin_master());
+        $this->assertTrue($user->has_role('admin'));
     }
 
     /**
@@ -144,48 +153,61 @@ class UserTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test soft delete detection for a deleted user.
+     * Test admin master check.
      *
      * @return void
      */
-    public function test_user_is_deleted()
+    public function test_user_is_admin_master()
     {
         $row = [
             'id' => 1,
-            'name' => 'John',
-            'email' => 'john@example.com',
+            'name' => 'Master',
+            'email' => 'master@example.com',
             'password' => password_hash('pass', PASSWORD_BCRYPT),
-            'role' => 'student',
-            'created_at' => '2026-01-01 00:00:00',
-            'updated_at' => null,
-            'deleted_at' => '2026-01-02 00:00:00',
+            'role' => 'admin-master',
         ];
 
         $user = User::from_database($row);
-
-        $this->assertTrue($user->is_deleted());
+        $this->assertTrue($user->is_admin_master());
     }
 
     /**
-     * Test that a non-deleted user is correctly identified.
+     * Test soft delete and restore.
      *
      * @return void
      */
-    public function test_user_not_deleted()
+    public function test_user_delete_and_restore()
     {
-        $row = [
-            'id' => 1,
-            'name' => 'John',
-            'email' => 'john@example.com',
-            'password' => password_hash('pass', PASSWORD_BCRYPT),
-            'role' => 'student',
-            'created_at' => '2026-01-01 00:00:00',
-            'updated_at' => null,
-            'deleted_at' => null,
-        ];
-
-        $user = User::from_database($row);
-
+        $user = User::create('John', new Email('john@test.com'), '123');
         $this->assertFalse($user->is_deleted());
+
+        $user->delete();
+        $this->assertTrue($user->is_deleted());
+
+        $user->restore();
+        $this->assertFalse($user->is_deleted());
+    }
+
+    /**
+     * Test setters and getters.
+     *
+     * @return void
+     */
+    public function test_user_setters()
+    {
+        $user = User::create('Original', new Email('orig@test.com'), '123');
+        $user->set_id(42);
+        $user->set_name('Novo Nome');
+        $user->set_email(new Email('novo@test.com'));
+        $user->set_active(false);
+        $user->set_role('instructor');
+        $user->set_role_ids([4, 5]);
+
+        $this->assertEquals(42, $user->get_id());
+        $this->assertEquals('Novo Nome', $user->get_name());
+        $this->assertEquals('novo@test.com', (string) $user->get_email());
+        $this->assertFalse($user->is_active());
+        $this->assertEquals('instructor', $user->get_role());
+        $this->assertEquals([4, 5], $user->get_role_ids());
     }
 }

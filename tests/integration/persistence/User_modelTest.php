@@ -21,6 +21,11 @@ class User_repositoryTest extends \PHPUnit\Framework\TestCase
      */
     protected function setUp(): void
     {
+        if (!in_array('sqlite', \PDO::getAvailableDrivers())) {
+            $this->markTestSkipped('SQLite PDO driver is not available in this environment.');
+            return;
+        }
+
         $this->pdo = new \PDO('sqlite::memory:');
         $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 

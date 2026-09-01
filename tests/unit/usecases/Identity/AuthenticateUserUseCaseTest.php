@@ -93,6 +93,23 @@ class MockUserRepository implements UserRepositoryInterface
     }
 
     /**
+     * Count users by role slug.
+     *
+     * @param string $role Role slug
+     * @return int
+     */
+    public function count_by_role(string $role): int
+    {
+        $count = 0;
+        foreach ($this->users as $user) {
+            if ($user->has_role($role) && !$user->is_deleted()) {
+                $count++;
+            }
+        }
+        return $count;
+    }
+
+    /**
      * Count users by role slug on a specific date.
      *
      * @param string $role Role slug
