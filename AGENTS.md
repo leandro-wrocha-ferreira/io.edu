@@ -45,7 +45,7 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
 - **Domain Exceptions**: Throw semantic exceptions from `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`) instead of generic `\RuntimeException`.
 - **Controllers** NÃO devem carregar `session`, `url` ou `form` manualmente — já estão no autoload.
 - **Controllers** NÃO devem carregar idiomas (`$this->lang->load()`) nem checar `HTTP_ACCEPT_LANGUAGE` manualmente — a detecção e carregamento de idioma é gerenciada globalmente via hook `Language_check` no `post_controller_constructor` com fallback para `english`.
-- **Controllers** carregam models no `__construct()` usando **lowercase** (ex: `$this->load->model('user_model')`).
+- **Controllers** delegam para Use Cases (que resolvem models via `Model_factory`). Controllers não precisam pré-carregar models no `__construct()` a menos que haja necessidade específica.
 - **Models** NÃO devem setar `created_at`/`updated_at` — isso é responsabilidade do banco via triggers.
 - **Models** ficam em `application/models/` (lowercase) — CI3 requer esta convenção.
 - **Controllers** ficam em `application/controllers/` com subdiretórios (`auth/`, `admin/`, `student/`).
@@ -210,9 +210,10 @@ namespace app\domain\identity;
 
 interface UserRepositoryInterface
 {
-    public function find_by_id(int $id): ?User;
+    public function find_by_id($id): ?User;
     public function find_by_email(Email $email): ?User;
     public function save(User $user): void;
+    public function delete(array $where): bool;
 }
 ```
 
@@ -241,6 +242,7 @@ namespace app\usecases\identity;
 
 use app\domain\identity\Email;
 use app\domain\identity\User;
+use app\domain\exceptions\UnauthorizedException;
 use app\factories\Model_factory;
 
 /**
@@ -271,16 +273,16 @@ class AuthenticateUserUseCase
      * @param string $email User email
      * @param string $password Plain text password
      * @return User Authenticated user
-     * @throws \RuntimeException When invalid credentials
+     * @throws UnauthorizedException When invalid credentials
      */
     public function execute(string $email, string $password): User
     {
         $user = $this->user_repository->find_by_email(new Email($email));
         if ($user === null) {
-            throw new \RuntimeException("Invalid credentials");
+            throw new UnauthorizedException("Credenciais inválidas");
         }
         if (!$user->verify_password($password)) {
-            throw new \RuntimeException("Invalid credentials");
+            throw new UnauthorizedException("Credenciais inválidas");
         }
         return $user;
     }
@@ -306,42 +308,26 @@ $hook['post_controller_constructor'][] = [
 ];
 
 $hook['post_controller_constructor'][] = [
-    'class'    => 'Auth_check',
-    'function' => 'check',
-    'filename' => 'Auth_check.php',
+    'class'    => 'Middleware',
+    'function' => 'validate',
+    'filename' => 'Middleware.php',
     'filepath' => 'hooks'
 ];
 ```
 
-### Auth Check Hook
+### Auth & RBAC Middleware Hook
 
 ```php
-// application/hooks/Auth_check.php
-class Auth_check
+// application/hooks/Middleware.php
+class Middleware
 {
-    public function check()
+    public function validate()
     {
         $CI =& get_instance();
         $CI->load->library('session');
 
-        $uri = $CI->uri->segment(1);
-        $public_routes = ['autenticacao', 'welcome'];
-
-        if (in_array($uri, $public_routes)) {
-            return;
-        }
-
-        if (!$CI->session->userdata('logged_in')) {
-            redirect('autenticacao/login');
-        }
-
-        if ($uri === 'admin' && $CI->session->userdata('user_role') !== 'admin') {
-            show_404();
-        }
-
-        if ($uri === 'aluno' && $CI->session->userdata('user_role') !== 'student') {
-            show_404();
-        }
+        // Middleware validates authentication and granular RBAC permissions
+        // Public routes ('entrar', 'sair', 'welcome') bypass authentication
     }
 }
 ```

@@ -14,8 +14,8 @@ Test domain entities and use cases in isolation. No database, no HTTP.
 ```php
 <?php
 
-use Application\Domain\Identity\Email;
-use Application\Domain\Identity\User;
+use app\domain\identity\Email;
+use app\domain\identity\User;
 
 class UserTest extends \PHPUnit\Framework\TestCase
 {
@@ -39,23 +39,36 @@ class UserTest extends \PHPUnit\Framework\TestCase
 
 ### Integration Tests (tests/integration/)
 
-Test models with real database (SQLite). Verify queries and persistence.
+Test persistence mapping, database schemas, and entity hydration using SQLite in-memory:
+
+> [!NOTE]
+> **CI3 & SQLite Test Strategy**:
+> In CI3 DDD-lite, models extend `MY_Model` and depend on `$this->db`. Integration tests in `tests/integration/persistence/` test schema constraints and `from_database()` entity hydration using SQLite PDO. Direct model engine logic (CRUD execution, query compilation, audit logs) is verified in `tests/unit/MY_ModelTest.php` by mocking the query builder.
 
 ```php
 <?php
 
-use Application\Domain\Identity\Email;
-use Application\Domain\Identity\User;
+use app\domain\identity\Email;
+use app\domain\identity\User;
 
-class User_repositoryTest extends \PHPUnit\Framework\TestCase
+/**
+ * Integration test for User persistence mapping and hydration.
+ */
+class User_modelTest extends \PHPUnit\Framework\TestCase
 {
-    private $pdo;
+    private \PDO $pdo;
 
     protected function setUp(): void
     {
+        if (!in_array('sqlite', \PDO::getAvailableDrivers())) {
+            $this->markTestSkipped('SQLite PDO driver is not available.');
+            return;
+        }
+
         $this->pdo = new \PDO('sqlite::memory:');
         $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
+        // Test schema mirroring the application users table (timestamps handled automatically)
         $this->pdo->exec("
             CREATE TABLE users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,24 +76,40 @@ class User_repositoryTest extends \PHPUnit\Framework\TestCase
                 email VARCHAR(255) NOT NULL UNIQUE,
                 password VARCHAR(255) NOT NULL,
                 role VARCHAR(50) DEFAULT 'student',
-                created_at DATETIME,
-                updated_at DATETIME,
-                deleted_at DATETIME
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT NULL,
+                deleted_at DATETIME DEFAULT NULL
             )
         ");
     }
 
-    public function test_find_by_email_returns_user()
+    public function test_insert_and_hydrate_user_entity(): void
     {
-        // Insert test data
-        $this->pdo->exec("INSERT INTO users (name, email, password, role, created_at) VALUES ('Test', 'test@example.com', '" . password_hash('pass', PASSWORD_BCRYPT) . "', 'student', '2026-01-01 00:00:00')");
+        $email = new Email('test@example.com');
+        $user = User::create('Test User', $email, 'password123');
+
+        // Note: Models never pass created_at/updated_at; DB defaults/triggers populate them
+        $stmt = $this->pdo->prepare("
+            INSERT INTO users (name, email, password, role)
+            VALUES (?, ?, ?, ?)
+        ");
+        $stmt->execute([
+            $user->get_name(),
+            (string) $user->get_email(),
+            $user->get_password(),
+            'student',
+        ]);
 
         $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute(['test@example.com']);
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         $this->assertNotNull($row);
-        $this->assertEquals('Test', $row['name']);
+        $hydrated = User::from_database($row);
+
+        $this->assertEquals('Test User', $hydrated->get_name());
+        $this->assertEquals('test@example.com', (string) $hydrated->get_email());
+        $this->assertTrue($hydrated->verify_password('password123'));
     }
 }
 ```
@@ -100,7 +129,7 @@ class LoginCest
 {
     public function loginPageLoadsCorrectly(AcceptanceTester $I)
     {
-        $I->amOnPage('/autenticacao/login');
+        $I->amOnPage('/entrar');
         $I->see('Login');
         $I->seeElement('#email');
         $I->seeElement('#password');
@@ -155,11 +184,23 @@ tests/
 
 ## Rules
 
-1. Unit tests: NO database, NO HTTP, use mocks for repositories
-2. Integration tests: use SQLite for database tests
-3. E2E tests: use Codeception for browser tests (PHP native, no Playwright)
-4. One test class per source class
-5. Test both success and failure scenarios
-6. Use descriptive test method names: `test_should_throw_exception_when_email_invalid`
-7. Use PSR-4 namespaces for test classes: `Tests\Acceptance\`, `Tests\Unit\`, etc.
-8. PHPUnit bootstrap loads Composer autoloader from `vendor/autoload.php`
+1. **Unit tests**: NO database, NO HTTP, use mocks/stubs for repositories.
+2. **Integration tests**: Use SQLite in-memory to test schema persistence and entity hydration.
+3. **Database Timestamps**: Models never persist `created_at` or `updated_at`. Test schemas must rely on `DEFAULT CURRENT_TIMESTAMP` or leave timestamps to triggers.
+4. **E2E tests**: Use Codeception for browser tests against actual application routes (e.g. `/entrar`).
+5. **One test class per source class**.
+6. **Test both success and failure scenarios**.
+7. **Use descriptive test method names**: `test_create_user_with_invalid_email_throws_exception`.
+8. **Use PSR-4 namespaces**: `app\domain\...` for domain classes and `Tests\Acceptance\` for Codeception.
+9. **Coverage requirement**: Automated tests MUST cover at least **80%** of application code.
+
+---
+
+## Anti-Patterns
+
+❌ **Uppercase `Application\` in Namespaces**: Writing `use Application\Domain\...` instead of `use app\domain\...` (breaks PSR-4 composer autoloading).
+❌ **Raw SQL Assertions Without Hydration**: Testing persistence without verifying Domain Entity hydration (`from_database()`).
+❌ **Manual Timestamps in Test Inserts**: Manually passing `created_at` in insert queries as if models set them. Models NEVER persist timestamps.
+❌ **Stale Routes in Acceptance Tests**: Using legacy routes like `/autenticacao/login` instead of the configured route `/entrar`.
+❌ **Real Database Calls in Unit Tests**: Querying SQLite or MySQL in `tests/unit/` (mock repositories instead).
+

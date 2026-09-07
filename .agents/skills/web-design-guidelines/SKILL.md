@@ -37,3 +37,8 @@ When a user provides a file or pattern argument:
 4. Output findings using the format specified in the guidelines
 
 If no files specified, ask the user which files to review.
+
+## Review Constraints
+
+> [!IMPORTANT]
+> **Strictly Grounded Findings**: Do NOT invent violations or report subjective preferences. Only report an issue when it directly maps to an explicit rule found in the fetched guideline document. If a component adheres to the guidelines or falls outside their scope, do not invent artificial findings.

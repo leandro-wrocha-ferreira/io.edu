@@ -27,11 +27,16 @@ Este projeto usa um sistema de UI centralizado que suporta Light e Dark Mode atr
    - Evite usar classes utilitárias rígidas do Bootstrap que quebram o dark mode, como `.bg-white`, `.text-dark`, ou `.text-gray-800`.
    - Substitua-as por `.bg-theme-card` e `.text-theme-heading`.
 
-5. **Animações de Entrada de Tela (`animate-fade-up`)**:
-   - TODAS as telas (atuais e futuras) DEVEM aplicar as classes de animação de entrada suave nos seus contêineres principais:
+5. **Diretriz de Animações de Entrada (`animate-fade-up`)**:
+   - Como padrão visual recomendado, as páginas aplicam animações de entrada suave nos seus contêineres principais:
      - Header da página: `<div class="page-header animate-fade-up">`
      - Card / Tabela / Formulário principal: `<div class="card card-theme animate-fade-up animate-delay-1">` ou `<div class="card-theme-form animate-fade-up animate-delay-1">`
      - Elementos secundários / Stat cards: Usar `.animate-fade-up` com atrasos escalonados (`.animate-delay-1`, `.animate-delay-2`, `.animate-delay-3`).
+   - **Exceções Justificadas**: A animação NÃO é um requisito arquitetural absoluto e deve ser omitida ou ajustada em:
+     - Usuários com preferência de movimento reduzido (`prefers-reduced-motion: reduce`) — respeitado automaticamente via `admin/layout.js`.
+     - Modais, dropdowns e popovers (usam as transições próprias do Bootstrap).
+     - Páginas de erro HTTP (404, 500).
+     - Componentes atualizados continuamente via polling/tempo real onde a animação cause cintilação ou perda de foco.
 
 ## Padrão de Inclusão do CSS
 
@@ -46,3 +51,13 @@ Nos arquivos de layout base (ex: `index.php`), assegure que o `theme.css` esteja
 
 <link rel="stylesheet" href="<?= base_url('public/assets/css/theme.css') ?>">
 ```
+
+---
+
+## Anti-Patterns
+
+❌ **Cores Hexadecimais Hardcoded**: Usar `#ffffff`, `#1a1a1a`, ou `#0d6efd` diretamente nos estilos ao invés das variáveis do `theme.css` (`var(--bg-card)`, `var(--text-main)`, etc.).
+❌ **Classes Utilitárias Rígidas do Bootstrap**: Usar `.bg-white`, `.text-dark`, ou `.text-muted` em cards e títulos, quebrando a legibilidade no Dark Mode.
+❌ **Paletas Paralelas**: Criar arquivos CSS separados duplicando ou divergindo paletas entre as áreas do Admin e do Aluno.
+❌ **Animações Forçadas sem Exceções**: Impor classes de animação sem considerar acessibilidade (`prefers-reduced-motion`) ou em contextos de modais e erros.
+

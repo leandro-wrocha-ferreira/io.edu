@@ -81,13 +81,16 @@ Models handling soft-deleted records track state via `deleted_at` timestamps ins
 
 ```php
 /**
- * Soft delete a record by ID.
+ * Soft delete records matching specified conditions.
  *
- * Sets deleted_at timestamp instead of removing record.
+ * Sets deleted_at timestamp instead of removing records.
+ *
+ * @param array $where Filter conditions (e.g. ['id' => $id])
+ * @return bool
  */
-public function delete(int $id): void
+public function delete(array $where): bool
 {
-	$this->update(['deleted_at' => date('Y-m-d H:i:s')], ['id' => $id]);
+	return $this->update(['deleted_at' => date('Y-m-d H:i:s')], $where);
 }
 ```
 

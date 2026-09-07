@@ -45,7 +45,7 @@ use app\domain\exceptions\ForbiddenException;
 use app\factories\Model_factory;
 
 /**
- * Caso de uso para autenticar um usuário no sistema.
+ * Use case for authenticating a user in the system.
  */
 class AuthenticateUserUseCase
 {
@@ -53,9 +53,9 @@ class AuthenticateUserUseCase
     private $user_repository;
 
     /**
-     * Construtor.
+     * Constructor.
      *
-     * @param \app\domain\identity\UserRepositoryInterface|null $repository Repository para testes (opcional)
+     * @param \app\domain\identity\UserRepositoryInterface|null $repository Repository for testing (optional)
      */
     public function __construct($repository = null)
     {
@@ -67,13 +67,13 @@ class AuthenticateUserUseCase
     }
 
     /**
-     * Executa a autenticação.
+     * Execute user authentication.
      *
-     * @param string $email Email do usuário
-     * @param string $password Senha em texto plano
-     * @return User Usuário autenticado
-     * @throws UnauthorizedException Quando credenciais são inválidas
-     * @throws ForbiddenException Quando conta estiver desativada
+     * @param string $email User email
+     * @param string $password Plain text password
+     * @return User Authenticated user entity
+     * @throws UnauthorizedException When credentials are invalid
+     * @throws ForbiddenException When account is deactivated
      */
     public function execute(string $email, string $password): User
     {
@@ -96,27 +96,45 @@ class AuthenticateUserUseCase
 }
 ```
 
-## Model Factory Pattern
+## Composition & Model Factory Pattern
 
-Use cases load models via `Model_factory` instead of `get_instance()`:
+The logical dependency of a Use Case is **always** the Domain Repository Interface (`UserRepositoryInterface`). 
+
+`Model_factory` is an infrastructure composition helper used solely as a default constructor fallback when no repository implementation is explicitly injected:
 
 ```php
+use app\domain\identity\UserRepositoryInterface;
 use app\factories\Model_factory;
 
 // Inside use case constructor:
-$this->user_repository = Model_factory::make('user_model');
+public function __construct(?UserRepositoryInterface $repository = null)
+{
+    $this->user_repository = $repository ?? Model_factory::make('user_model');
+}
 ```
+
+> [!IMPORTANT]
+> **Boundary Rule**: `Model_factory` belongs to the Infrastructure/Factory layer (`app\factories\`). It MUST NEVER be referenced or used inside the Domain layer (`app\domain\`).
 
 ## Rules
 
-1. Use Cases use `Model_factory` to load CI3 models (not `get_instance()`)
-2. Accept repository in constructor for testability (dependency injection)
-3. Use Cases orchestrate domain logic, NOT implement it
-4. One Use Case per business action (Single Responsibility)
-5. Method name: `execute()` (consistent across all use cases)
-6. **Throw Semantic Domain Exceptions**: Use specific exception classes from `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`). Never throw generic `\RuntimeException` or return `false`/`null` for errors.
-7. Return entities, not arrays or raw objects
-8. All classes and methods MUST have docblocks with `@param` and `@return`
-9. Opening braces `{` on the NEXT line for classes and methods (PSR-12)
-10. Directories are lowercase: `usecases/`, `identity/`, `admin/`
-11. Files are PascalCase: `AuthenticateUserUseCase.php`, `GetUserUseCase.php`
+1. **Logical Dependency**: Use Cases depend on Domain Repository Interfaces, accepting them in the constructor for testability.
+2. **Infrastructure Fallback**: Use `Model_factory::make('model_name')` solely for constructor default assignment.
+3. **Orchestration Only**: Use Cases orchestrate business rules and domain operations; they do NOT contain UI logic or direct SQL.
+4. **Single Responsibility**: One Use Case per business action with a standard `execute()` method.
+5. **Throw Semantic Domain Exceptions**: Always throw semantic exceptions from `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`). Never throw generic `\RuntimeException`.
+6. **Return Domain Entities**: Return hydrated Domain Entities or DTOs, not raw database associative arrays.
+7. **All Docblocks in English**: Classes, methods, `@param`, `@return`, and `@throws` MUST be in English.
+8. **PSR-12**: Opening braces `{` on the next line for classes and methods.
+9. **Namespaces & Paths**: Directory lowercase (`usecases/<context>/`), file PascalCase (`AuthenticateUserUseCase.php`).
+
+---
+
+## Anti-Patterns
+
+❌ **Throwing `\RuntimeException`**: Throwing generic unclassified exceptions instead of semantic exceptions from `app\domain\exceptions\`.
+❌ **Leaking `Model_factory` into Domain**: Referencing or calling `Model_factory` inside Entities or Value Objects.
+❌ **Direct `get_instance()` Coupling**: Calling `$CI =& get_instance()` directly inside Use Cases instead of using constructor dependency injection with `Model_factory` fallback.
+❌ **Returning Raw Arrays**: Returning raw database rows or untyped associative arrays from `execute()` when representing domain models.
+❌ **Multiple Business Actions in One Use Case**: Creating a monolithic service with multiple unrelated public methods instead of dedicated single-action Use Cases.
+

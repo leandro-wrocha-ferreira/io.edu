@@ -80,7 +80,7 @@ O projeto usa Composer PSR-4 para autoloading:
 |--------|-----------|---------|
 | Domain | `app\domain\<context>` | `app\domain\identity\User` |
 | Use Cases | `app\usecases\<context>` | `app\usecases\identity\AuthenticateUserUseCase` |
-| Factories | `app\Factories` | `app\Factories\Model_factory` |
+| Factories | `app\factories` | `app\factories\Model_factory` |
 | Tests | `Tests\<Type>` | `Tests\Acceptance\LoginCest` |
 
 ### Notas Importantes
@@ -204,9 +204,10 @@ namespace app\domain\identity;
 
 interface UserRepositoryInterface
 {
-    public function find_by_id(int $id): ?User;
+    public function find_by_id($id): ?User;
     public function find_by_email(Email $email): ?User;
     public function save(User $user): void;
+    public function delete(array $where): bool;
 }
 ```
 
@@ -214,7 +215,7 @@ interface UserRepositoryInterface
 
 ```php
 // application/factories/Model_factory.php
-namespace app\Factories;
+namespace app\factories;
 
 class Model_factory
 {
@@ -235,7 +236,8 @@ namespace app\usecases\identity;
 
 use app\domain\identity\Email;
 use app\domain\identity\User;
-use app\Factories\Model_factory;
+use app\domain\exceptions\UnauthorizedException;
+use app\factories\Model_factory;
 
 class AuthenticateUserUseCase
 {
@@ -246,7 +248,7 @@ class AuthenticateUserUseCase
         if ($repository !== null) {
             $this->user_repository = $repository;
         } else {
-            $this->user_repository = Model_factory::make('User_model');
+            $this->user_repository = Model_factory::make('user_model');
         }
     }
 
@@ -254,10 +256,10 @@ class AuthenticateUserUseCase
     {
         $user = $this->user_repository->find_by_email(new Email($email));
         if ($user === null) {
-            throw new \RuntimeException("Credenciais inválidas");
+            throw new UnauthorizedException("Credenciais inválidas");
         }
         if (!$user->verify_password($password)) {
-            throw new \RuntimeException("Credenciais inválidas");
+            throw new UnauthorizedException("Credenciais inválidas");
         }
         return $user;
     }
@@ -283,42 +285,26 @@ $hook['post_controller_constructor'][] = [
 ];
 
 $hook['post_controller_constructor'][] = [
-    'class'    => 'Auth_check',
-    'function' => 'check',
-    'filename' => 'Auth_check.php',
+    'class'    => 'Middleware',
+    'function' => 'validate',
+    'filename' => 'Middleware.php',
     'filepath' => 'hooks'
 ];
 ```
 
-### Auth Check Hook
+### Auth & RBAC Middleware Hook
 
 ```php
-// application/hooks/Auth_check.php
-class Auth_check
+// application/hooks/Middleware.php
+class Middleware
 {
-    public function check()
+    public function validate()
     {
         $CI =& get_instance();
         $CI->load->library('session');
 
-        $uri = $CI->uri->segment(1);
-        $public_routes = ['autenticacao', 'welcome'];
-
-        if (in_array($uri, $public_routes)) {
-            return;
-        }
-
-        if (!$CI->session->userdata('logged_in')) {
-            redirect('autenticacao/login');
-        }
-
-        if ($uri === 'admin' && $CI->session->userdata('user_role') !== 'admin') {
-            show_404();
-        }
-
-        if ($uri === 'aluno' && $CI->session->userdata('user_role') !== 'student') {
-            show_404();
-        }
+        // Middleware valida autenticação e permissões RBAC no banco
+        // Rotas públicas ('entrar', 'sair', 'welcome') não requerem sessão
     }
 }
 ```

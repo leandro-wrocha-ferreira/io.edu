@@ -24,7 +24,7 @@ Use this skill when creating or modifying:
 3. **No Business Logic**: All business rules, calculations, counting, or filtering belong in Use Cases (`app\usecases\...`). Controllers delegate logic to Use Cases.
 4. **Form Flow (Single View Load)**: DO NOT create private `_handle_*()` helper methods that duplicate view assembly and `$this->load->view()`. Evaluate `$this->form_validation->run() === TRUE` directly in the action. View preparation (`$data`) and rendering happen **ONCE** at the end of the action.
 5. **No Try/Catch for Standard Exceptions**: Uncaught semantic domain exceptions (`NotFoundException`, `ValidationException`, `ConflictException`, etc.) are intercepted by `MY_Controller::_remap()`, which returns JSON for AJAX or sets flashdata and redirects for HTML.
-6. **No Direct Model Manipulation for Business Rules**: Controllers load models in `__construct()` using lowercase (`$this->load->model('user_model')`), but invoke Use Cases to perform actions.
+6. **Controllers Delegate to Use Cases**: Controllers instantiate and call Use Cases (`app\usecases\...`) to orchestrate business actions. Models are resolved by Use Cases via `Model_factory`. Controllers do NOT need to preload models in `__construct()` unless a specific presentation helper requires it.
 7. **Standardized Responses**:
    - For JSON output (e.g. DataTables, AJAX, API endpoints), ALWAYS use `json_response($data, $status_code)` from `response_helper.php`.
    - DO NOT call `$this->output->set_content_type('application/json')->set_output(json_encode(...))` manually.
@@ -58,7 +58,6 @@ class Users extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('user_model');
     }
 
     /**
@@ -124,3 +123,15 @@ class Users extends MY_Controller
     }
 }
 ```
+
+---
+
+## Anti-Patterns
+
+❌ **Business logic in Controller**: Calculating metrics, sorting/filtering domain objects, or validating domain invariants directly in controllers instead of delegating to Use Cases.
+❌ **Direct Model manipulation**: Invoking model CRUD queries directly from controllers for business workflows instead of calling Use Cases.
+❌ **Private `_handle_*` methods**: Duplicating `$data` assembly and view loading in private helpers instead of keeping a single `$this->load->view()` at the end of the action.
+❌ **Manual Try/Catch for standard exceptions**: Catching `NotFoundException`, `ValidationException`, `ConflictException`, etc. inside controllers instead of letting `MY_Controller::_remap()` handle them globally.
+❌ **Manual language loading**: Calling `$this->lang->load()` or checking `HTTP_ACCEPT_LANGUAGE` in controllers instead of relying on the global `Language_check` hook.
+❌ **Manual JSON formatting**: Calling `$this->output->set_output(json_encode(...))` instead of `json_response($data, $status_code)`.
+

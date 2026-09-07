@@ -84,20 +84,21 @@ Derived semantic exceptions:
 namespace app\domain\identity;
 
 /**
- * Entity que representa um usuário do sistema.
+ * Entity representing a system user.
  */
 class User
 {
     private $id;
     private $name;
     private $email;  // Value Object
+    private ?\DateTime $created_at = null;
 
     /**
-     * Cria um novo usuário.
+     * Create a new user.
      *
-     * @param string $name Nome do usuário
-     * @param Email $email Email do usuário (Value Object)
-     * @param string $password Senha em texto plano
+     * @param string $name User's name
+     * @param Email $email User's email (Value Object)
+     * @param string $password Plain text password
      * @return self
      */
     public static function create(string $name, Email $email, string $password): self
@@ -111,9 +112,9 @@ class User
     }
 
     /**
-     * Hidrata um usuário a partir de um registro do banco.
+     * Hydrate a user from a database row.
      *
-     * @param array $row Registro do banco de dados
+     * @param array $row Database record
      * @return self
      */
     public static function from_database(array $row): self
@@ -122,11 +123,12 @@ class User
         $user->id = (int) $row['id'];
         $user->name = $row['name'];
         $user->email = new Email($row['email']);
+        $user->created_at = isset($row['created_at']) ? new \DateTime($row['created_at']) : null;
         return $user;
     }
 
     /**
-     * Obtém o ID do usuário.
+     * Get the user ID.
      *
      * @return int|null
      */
@@ -137,6 +139,10 @@ class User
 }
 ```
 
+> [!NOTE]
+> **In-Memory Timestamps vs Database Triggers**:
+> `$user->created_at = new \DateTime()` in `create()` sets an in-memory timestamp so domain logic/getters can inspect it immediately. However, the database layer (`Model::save()`) **NEVER** includes `created_at` or `updated_at` in SQL insert/update arrays — those columns are managed exclusively by database triggers.
+
 ## Value Object Pattern
 
 ```php
@@ -144,20 +150,24 @@ class User
 
 namespace app\domain\identity;
 
-use app\domain\exceptions\ValidationException;
-
 /**
- * Value Object que representa um endereço de email.
+ * Value Object representing an email address.
  */
 class Email
 {
-    private $value;
+    private string $value;
 
+    /**
+     * Constructor.
+     *
+     * @param string $email Raw email address
+     * @throws \InvalidArgumentException If email format is invalid
+     */
     public function __construct(string $email)
     {
         $trimmed = trim($email);
         if (!filter_var($trimmed, FILTER_VALIDATE_EMAIL)) {
-            throw new ValidationException("Email inválido: {$email}");
+            throw new \InvalidArgumentException("Invalid email: {$email}");
         }
         $this->value = strtolower($trimmed);
     }
@@ -181,28 +191,68 @@ class Email
 
 namespace app\domain\identity;
 
+/**
+ * Repository interface for User persistence.
+ */
 interface UserRepositoryInterface
 {
-    public function find_by_id(int $id): ?User;
+    /**
+     * Find a user by ID.
+     *
+     * @param int|string $id User ID
+     * @return User|null
+     */
+    public function find_by_id($id): ?User;
 
+    /**
+     * Find a user by email.
+     *
+     * @param Email $email User email
+     * @return User|null
+     */
     public function find_by_email(Email $email): ?User;
 
+    /**
+     * Save (insert or update) a user.
+     *
+     * @param User $user User entity to persist
+     * @return void
+     */
     public function save(User $user): void;
 
-    public function delete(int $id): void;
+    /**
+     * Delete users matching specified filter conditions.
+     *
+     * @param array $where Filter conditions (e.g. ['id' => $id])
+     * @return bool
+     */
+    public function delete(array $where): bool;
 }
 ```
 
 ## Rules
 
-1. Domain classes MUST NOT depend on CI3 (no `get_instance()`, no `CI_Model`)
-2. Domain exceptions inherit from `app\domain\exceptions\AppException`
-3. Use `private` properties with getters (no setters for immutable fields)
-4. Factory methods: `create()` for new entities, `from_database()` for hydration
-5. Value Objects must be immutable and implement `__toString()`
-6. Repository Interfaces define contracts, NOT implementations
-7. All classes and methods MUST have docblocks with `@param` and `@return`
-8. Opening braces `{` on the NEXT line for classes and methods (PSR-12)
-9. Use PSR-4 namespaces: `app\domain\<BoundedContext>\`
-10. Directories are lowercase: `domain/`, `identity/`, `exceptions/`
-11. Files are PascalCase: `User.php`, `Email.php`, `AppException.php`
+1. Domain classes MUST NOT depend on CI3 (no `get_instance()`, no `CI_Model`).
+2. Domain exceptions inherit from `app\domain\exceptions\AppException`.
+3. Value Object constructors throw `\InvalidArgumentException` for invalid scalar arguments.
+4. Use `private` properties with getters (no setters for immutable fields).
+5. Factory methods: `create()` for new entities, `from_database()` for hydration.
+6. Value Objects must be immutable and implement `__toString()`.
+7. Repository Interfaces define contracts matching `MY_Model` signatures (`find_by_id($id)`, `delete(array $where): bool`).
+8. Models never persist `created_at` or `updated_at` (database triggers manage timestamps).
+9. All classes and methods MUST have docblocks with `@param` and `@return` — **always in English**.
+10. Opening braces `{` on the NEXT line for classes and methods (PSR-12).
+11. Use PSR-4 namespaces: `app\domain\<BoundedContext>\`.
+12. Directories are lowercase (`domain/`, `identity/`, `exceptions/`) and files are PascalCase (`User.php`, `Email.php`).
+
+---
+
+## Anti-Patterns
+
+❌ **Framework Coupling in Domain**: Calling `get_instance()`, `CI_Model`, `CI_Controller`, or database helpers inside Domain classes.
+❌ **Using `Model_factory` in Domain**: Domain entities and value objects must be pure PHP and must never instantiate models.
+❌ **Mutable Value Objects**: Adding setters to Value Objects or modifying internal state after construction.
+❌ **Typed `$id` in Repository Interfaces**: Declaring `find_by_id(int $id)` creates PHP 8.2 type incompatibility with `MY_Model::find_by_id($id)`. Keep `$id` untyped in parameter.
+❌ **Legacy `delete(int $id)` signature**: Declaring `delete(int $id): void` in repository interfaces or models causes PHP 8.2 fatal compile error against `MY_Model::delete(array $where): bool`.
+❌ **Portuguese Docblocks**: Writing `@param`, `@return`, or summaries in Portuguese instead of English.
+
