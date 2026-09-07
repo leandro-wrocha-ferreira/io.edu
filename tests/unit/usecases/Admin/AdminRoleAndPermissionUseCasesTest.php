@@ -18,8 +18,9 @@ class MockRoleRepository implements RoleRepositoryInterface
 {
 	public array $roles = [];
 
-	public function find_by_id(int $id): ?Role
+	public function find_by_id($id): ?Role
 	{
+		$id = (int) $id;
 		foreach ($this->roles as $r) {
 			if ($r->get_id() === $id) {
 				return $r;
@@ -52,9 +53,13 @@ class MockRoleRepository implements RoleRepositoryInterface
 		}
 	}
 
-	public function delete(int $id): void
+	public function delete(array $where): bool
 	{
-		$this->roles = array_filter($this->roles, fn($r) => $r->get_id() !== $id);
+		$id = $where['id'] ?? null;
+		if ($id !== null) {
+			$this->roles = array_values(array_filter($this->roles, fn($r) => $r->get_id() !== (int) $id));
+		}
+		return true;
 	}
 
 	public function find_paginated(int $start, int $length, string $search, string $order_col, string $order_dir): array
@@ -86,8 +91,9 @@ class MockPermissionRepository implements PermissionRepositoryInterface
 		return $this->permissions;
 	}
 
-	public function find_by_id(int $id): ?Permission
+	public function find_by_id($id): ?Permission
 	{
+		$id = (int) $id;
 		foreach ($this->permissions as $p) {
 			if ($p->get_id() === $id) {
 				return $p;
@@ -115,9 +121,13 @@ class MockPermissionRepository implements PermissionRepositoryInterface
 		}
 	}
 
-	public function delete(int $id): void
+	public function delete(array $where): bool
 	{
-		$this->permissions = array_filter($this->permissions, fn($p) => $p->get_id() !== $id);
+		$id = $where['id'] ?? null;
+		if ($id !== null) {
+			$this->permissions = array_values(array_filter($this->permissions, fn($p) => $p->get_id() !== (int) $id));
+		}
+		return true;
 	}
 }
 

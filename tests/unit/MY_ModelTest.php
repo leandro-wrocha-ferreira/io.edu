@@ -4,6 +4,9 @@ if (!function_exists('log_message')) {
 	function log_message($level, $message) {}
 }
 
+if (!class_exists('CI_Model')) {
+	require_once __DIR__ . '/../../system/core/Model.php';
+}
 require_once __DIR__ . '/../../application/core/MY_Model.php';
 
 /**
@@ -17,6 +20,7 @@ class MockQueryBuilder
 	public array $insertedData = [];
 	public array $updatedData = [];
 	public ?string $lastQuery = 'SELECT * FROM mock';
+	public array $auditLogs = [];
 
 	public function from(string $table): self
 	{
@@ -34,7 +38,20 @@ class MockQueryBuilder
 		return $this;
 	}
 
-	public function get(): self
+	public function get(string $table = ''): self
+	{
+		if ($table !== '') {
+			$this->fromTable = $table;
+		}
+		return $this;
+	}
+
+	public function get_compiled_select(string $table = '', bool $reset = true): string
+	{
+		return "SELECT * FROM {$table}";
+	}
+
+	public function query(string $sql): self
 	{
 		return $this;
 	}
@@ -59,6 +76,11 @@ class MockQueryBuilder
 
 	public function insert(string $table, array $data): bool
 	{
+		if ($table === 'logs') {
+			$this->auditLogs[] = $data;
+			return true;
+		}
+
 		$this->fromTable = $table;
 		$this->insertedData = $data;
 		return true;
@@ -99,64 +121,25 @@ class MockQueryBuilder
  */
 class ConcreteTestModel extends MY_Model
 {
-	public bool $scope_ran = false;
-	public bool $other_scope_ran = false;
-	public ?array $audit_log = null;
-	public ?array $update_audit = null;
-	public mixed $delete_audit = null;
-
+	public $db;
 	public string $table = 'test_table';
-	public array $before_get = ['scope_first', 'scope_second'];
-	public array $after_create = ['log_creation'];
-	public array $after_update = ['log_update'];
-	public array $after_delete = ['log_delete'];
 
 	public function __construct()
 	{
 		$this->db = new MockQueryBuilder();
 	}
 
-	protected function scope_first(): void
-	{
-		$this->scope_ran = true;
-	}
-
-	protected function scope_second(): void
-	{
-		$this->other_scope_ran = true;
-	}
-
-	protected function log_creation($insert_id, array $data): void
-	{
-		$this->audit_log = ['id' => $insert_id, 'data' => $data];
-	}
-
-	protected function log_update($result, array $data = [], $id = null): void
-	{
-		$this->update_audit = ['id' => $id, 'data' => $data, 'result' => $result];
-	}
-
-	protected function log_delete($result, array $data = [], $id = null): void
-	{
-		$this->delete_audit = $id;
-	}
-
 	public function reset_test_state(): void
 	{
-		$this->scope_ran = false;
-		$this->other_scope_ran = false;
-		$this->audit_log = null;
-		$this->update_audit = null;
-		$this->delete_audit = null;
 		$this->db = new MockQueryBuilder();
 	}
 }
 
 /**
  * Unit test for MY_Model base class features:
- * - Automatic query scoping and lifecycle callbacks
- * - Scope bypass mechanisms
- * - Standard CRUD methods (get_all, find_all, get_by_id, find_by_id, get_by, count_all, count_by, insert, insert_batch, update_record, update_by, delete_record, delete_by)
+ * - Standard CRUD methods (find_all, find_by_id, count_all, insert, insert_batch, update, delete)
+ * - Automatic audit logging to logs table
+ * - Entity hydration
  */
 class MY_ModelTest extends \PHPUnit\Framework\TestCase
 {
@@ -168,114 +151,100 @@ class MY_ModelTest extends \PHPUnit\Framework\TestCase
 		$this->model->reset_test_state();
 	}
 
-	public function test_get_all_and_find_all(): void
+	public function test_find_all(): void
 	{
-		$res1 = $this->model->get_all();
-		$this->assertCount(2, $res1);
-		$this->assertTrue($this->model->scope_ran);
-
-		$this->model->reset_test_state();
-		$res2 = $this->model->find_all();
-		$this->assertCount(2, $res2);
-		$this->assertTrue($this->model->scope_ran);
+		$res = $this->model->find_all();
+		$this->assertCount(2, $res);
+		$this->assertEquals(1, $res[0]['id']);
+		$this->assertEquals('Item 1', $res[0]['name']);
 	}
 
-	public function test_get_by_id_and_find_by_id(): void
+	public function test_find_by_id(): void
 	{
-		$res1 = $this->model->get_by_id(1);
-		$this->assertNotNull($res1);
-		$this->assertEquals(1, $res1['id']);
-
-		$this->model->reset_test_state();
-		$res2 = $this->model->find_by_id(1);
-		$this->assertNotNull($res2);
-		$this->assertEquals(1, $res2['id']);
+		$res = $this->model->find_by_id(1);
+		$this->assertNotNull($res);
+		$this->assertEquals(1, $res['id']);
+		$this->assertEquals('Item 1', $res['name']);
 	}
 
-	public function test_get_by(): void
+	public function test_count_all(): void
 	{
-		$row = $this->model->get_by(['name' => 'Item 1']);
-		$this->assertNotNull($row);
-		$this->assertEquals('Item 1', $row['name']);
-	}
-
-	public function test_count_all_and_count_by(): void
-	{
-		$count1 = $this->model->count_all();
-		$this->assertEquals(5, $count1);
-
-		$count2 = $this->model->count_by(['active' => 1]);
-		$this->assertEquals(5, $count2);
+		$count = $this->model->count_all();
+		$this->assertEquals(5, $count);
 	}
 
 	public function test_insert_and_insert_batch(): void
 	{
 		$id = $this->model->insert(['name' => 'New Item']);
 		$this->assertEquals(100, $id);
-		$this->assertNotNull($this->model->audit_log);
-		$this->assertEquals(['name' => 'New Item'], $this->model->audit_log['data']);
+		$this->assertEquals(['name' => 'New Item'], $this->model->db->insertedData);
 
 		$batchCount = $this->model->insert_batch([['name' => 'A'], ['name' => 'B']]);
 		$this->assertEquals(2, $batchCount);
 	}
 
-	public function test_update_record_and_update_by(): void
+	public function test_update(): void
 	{
-		$res1 = $this->model->update_record(10, ['name' => 'Updated']);
-		$this->assertTrue($res1);
-		$this->assertNotNull($this->model->update_audit);
-		$this->assertEquals(10, $this->model->update_audit['id']);
-
-		$res2 = $this->model->update_by(['id' => 10], ['name' => 'Updated By']);
-		$this->assertTrue($res2);
+		$res = $this->model->update(['name' => 'Updated'], ['id' => 10]);
+		$this->assertTrue($res);
+		$this->assertEquals(['name' => 'Updated'], $this->model->db->updatedData);
 	}
 
-	public function test_delete_record_and_delete_by(): void
+	public function test_delete(): void
 	{
-		$res1 = $this->model->delete_record(50);
-		$this->assertTrue($res1);
-		$this->assertEquals(50, $this->model->delete_audit);
-
-		$res2 = $this->model->delete_by(['id' => 50]);
-		$this->assertTrue($res2);
+		$res = $this->model->delete(['id' => 50]);
+		$this->assertTrue($res);
+		$this->assertEquals('test_table', $this->model->db->fromTable);
 	}
 
-	public function test_without_scope_bypasses_specified_scope(): void
+	public function test_audit_logging_on_write_operations(): void
 	{
-		$this->model->without_scope('scope_first');
-		$this->model->get_all();
+		$this->model->insert(['name' => 'Logged Item']);
+		$this->assertNotEmpty($this->model->db->auditLogs);
 
-		$this->assertFalse($this->model->scope_ran);
-		$this->assertTrue($this->model->other_scope_ran);
-
-		// Scopes reset automatically
-		$this->model->reset_test_state();
-		$this->model->get_all();
-		$this->assertTrue($this->model->scope_ran);
+		$lastLog = end($this->model->db->auditLogs);
+		$this->assertEquals('test_table', $lastLog['table']);
+		$this->assertStringContainsString('"action":"insert"', $lastLog['content']);
 	}
 
-	public function test_without_global_scopes_bypasses_all_scopes(): void
+	public function test_entity_hydration_in_find_by_id_and_find_all(): void
 	{
-		$this->model->without_global_scopes();
-		$this->model->get_all();
+		$model = new EntityTestModel();
+		$entity = $model->find_by_id(1);
 
-		$this->assertFalse($this->model->scope_ran);
-		$this->assertFalse($this->model->other_scope_ran);
+		$this->assertInstanceOf(DummyEntity::class, $entity);
+		$this->assertEquals(1, $entity->id);
+		$this->assertEquals('Item 1', $entity->name);
 
-		// Scopes reset automatically
-		$this->model->reset_test_state();
-		$this->model->get_all();
-		$this->assertTrue($this->model->scope_ran);
-		$this->assertTrue($this->model->other_scope_ran);
+		$entities = $model->find_all();
+		$this->assertCount(2, $entities);
+		$this->assertInstanceOf(DummyEntity::class, $entities[0]);
+		$this->assertInstanceOf(DummyEntity::class, $entities[1]);
 	}
+}
 
-	public function test_with_global_scopes_reenables(): void
+class DummyEntity
+{
+	public int $id;
+	public string $name;
+
+	public static function from_database(array $row): self
 	{
-		$this->model->without_global_scopes();
-		$this->model->with_global_scopes();
-		$this->model->get_all();
+		$entity = new self();
+		$entity->id = (int) ($row['id'] ?? 0);
+		$entity->name = (string) ($row['name'] ?? '');
+		return $entity;
+	}
+}
 
-		$this->assertTrue($this->model->scope_ran);
-		$this->assertTrue($this->model->other_scope_ran);
+class EntityTestModel extends MY_Model
+{
+	public $db;
+	public string $table = 'test_table';
+	protected ?string $entity_class = DummyEntity::class;
+
+	public function __construct()
+	{
+		$this->db = new MockQueryBuilder();
 	}
 }

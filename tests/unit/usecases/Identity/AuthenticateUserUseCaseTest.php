@@ -1,5 +1,6 @@
 <?php
 
+use app\domain\exceptions\UnauthorizedException;
 use app\domain\identity\Email;
 use app\domain\identity\User;
 use app\domain\identity\UserRepositoryInterface;
@@ -29,11 +30,12 @@ class MockUserRepository implements UserRepositoryInterface
     /**
      * Find a user by ID.
      *
-     * @param int $id User ID
+     * @param int|string $id User ID
      * @return User|null
      */
-    public function find_by_id(int $id): ?User
+    public function find_by_id($id): ?User
     {
+        $id = (int) $id;
         foreach ($this->users as $user) {
             if ($user->get_id() === $id) {
                 return $user;
@@ -70,16 +72,20 @@ class MockUserRepository implements UserRepositoryInterface
     }
 
     /**
-     * Delete a user by ID from the in-memory list.
+     * Delete users matching conditions.
      *
-     * @param int $id User ID
-     * @return void
+     * @param array $where Filter conditions
+     * @return bool
      */
-    public function delete(int $id): void
+    public function delete(array $where): bool
     {
-        $this->users = array_filter($this->users, function ($user) use ($id) {
-            return $user->get_id() !== $id;
-        });
+        $id = $where['id'] ?? null;
+        if ($id !== null) {
+            $this->users = array_values(array_filter($this->users, function ($user) use ($id) {
+                return $user->get_id() !== (int) $id;
+            }));
+        }
+        return true;
     }
 
     /**
@@ -185,8 +191,8 @@ class AuthenticateUserUseCaseTest extends \PHPUnit\Framework\TestCase
 
         $use_case = new AuthenticateUserUseCase($this->mock_repository);
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Invalid credentials');
+        $this->expectException(UnauthorizedException::class);
+        $this->expectExceptionMessage('Credenciais inválidas');
         $use_case->execute('notfound@example.com', 'password123');
     }
 
@@ -204,8 +210,8 @@ class AuthenticateUserUseCaseTest extends \PHPUnit\Framework\TestCase
 
         $use_case = new AuthenticateUserUseCase($this->mock_repository);
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Invalid credentials');
+        $this->expectException(UnauthorizedException::class);
+        $this->expectExceptionMessage('Credenciais inválidas');
         $use_case->execute('john@example.com', 'wrongpassword');
     }
 }

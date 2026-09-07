@@ -22,8 +22,9 @@ class AdminMockUserRepository implements UserRepositoryInterface
 {
 	public array $users = [];
 
-	public function find_by_id(int $id): ?User
+	public function find_by_id($id): ?User
 	{
+		$id = (int) $id;
 		foreach ($this->users as $u) {
 			if ($u->get_id() === $id) {
 				return $u;
@@ -58,13 +59,17 @@ class AdminMockUserRepository implements UserRepositoryInterface
 		}
 	}
 
-	public function delete(int $id): void
+	public function delete(array $where): bool
 	{
-		foreach ($this->users as $u) {
-			if ($u->get_id() === $id) {
-				$u->delete();
+		$id = $where['id'] ?? null;
+		if ($id !== null) {
+			foreach ($this->users as $u) {
+				if ($u->get_id() === (int) $id) {
+					$u->delete();
+				}
 			}
 		}
+		return true;
 	}
 
 	public function find_all(): array
@@ -105,10 +110,10 @@ class AdminMockUserRepository implements UserRepositoryInterface
 
 class AdminMockRoleRepository implements \app\domain\admin\role\RoleRepositoryInterface
 {
-	public function find_by_id(int $id): ?\app\domain\admin\role\Role { return null; }
+	public function find_by_id($id): ?\app\domain\admin\role\Role { return null; }
 	public function find_all(): array { return []; }
 	public function save(\app\domain\admin\role\Role $role): void {}
-	public function delete(int $id): void {}
+	public function delete(array $where): bool { return true; }
 	public function find_paginated(int $start, int $length, string $search, string $order_col, string $order_dir): array { return []; }
 	public function count_all(): int { return 0; }
 }
