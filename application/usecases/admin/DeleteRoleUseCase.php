@@ -43,6 +43,6 @@ class DeleteRoleUseCase
             throw new NotFoundException("Perfil não encontrado");
         }
 
-        $this->role_repository->delete($role_id);
+        $this->role_repository->delete(['id' => $role_id]);
     }
 }
