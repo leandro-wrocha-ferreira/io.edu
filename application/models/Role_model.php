@@ -7,8 +7,8 @@ use app\domain\admin\role\RoleRepositoryInterface;
 /**
  * Role model implementing RoleRepositoryInterface.
  *
- * Handles persistence for the Role entity using MY_Model lifecycle engine.
- * Syncs associated permissions and applies automatic admin-master scope exclusion.
+ * Handles persistence for the Role entity using MY_Model explicit CRUD engine.
+ * Syncs associated permissions via dedicated KISS helpers without GROUP_CONCAT.
  */
 class Role_model extends MY_Model implements RoleRepositoryInterface
 {
@@ -20,11 +20,11 @@ class Role_model extends MY_Model implements RoleRepositoryInterface
 	protected string $table = 'roles';
 
 	/**
-	 * Scopes executed automatically before GET/SELECT queries.
+	 * Target entity class for automatic hydration.
 	 *
-	 * @var array
+	 * @var string|null
 	 */
-	protected array $before_get = ['scope_exclude_admin_master'];
+	protected ?string $entity_class = Role::class;
 
 	/**
 	 * Constructor.
@@ -35,13 +35,11 @@ class Role_model extends MY_Model implements RoleRepositoryInterface
 	}
 
 	/**
-	 * Centralized global scope to exclude admin-master role from queries.
-	 *
-	 * Executed automatically by MY_Model lifecycle before query execution.
+	 * Explicit filter to exclude admin-master role from queries.
 	 *
 	 * @return void
 	 */
-	protected function scope_exclude_admin_master(): void
+	public function apply_exclude_admin_master(): void
 	{
 		$this->db->where('roles.slug !=', 'admin-master');
 	}
@@ -53,14 +51,11 @@ class Role_model extends MY_Model implements RoleRepositoryInterface
 	 */
 	public function find_all(): array
 	{
-		$this->_build_role_query()
-			->order_by('roles.name', 'ASC');
+		$this->db->order_by('roles.name', 'ASC');
+		$rows = $this->db->get($this->table)->result_array();
+		$rows = $this->_hydrate_batch_role_permissions($rows);
 
-		$rows = $this->get_all();
-
-		return array_map(function (array $row) {
-			return Role::from_database($row);
-		}, $rows);
+		return $this->to_entities($rows);
 	}
 
 	/**
@@ -69,30 +64,19 @@ class Role_model extends MY_Model implements RoleRepositoryInterface
 	 * @param int $id Role ID
 	 * @return Role|null
 	 */
-	public function find_by_id(int $id): ?Role
+	public function find_by_id($id): ?Role
 	{
-		$this->_build_role_query();
-		$row = $this->get_by_id($id);
+		$row = $this->db
+			->where('roles.id', (int) $id)
+			->get($this->table)
+			->row_array();
 
-		return $row ? Role::from_database($row) : null;
-	}
+		if ($row === null) {
+			return null;
+		}
 
-	/**
-	 * Build base role query with role_permissions JOIN.
-	 *
-	 * @return CI_DB_mysqli_driver
-	 */
-	private function _build_role_query()
-	{
-		$this->db->flush_cache();
-
-		return $this->db
-			->select("
-				roles.*,
-				GROUP_CONCAT(DISTINCT role_permissions.permission_id ORDER BY role_permissions.permission_id SEPARATOR ',') as permission_ids
-			")
-			->join('role_permissions', 'role_permissions.role_id = roles.id', 'left')
-			->group_by('roles.id');
+		$row = $this->_hydrate_role_permissions($row);
+		return $this->to_entity($row);
 	}
 
 	/**
@@ -112,7 +96,7 @@ class Role_model extends MY_Model implements RoleRepositoryInterface
 		];
 
 		if ($role->get_id() !== null) {
-			$this->update_record($role->get_id(), $data);
+			$this->update($data, ['id' => $role->get_id()]);
 		} else {
 			$new_id = $this->insert($data);
 			$role->set_slug($role->get_slug());
@@ -121,15 +105,63 @@ class Role_model extends MY_Model implements RoleRepositoryInterface
 		$this->_sync_role_permissions($role);
 	}
 
+
 	/**
-	 * Delete a role by ID.
+	 * Hydrate permission IDs for a single role row.
 	 *
-	 * @param int $id
-	 * @return void
+	 * @param array $row
+	 * @return array
 	 */
-	public function delete(int $id): void
+	private function _hydrate_role_permissions(array $row): array
 	{
-		$this->delete_record($id);
+		$perms = $this->db
+			->select('permission_id')
+			->where('role_id', (int) $row['id'])
+			->get('role_permissions')
+			->result_array();
+
+		$row['permission_ids'] = array_map(static fn($p) => (int) $p['permission_id'], $perms);
+		return $row;
+	}
+
+	/**
+	 * Hydrate permission IDs for multiple role rows in batch.
+	 *
+	 * @param array $rows
+	 * @return array
+	 */
+	private function _hydrate_batch_role_permissions(array $rows): array
+	{
+		if (empty($rows)) {
+			return [];
+		}
+
+		$role_ids = array_map('intval', array_column($rows, 'id'));
+		$role_ids = array_filter(array_unique($role_ids));
+
+		if (empty($role_ids)) {
+			return $rows;
+		}
+
+		$perms_data = $this->db
+			->select('role_id, permission_id')
+			->where_in('role_id', $role_ids)
+			->get('role_permissions')
+			->result_array();
+
+		$perm_map = [];
+		foreach ($perms_data as $item) {
+			$rid = (int) $item['role_id'];
+			$perm_map[$rid][] = (int) $item['permission_id'];
+		}
+
+		foreach ($rows as &$row) {
+			$rid = (int) $row['id'];
+			$row['permission_ids'] = $perm_map[$rid] ?? [];
+		}
+		unset($row);
+
+		return $rows;
 	}
 
 	/**
@@ -187,7 +219,14 @@ class Role_model extends MY_Model implements RoleRepositoryInterface
 			->order_by($col, $dir)
 			->limit($length, $start);
 
-		$rows = $this->get_all();
+		if ($search !== '') {
+			$this->db->group_start()
+				->like('roles.name', $search)
+				->or_like('roles.slug', $search)
+				->group_end();
+		}
+
+		$rows = $this->db->get($this->table)->result_array();
 
 		return ['data' => $rows, 'recordsFiltered' => $total];
 	}
@@ -200,10 +239,6 @@ class Role_model extends MY_Model implements RoleRepositoryInterface
 	 */
 	private function _count_paginated(string $search): int
 	{
-		$this->db->flush_cache();
-
-		$this->db->select('COUNT(*) as cnt');
-
 		if ($search !== '') {
 			$this->db->group_start()
 				->like('roles.name', $search)
@@ -211,7 +246,6 @@ class Role_model extends MY_Model implements RoleRepositoryInterface
 				->group_end();
 		}
 
-		$row = $this->get_by([]);
-		return (int) ($row['cnt'] ?? 0);
+		return (int) $this->db->from($this->table)->count_all_results();
 	}
 }

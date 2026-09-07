@@ -19,6 +19,13 @@ class Permission_model extends MY_Model implements PermissionRepositoryInterface
 	protected string $table = 'permissions';
 
 	/**
+	 * Target entity class for automatic hydration.
+	 *
+	 * @var string|null
+	 */
+	protected ?string $entity_class = Permission::class;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct()
@@ -34,23 +41,18 @@ class Permission_model extends MY_Model implements PermissionRepositoryInterface
 	public function find_all(): array
 	{
 		$this->db->order_by('name', 'ASC');
-		$rows = $this->get_all();
-
-		return array_map(function (array $row) {
-			return Permission::from_database($row);
-		}, $rows);
+		return parent::find_all();
 	}
 
 	/**
 	 * Find a permission by ID.
 	 *
-	 * @param int $id Permission ID
+	 * @param int|string $id Permission ID
 	 * @return Permission|null
 	 */
-	public function find_by_id(int $id): ?Permission
+	public function find_by_id($id): ?Permission
 	{
-		$row = $this->get_by_id($id);
-		return $row ? Permission::from_database($row) : null;
+		return parent::find_by_id($id);
 	}
 
 	/**
@@ -68,21 +70,11 @@ class Permission_model extends MY_Model implements PermissionRepositoryInterface
 		];
 
 		if ($permission->get_id() !== null) {
-			$this->update_record($permission->get_id(), $data);
+			$this->update($data, ['id' => $permission->get_id()]);
 		} else {
 			$new_id = $this->insert($data);
 			$permission->set_name($permission->get_name());
 		}
 	}
 
-	/**
-	 * Delete a permission by ID.
-	 *
-	 * @param int $id
-	 * @return void
-	 */
-	public function delete(int $id): void
-	{
-		$this->delete_record($id);
-	}
 }

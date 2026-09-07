@@ -5,8 +5,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Base Model for the Application.
  *
- * Extends CI_Model to provide a lightweight Lifecycle CRUD Engine with
- * automatic global query scopes, before/after event callbacks, and centralized error logging.
+ * Provides a lightweight CRUD Engine with entity hydration and 
+ * automatic auditing via the `logs` table.
  */
 class MY_Model extends CI_Model
 {
@@ -25,74 +25,11 @@ class MY_Model extends CI_Model
 	protected string $primary_key = 'id';
 
 	/**
-	 * Callbacks executed automatically before a SELECT / GET query is run.
+	 * Target Domain Entity class FQCN for automatic row hydration (optional).
 	 *
-	 * @var array
+	 * @var string|null
 	 */
-	protected array $before_get = [];
-
-	/**
-	 * Callbacks executed after a SELECT / GET query has run.
-	 *
-	 * @var array
-	 */
-	protected array $after_get = [];
-
-	/**
-	 * Callbacks executed before an INSERT operation.
-	 *
-	 * @var array
-	 */
-	protected array $before_create = [];
-
-	/**
-	 * Callbacks executed after an INSERT operation.
-	 *
-	 * @var array
-	 */
-	protected array $after_create = [];
-
-	/**
-	 * Callbacks executed before an UPDATE operation.
-	 *
-	 * @var array
-	 */
-	protected array $before_update = [];
-
-	/**
-	 * Callbacks executed after an UPDATE operation.
-	 *
-	 * @var array
-	 */
-	protected array $after_update = [];
-
-	/**
-	 * Callbacks executed before a DELETE operation.
-	 *
-	 * @var array
-	 */
-	protected array $before_delete = [];
-
-	/**
-	 * Callbacks executed after a DELETE operation.
-	 *
-	 * @var array
-	 */
-	protected array $after_delete = [];
-
-	/**
-	 * Scopes temporarily disabled for the next query.
-	 *
-	 * @var array
-	 */
-	protected array $disabled_scopes = [];
-
-	/**
-	 * Whether all global query scopes are disabled for the next query.
-	 *
-	 * @var bool
-	 */
-	protected bool $disable_all_scopes = false;
+	protected ?string $entity_class = null;
 
 	/**
 	 * Constructor.
@@ -103,145 +40,91 @@ class MY_Model extends CI_Model
 	}
 
 	/**
-	 * Temporarily disable a specific global query scope for the next query.
+	 * Hydrate a single database row array into a Domain Entity if $entity_class is configured.
 	 *
-	 * @param string $scope_name Name of the scope method (e.g. 'scope_exclude_admin_master')
-	 * @return self
+	 * @param array|null $row Raw database row array
+	 * @return object|array|null Domain Entity instance, raw array, or null
 	 */
-	public function without_scope(string $scope_name): self
+	protected function to_entity(?array $row)
 	{
-		$this->disabled_scopes[] = $scope_name;
-		return $this;
+		if ($row === null) {
+			return null;
+		}
+
+		if (!empty($this->entity_class) && method_exists($this->entity_class, 'from_database')) {
+			$class = $this->entity_class;
+			return $class::from_database($row);
+		}
+
+		return $row;
 	}
 
 	/**
-	 * Temporarily disable all global query scopes for the next query.
+	 * Hydrate multiple database row arrays into Domain Entities if $entity_class is configured.
 	 *
-	 * @return self
+	 * @param array $rows List of raw database row arrays
+	 * @return array List of Domain Entities or raw arrays
 	 */
-	public function without_global_scopes(): self
+	protected function to_entities(array $rows): array
 	{
-		$this->disable_all_scopes = true;
-		return $this;
+		if (empty($rows) || empty($this->entity_class) || !method_exists($this->entity_class, 'from_database')) {
+			return $rows;
+		}
+
+		$class = $this->entity_class;
+		return array_map(static function (array $row) use ($class) {
+			return $class::from_database($row);
+		}, $rows);
 	}
 
 	/**
-	 * Re-enable all global query scopes.
+	 * Fetch all records hydrated as Domain Entities if $entity_class is set.
 	 *
-	 * @return self
-	 */
-	public function with_global_scopes(): self
-	{
-		$this->disable_all_scopes = false;
-		$this->disabled_scopes = [];
-		return $this;
-	}
-
-	/**
-	 * Fetch all records from the table.
+	 * Can be chained with previous $this->db calls.
 	 *
-	 * Applies before_get scopes and executes query. Can be chained with previous $this->db calls.
-	 *
-	 * @return array List of rows
-	 */
-	public function get_all(): array
-	{
-		return $this->_run_pipeline('get', function () {
-			if ($this->table !== '') {
-				$this->db->from($this->table);
-			}
-			return $this->db->get()->result_array();
-		});
-	}
-
-	/**
-	 * Alias for get_all() for convenience.
-	 *
-	 * @return array
+	 * @return array List of Domain Entities or raw row arrays
 	 */
 	public function find_all(): array
 	{
-		return $this->get_all();
+		if ($this->table !== '') {
+			$this->db->from($this->table);
+		}
+		$rows = $this->db->get()->result_array();
+		return $this->to_entities($rows);
 	}
 
 	/**
-	 * Fetch a single record by primary key ID.
+	 * Fetch a single record by primary key ID and hydrate as Domain Entity if $entity_class is set.
 	 *
 	 * @param int|string $id Primary key ID
-	 * @return array|null Record row or null if not found
+	 * @return object|array|null Record entity, raw row array, or null if not found
 	 */
-	public function get_by_id($id): ?array
+	public function find_by_id($id)
 	{
-		return $this->_run_pipeline('get', function () use ($id) {
-			if ($this->table !== '') {
-				$this->db->from($this->table);
-			}
-			$pk = (strpos($this->primary_key, '.') === false && $this->table !== '')
-				? $this->table . '.' . $this->primary_key
-				: $this->primary_key;
+		if ($this->table === '') {
+			return null;
+		}
 
-			return $this->db->where($pk, $id)->get()->row_array() ?: null;
-		}, [], $id);
+		$pk = (strpos($this->primary_key, '.') === false)
+			? $this->table . '.' . $this->primary_key
+			: $this->primary_key;
+
+		$row = $this->db->where($pk, $id)->get($this->table)->row_array() ?: null;
+		
+		return $this->to_entity($row);
 	}
 
 	/**
-	 * Alias for get_by_id().
-	 *
-	 * @param int|string $id
-	 * @return array|null
-	 */
-	public function find_by_id($id): ?array
-	{
-		return $this->get_by_id($id);
-	}
-
-	/**
-	 * Fetch a single record matching given conditions.
-	 *
-	 * @param array $where Associative array of column => value filters
-	 * @return array|null Record row or null if not found
-	 */
-	public function get_by(array $where): ?array
-	{
-		return $this->_run_pipeline('get', function () use ($where) {
-			if ($this->table !== '') {
-				$this->db->from($this->table);
-			}
-			return $this->db->where($where)->get()->row_array() ?: null;
-		}, $where);
-	}
-
-	/**
-	 * Count all records in the table.
-	 *
-	 * Applies before_get scopes and counts results.
+	 * Count all records in the table or matching active query builder conditions.
 	 *
 	 * @return int Total record count
 	 */
 	public function count_all(): int
 	{
-		return (int) $this->_run_pipeline('get', function () {
-			if ($this->table !== '') {
-				$this->db->from($this->table);
-			}
-			return $this->db->count_all_results();
-		});
-	}
-
-	/**
-	 * Count records matching specified conditions.
-	 *
-	 * @param array $where Associative array of column => value filters
-	 * @return int
-	 */
-	public function count_by(array $where): int
-	{
-		return (int) $this->_run_pipeline('get', function () use ($where) {
-			if ($this->table !== '') {
-				$this->db->from($this->table);
-			}
-			return $this->db->where($where)->count_all_results();
-		}, $where);
+		if ($this->table !== '') {
+			$this->db->from($this->table);
+		}
+		return $this->db->count_all_results();
 	}
 
 	/**
@@ -252,10 +135,11 @@ class MY_Model extends CI_Model
 	 */
 	public function insert(array $data)
 	{
-		return $this->_run_pipeline('create', function () use ($data) {
-			$this->db->insert($this->table, $data);
-			return $this->db->insert_id();
-		}, $data);
+		$this->db->insert($this->table, $data);
+		$insert_id = $this->db->insert_id();
+		
+		$this->log_audit('insert', $insert_id, null, $data);
+		return $insert_id;
 	}
 
 	/**
@@ -266,152 +150,98 @@ class MY_Model extends CI_Model
 	 */
 	public function insert_batch(array $data): int
 	{
-		return (int) $this->_run_pipeline('create', function () use ($data) {
-			return $this->db->insert_batch($this->table, $data);
-		}, $data);
-	}
-
-	/**
-	 * Update a record by primary key ID.
-	 *
-	 * @param int|string $id Primary key value
-	 * @param array $data Data to update
-	 * @return bool
-	 */
-	public function update_record($id, array $data): bool
-	{
-		return (bool) $this->_run_pipeline('update', function () use ($id, $data) {
-			return $this->db->where($this->primary_key, $id)->update($this->table, $data);
-		}, $data, $id);
+		$inserted_count = $this->db->insert_batch($this->table, $data);
+		$this->log_audit('insert_batch', 'batch', null, $data);
+		return (int) $inserted_count;
 	}
 
 	/**
 	 * Update records matching specified conditions.
 	 *
-	 * @param array $where Filter conditions
 	 * @param array $data Data to update
+	 * @param array $where Filter conditions. Usually the primary key (e.g. ['id' => $id])
 	 * @return bool
 	 */
-	public function update_by(array $where, array $data): bool
+	public function update(array $data, array $where): bool
 	{
-		return (bool) $this->_run_pipeline('update', function () use ($where, $data) {
-			return $this->db->where($where)->update($this->table, $data);
-		}, $data, $where);
-	}
-
-	/**
-	 * Delete a record by primary key ID.
-	 *
-	 * @param int|string $id Primary key ID
-	 * @return bool
-	 */
-	public function delete_record($id): bool
-	{
-		return (bool) $this->_run_pipeline('delete', function () use ($id) {
-			return $this->db->where($this->primary_key, $id)->delete($this->table);
-		}, [], $id);
+		$this->db->where($where);
+		
+		// Build the SELECT query string without resetting the Query Builder state
+		$sql = $this->db->get_compiled_select($this->table, FALSE);
+		// Execute the raw query to get the 'before' state
+		$before = $this->db->query($sql)->result_array();
+		
+		// Execute the UPDATE which will consume the Query Builder state
+		$result = $this->db->update($this->table, $data);
+		
+		if ($result) {
+			$row_identifier = isset($where[$this->primary_key]) ? $where[$this->primary_key] : json_encode($where);
+			$this->log_audit('update', $row_identifier, $before, $data);
+		}
+		
+		return (bool) $result;
 	}
 
 	/**
 	 * Delete records matching specified conditions.
 	 *
-	 * @param array $where Filter conditions
+	 * @param array $where Filter conditions. Usually the primary key (e.g. ['id' => $id])
 	 * @return bool
 	 */
-	public function delete_by(array $where): bool
+	public function delete(array $where): bool
 	{
-		return (bool) $this->_run_pipeline('delete', function () use ($where) {
-			return $this->db->where($where)->delete($this->table);
-		}, [], $where);
-	}
-
-	/**
-	 * Execute the lifecycle pipeline for a given action.
-	 *
-	 * @param string $action Action name ('get', 'create', 'update', 'delete')
-	 * @param callable $query_fn Query callback
-	 * @param array $data Payload data
-	 * @param mixed ...$args Additional callback parameters
-	 * @return mixed Result of $query_fn
-	 * @throws \Throwable
-	 */
-	protected function _run_pipeline(string $action, callable $query_fn, array $data = [], ...$args)
-	{
-		try {
-			// 1. Run before callbacks (e.g. global scopes before_get, validations before_create)
-			$this->_trigger('before_' . $action, $data, ...$args);
-
-			// 2. Execute query callable
-			$result = $query_fn();
-
-			// 3. Run after callbacks (e.g. after_create audit logs, after_get transformations)
-			$this->_trigger('after_' . $action, $result, $data, ...$args);
-
-			return $result;
-		} catch (\Throwable $e) {
-			$this->log_database_failure($e, $action);
-			throw $e;
-		} finally {
-			// Reset temporary scope overrides after every query
-			if ($action === 'get') {
-				$this->disabled_scopes = [];
-				$this->disable_all_scopes = false;
-			}
+		$this->db->where($where);
+		
+		// Build the SELECT query string without resetting the Query Builder state
+		$sql = $this->db->get_compiled_select($this->table, FALSE);
+		$before = $this->db->query($sql)->result_array();
+		
+		// Execute the DELETE which will consume the Query Builder state
+		$result = $this->db->delete($this->table);
+		
+		if ($result) {
+			$row_identifier = isset($where[$this->primary_key]) ? $where[$this->primary_key] : json_encode($where);
+			$this->log_audit('delete', $row_identifier, $before, null);
 		}
+		
+		return (bool) $result;
 	}
 
 	/**
-	 * Trigger registered lifecycle callbacks for an event.
+	 * Audit log for successful operations into the `logs` table.
 	 *
-	 * @param string $event Event name ('before_get', 'after_create', etc.)
-	 * @param mixed ...$args Arguments forwarded to callback methods
+	 * @param string $action Database action context
+	 * @param mixed $row_identifier The affected row identifier or conditions
+	 * @param mixed $before Data before the operation
+	 * @param mixed $after Data after the operation
 	 * @return void
 	 */
-	protected function _trigger(string $event, ...$args): void
+	protected function log_audit(string $action, $row_identifier, $before = null, $after = null): void
 	{
-		if (!isset($this->{$event}) || !is_array($this->{$event})) {
+		if ($this->table === 'logs' || empty($this->table)) {
 			return;
 		}
 
-		foreach ($this->{$event} as $callback) {
-			// Check if global scopes are disabled for before_get callbacks
-			if ($event === 'before_get') {
-				if ($this->disable_all_scopes || in_array($callback, $this->disabled_scopes, true)) {
-					continue;
-				}
-			}
-
-			if (is_string($callback) && method_exists($this, $callback)) {
-				$this->{$callback}(...$args);
-			} elseif (is_callable($callback)) {
-				call_user_func($callback, ...$args);
-			}
+		$user_id = null;
+		if (isset($this->session) && $this->session->userdata('user_id')) {
+			$user_id = $this->session->userdata('user_id');
 		}
-	}
 
-	/**
-	 * Log database errors and exceptions with context details.
-	 *
-	 * @param \Throwable $e Exception
-	 * @param string $action Database action context
-	 * @return void
-	 */
-	protected function log_database_failure(\Throwable $e, string $action): void
-	{
-		$last_query = (isset($this->db) && method_exists($this->db, 'last_query'))
-			? $this->db->last_query()
-			: 'N/A';
+		$content = json_encode([
+			'action' => $action,
+			'before' => $before,
+			'after'  => $after
+		], JSON_UNESCAPED_UNICODE);
 
-		$message = sprintf(
-			"[%s] Database failure during '%s' on table '%s'. Last query: %s | Error: %s\nStack trace:\n%s",
-			get_class($this),
-			$action,
-			$this->table ?: 'unknown',
-			$last_query,
-			$e->getMessage(),
-			$e->getTraceAsString()
-		);
+		$row_str = is_array($row_identifier) ? json_encode($row_identifier) : (string) $row_identifier;
 
-		log_message('error', $message);
+		$log_data = [
+			'user_execute' => $user_id,
+			'table' => $this->table,
+			'row' => $row_str,
+			'content' => $content
+		];
+
+		$this->db->insert('logs', $log_data);
 	}
 }
