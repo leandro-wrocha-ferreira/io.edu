@@ -13,10 +13,10 @@ interface UserRepositoryInterface
     /**
      * Find a user by their ID.
      *
-     * @param int $id User ID
+     * @param int|string $id User ID
      * @return User|null User entity or null if not found
      */
-    public function find_by_id(int $id): ?User;
+    public function find_by_id($id): ?User;
 
     /**
      * Find a user by their email address.
@@ -35,12 +35,12 @@ interface UserRepositoryInterface
     public function save(User $user): void;
 
     /**
-     * Soft delete a user by ID.
+     * Soft delete users matching specified conditions.
      *
-     * @param int $id User ID to delete
-     * @return void
+     * @param array $where Filter conditions (e.g. ['id' => $id])
+     * @return bool
      */
-    public function delete(int $id): void;
+    public function delete(array $where): bool;
 
     /**
      * Find all non-deleted users, ordered by creation date DESC.

@@ -17,10 +17,10 @@ interface RoleRepositoryInterface
 	/**
 	 * Find a role by ID.
 	 *
-	 * @param int $id Role ID
+	 * @param int|string $id Role ID
 	 * @return Role|null
 	 */
-	public function find_by_id(int $id): ?Role;
+	public function find_by_id($id): ?Role;
 
 	/**
 	 * Save (insert or update) a role.
@@ -33,10 +33,10 @@ interface RoleRepositoryInterface
 	public function save(Role $role): void;
 
 	/**
-	 * Delete a role by ID.
+	 * Delete roles matching specified conditions.
 	 *
-	 * @param int $id
-	 * @return void
+	 * @param array $where Filter conditions (e.g. ['id' => $id])
+	 * @return bool
 	 */
-	public function delete(int $id): void;
+	public function delete(array $where): bool;
 }

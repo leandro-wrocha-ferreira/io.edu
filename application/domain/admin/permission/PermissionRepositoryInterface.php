@@ -17,10 +17,10 @@ interface PermissionRepositoryInterface
 	/**
 	 * Find a permission by ID.
 	 *
-	 * @param int $id Permission ID
+	 * @param int|string $id Permission ID
 	 * @return Permission|null
 	 */
-	public function find_by_id(int $id): ?Permission;
+	public function find_by_id($id): ?Permission;
 
 	/**
 	 * Save (insert or update) a permission.
@@ -31,10 +31,10 @@ interface PermissionRepositoryInterface
 	public function save(Permission $permission): void;
 
 	/**
-	 * Delete a permission by ID.
+	 * Delete permissions matching specified conditions.
 	 *
-	 * @param int $id
-	 * @return void
+	 * @param array $where Filter conditions (e.g. ['id' => $id])
+	 * @return bool
 	 */
-	public function delete(int $id): void;
+	public function delete(array $where): bool;
 }
