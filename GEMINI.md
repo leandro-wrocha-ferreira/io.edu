@@ -130,6 +130,21 @@ public static function create(string $name, Email $email, string $password): sel
 - **Line endings:** LF
 - **Charset:** UTF-8
 
+### No Vertical Alignment
+
+- **NÃO** utilize alinhamento vertical (Smart Alignment / Column Alignment) para arrays ou atribuições. 
+- O uso de espaços extras apenas para alinhar símbolos como `=>` ou `=` é **proibido**, pois gera diffs ruidosos no controle de versão.
+- Siga a PSR-12: utilize apenas **um espaço** antes e depois do símbolo.
+
+Exemplo correto:
+```php
+$data = [
+    'id' => 123,
+    'nome_longo' => 'João Silva',
+    'content' => $content
+];
+```
+
 ## Domain Patterns
 
 ### Entity
