@@ -8,85 +8,84 @@ use app\usecases\identity\AuthenticateUserUseCase;
  *
  * Handles user login, logout, and role-based redirection.
  */
-class Auth extends CI_Controller
+class Auth extends MY_Controller
 {
-    /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
+	/**
+	 * Constructor.
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+		$this->load->model('user_model');
+	}
 
-    /**
-     * Display login form or process login submission.
-     *
-     * If user is already logged in, redirects to their panel.
-     * On POST, validates credentials via AuthenticateUserUseCase
-     * and creates the session on success.
-     *
-     * @return void
-     */
-    public function login()
-    {
-        if ($this->session->userdata('user_id')) {
-            $this->_redirect_by_role();
-            return;
-        }
+	/**
+	 * Display login form or process login submission.
+	 *
+	 * If user is already logged in, redirects to their panel.
+	 * On POST, validates credentials via AuthenticateUserUseCase
+	 * and creates the session on success.
+	 *
+	 * @return void
+	 */
+	public function login()
+	{
+		if ($this->session->userdata('user_id')) {
+			$this->_redirect_by_role();
+			return;
+		}
 
-        if ($this->input->method() === 'post') {
-            $email = $this->input->post('email');
-            $password = $this->input->post('password');
+		$this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
+		$this->form_validation->set_rules('password', 'Password', 'required');
 
-            try {
-                $use_case = new AuthenticateUserUseCase();
-                $user = $use_case->execute($email, $password);
+		if ($this->form_validation->run() === TRUE) {
+			$email = $this->input->post('email', TRUE);
+			$password = $this->input->post('password', TRUE);
 
-                $session_data = [
-                    'user_id' => $user->get_id(),
-                    'user_name' => $user->get_name(),
-                    'user_email' => (string) $user->get_email(),
-                    'user_role' => $user->get_role(),
-                    'logged_in' => TRUE,
-                ];
-                $this->session->set_userdata($session_data);
+			$use_case = new AuthenticateUserUseCase();
+			$user = $use_case->execute($email, $password);
 
-                $this->_redirect_by_role();
-            } catch (\Exception $e) {
-                log_message('error', $e->getMessage());
-                $this->session->set_flashdata('error', $e->getMessage());
-                redirect(base_url('entrar'));
-            }
-        }
+			$session_data = [
+				'user_id'    => $user->get_id(),
+				'user_name'  => $user->get_name(),
+				'user_email' => (string) $user->get_email(),
+				'user_role'  => $user->get_role(),
+				'logged_in'  => TRUE,
+			];
+			$this->session->set_userdata($session_data);
 
-        $this->load->view('login', ['title' => 'Login']);
-    }
+			$this->_redirect_by_role();
+			return;
+		}
 
-    /**
-     * Log out the current user.
-     *
-     * Destroys the session and redirects to the login page.
-     *
-     * @return void
-     */
-    public function logout()
-    {
-        $this->session->sess_destroy();
-        redirect(base_url('entrar'));
-    }
+		$this->load->view('login', ['title' => 'Login']);
+	}
 
-    /**
-     * Redirect user to their role-specific panel.
-     *
-     * @return void
-     */
-    private function _redirect_by_role()
-    {
-        $role = $this->session->userdata('user_role');
-        if ($role === 'admin-master' || $role === 'admin') {
-            redirect(base_url('admin/painel'));
-        } else {
-            redirect(base_url('aluno/painel'));
-        }
-    }
+	/**
+	 * Log out the current user.
+	 *
+	 * Destroys the session and redirects to the login page.
+	 *
+	 * @return void
+	 */
+	public function logout()
+	{
+		$this->session->sess_destroy();
+		redirect('entrar');
+	}
+
+	/**
+	 * Redirect user to their role-specific panel.
+	 *
+	 * @return void
+	 */
+	private function _redirect_by_role()
+	{
+		$role = $this->session->userdata('user_role');
+		if ($role === 'admin-master' || $role === 'admin') {
+			redirect('admin/painel');
+		} else {
+			redirect('aluno/painel');
+		}
+	}
 }

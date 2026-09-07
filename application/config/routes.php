@@ -59,6 +59,8 @@ $route['sair'] = 'auth/logout';
 
 // Admin routes
 $route['admin/painel'] = 'admin/dashboard/index';
+
+// Usuários
 $route['admin/usuarios'] = 'admin/users/index';
 $route['admin/usuarios/dados'] = 'admin/users/ajax_data';
 $route['admin/usuarios/novo'] = 'admin/users/create';
@@ -66,11 +68,32 @@ $route['admin/usuarios/editar/(:num)'] = 'admin/users/update/$1';
 $route['admin/usuarios/ativar/(:num)'] = 'admin/users/activate/$1';
 $route['admin/usuarios/desativar/(:num)'] = 'admin/users/disable/$1';
 $route['admin/usuarios/excluir/(:num)'] = 'admin/users/delete/$1';
+
+// Perfis e Permissões
 $route['admin/perfis'] = 'admin/roles/index';
 $route['admin/perfis/dados'] = 'admin/roles/ajax_data';
 $route['admin/perfis/novo'] = 'admin/roles/create';
 $route['admin/perfis/editar/(:num)'] = 'admin/roles/update/$1';
 $route['admin/perfis/excluir/(:num)'] = 'admin/roles/delete/$1';
+
+// Cursos
+$route['admin/cursos'] = 'admin/courses/index';
+$route['admin/cursos/novo'] = 'admin/courses/create';
+$route['admin/cursos/editar/(:num)'] = 'admin/courses/edit/$1';
+$route['admin/cursos/excluir/(:num)'] = 'admin/courses/delete/$1';
+
+// Turmas
+$route['admin/turmas'] = 'admin/classes/index';
+$route['admin/turmas/novo'] = 'admin/classes/create';
+$route['admin/turmas/nova'] = 'admin/classes/create';
+$route['admin/turmas/editar/(:num)'] = 'admin/classes/edit/$1';
+$route['admin/turmas/excluir/(:num)'] = 'admin/classes/delete/$1';
+
+// Provedores de Vídeo
+$route['admin/provedores-video'] = 'admin/video_providers/index';
+$route['admin/provedores-video/novo'] = 'admin/video_providers/create';
+$route['admin/provedores-video/editar/(:num)'] = 'admin/video_providers/edit/$1';
+$route['admin/provedores-video/excluir/(:num)'] = 'admin/video_providers/delete/$1';
 
 // Student routes
 $route['aluno/painel'] = 'student/dashboard/index';

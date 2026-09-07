@@ -76,6 +76,7 @@ class MY_Controller extends CI_Controller
         }
 
         $this->session->set_flashdata('error', $e->getMessage());
+        redirect($this->get_redirect_back_url());
     }
 
     /**

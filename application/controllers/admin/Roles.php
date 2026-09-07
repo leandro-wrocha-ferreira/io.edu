@@ -22,6 +22,8 @@ class Roles extends MY_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('role_model');
+        $this->load->model('permission_model');
     }
 
     /**

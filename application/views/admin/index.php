@@ -92,25 +92,31 @@
 						<span class="nav-section-title">Acadêmico</span>
 					</li>
 					<li class="nav-item" role="none">
-						<a class="nav-link disabled-link" href="#" role="menuitem" aria-disabled="true" tabindex="-1">
+						<a class="nav-link <?= $this->uri->segment(2) == 'cursos' ? 'active' : '' ?>"
+						   href="<?= base_url('admin/cursos') ?>"
+						   role="menuitem"
+						   <?= $this->uri->segment(2) == 'cursos' ? 'aria-current="page"' : '' ?>>
 							<i class="bi bi-journal-bookmark" aria-hidden="true"></i> Gestão de Cursos
-							<span class="badge badge-dev">Em dev</span>
 						</a>
 					</li>
 					<li class="nav-item" role="none">
-						<a class="nav-link disabled-link" href="#" role="menuitem" aria-disabled="true" tabindex="-1">
-							<i class="bi bi-star" aria-hidden="true"></i> Gestão de Avaliações
-							<span class="badge badge-dev">Em dev</span>
+						<a class="nav-link <?= $this->uri->segment(2) == 'turmas' ? 'active' : '' ?>"
+						   href="<?= base_url('admin/turmas') ?>"
+						   role="menuitem"
+						   <?= $this->uri->segment(2) == 'turmas' ? 'aria-current="page"' : '' ?>>
+							<i class="bi bi-mortarboard" aria-hidden="true"></i> Gestão de Turmas
 						</a>
 					</li>
 
 					<li class="nav-item nav-section" role="none">
-						<span class="nav-section-title">Insights</span>
+						<span class="nav-section-title">Configurações</span>
 					</li>
 					<li class="nav-item" role="none">
-						<a class="nav-link disabled-link" href="#" role="menuitem" aria-disabled="true" tabindex="-1">
-							<i class="bi bi-bar-chart-line" aria-hidden="true"></i> Relatórios
-							<span class="badge badge-dev">Em dev</span>
+						<a class="nav-link <?= $this->uri->segment(2) == 'provedores-video' ? 'active' : '' ?>"
+						   href="<?= base_url('admin/provedores-video') ?>"
+						   role="menuitem"
+						   <?= $this->uri->segment(2) == 'provedores-video' ? 'aria-current="page"' : '' ?>>
+							<i class="bi bi-play-btn" aria-hidden="true"></i> Provedores de Vídeo
 						</a>
 					</li>
 				</ul>

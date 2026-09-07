@@ -19,6 +19,8 @@ class Middleware
      */
     private array $route_permission_map = [
         'admin/painel' => 'dashboard.view',
+
+        // Usuários
         'admin/usuarios' => 'users.view',
         'admin/usuarios/dados' => 'users.view',
         'admin/usuarios/novo' => 'users.create',
@@ -26,11 +28,32 @@ class Middleware
         'admin/usuarios/ativar' => 'users.toggle_status',
         'admin/usuarios/desativar' => 'users.toggle_status',
         'admin/usuarios/excluir' => 'users.delete',
+
+        // Perfis
         'admin/perfis' => 'roles.view',
         'admin/perfis/dados' => 'roles.view',
         'admin/perfis/novo' => 'roles.create',
         'admin/perfis/editar' => 'roles.edit',
         'admin/perfis/excluir' => 'roles.delete',
+
+        // Cursos
+        'admin/cursos' => 'courses.view',
+        'admin/cursos/novo' => 'courses.create',
+        'admin/cursos/editar' => 'courses.edit',
+        'admin/cursos/excluir' => 'courses.delete',
+
+        // Turmas
+        'admin/turmas' => 'classes.view',
+        'admin/turmas/novo' => 'classes.create',
+        'admin/turmas/nova' => 'classes.create',
+        'admin/turmas/editar' => 'classes.edit',
+        'admin/turmas/excluir' => 'classes.delete',
+
+        // Provedores de Vídeo
+        'admin/provedores-video' => 'video_providers.view',
+        'admin/provedores-video/novo' => 'video_providers.create',
+        'admin/provedores-video/editar' => 'video_providers.edit',
+        'admin/provedores-video/excluir' => 'video_providers.delete',
     ];
 
     /**
