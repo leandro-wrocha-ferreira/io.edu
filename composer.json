@@ -47,9 +47,6 @@
 	},
 	"require-dev": {
 		"mikey179/vfsstream": "1.6.*",
-		"phpunit/phpunit": "4.* || 5.* || 9.*",
-		"codeception/codeception": "^5.0",
-		"codeception/module-asserts": "^3.0",
-		"codeception/module-phpbrowser": "^3.0"
+		"phpunit/phpunit": "4.* || 5.* || 9.*"
 	}
 }
