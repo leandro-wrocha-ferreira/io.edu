@@ -134,6 +134,7 @@ class Example_model extends MY_Model implements ExampleRepositoryInterface
    - Tab indentations (`.editorconfig`)
    - PSR-12 bracket style (`{` on the next line for classes and methods)
    - Mandatory English docblocks with `@param` and `@return`
+   - **No Vertical Alignment**: Never use extra spaces to align symbols like `=>` or `=`. Use exactly one space before and after the symbol to prevent noisy git diffs.
 
 ---
 
@@ -144,4 +145,5 @@ class Example_model extends MY_Model implements ExampleRepositoryInterface
 ❌ **`GROUP_CONCAT` for Relations**: Building complex multi-join SQL queries with `GROUP_CONCAT` and `ANY_VALUE` instead of using KISS relation hydration methods.
 ❌ **Global Magic Scopes**: Adding `$before_get` or global query interception hooks. Models must apply filters explicitly.
 ❌ **Type-narrowed `find_by_id` or legacy `delete`**: Narrowing `find_by_id(int $id)` or declaring `delete(int $id): void` breaks PHP 8.2 method inheritance against `MY_Model` (`find_by_id($id)` and `delete(array $where): bool`).
+❌ **Vertical Alignment**: Using extra spaces to align `=` or `=>` vertically in arrays or variable assignments.
 
