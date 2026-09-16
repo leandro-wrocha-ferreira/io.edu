@@ -16,7 +16,7 @@ interface UserRepositoryInterface
      * @param int|string $id User ID
      * @return User|null User entity or null if not found
      */
-    public function find_by_id($id): ?User;
+    public function find_by_id(int|string $id): ?User;
 
     /**
      * Find a user by their email address.
@@ -30,9 +30,9 @@ interface UserRepositoryInterface
      * Save (insert or update) a user.
      *
      * @param User $user User entity to persist
-     * @return void
+     * @return User
      */
-    public function save(User $user): void;
+    public function save(User $user): User;
 
     /**
      * Soft delete users matching specified conditions.

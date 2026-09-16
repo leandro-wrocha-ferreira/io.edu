@@ -104,9 +104,9 @@ class User_model extends MY_Model implements UserRepositoryInterface
 	 * Also syncs the user_roles association.
 	 *
 	 * @param User $user User entity to persist
-	 * @return void
+	 * @return User
 	 */
-	public function save(User $user): void
+	public function save(User $user): User
 	{
 		$data = [
 			'name' => $user->get_name(),
@@ -123,7 +123,7 @@ class User_model extends MY_Model implements UserRepositoryInterface
 			$user->set_id((int) $new_id);
 		}
 
-		$this->_sync_user_roles($user);
+		return $user;
 	}
 
 	/**

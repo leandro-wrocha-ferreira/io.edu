@@ -38,6 +38,7 @@ class User
         $user->email = $email;
         $user->password = password_hash($password, PASSWORD_BCRYPT);
         $user->created_at = new \DateTime();
+        
         return $user;
     }
 

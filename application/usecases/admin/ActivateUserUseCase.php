@@ -3,6 +3,8 @@
 namespace app\usecases\admin;
 
 use app\domain\exceptions\NotFoundException;
+use app\domain\identity\User;
+use app\domain\identity\UserRepositoryInterface;
 use app\factories\Model_factory;
 
 /**
@@ -16,32 +18,28 @@ class ActivateUserUseCase
     /**
      * Constructor.
      *
-     * @param \app\domain\identity\UserRepositoryInterface|null $repository Repository for testing (optional)
+     * @param \app\domain\identity\UserRepositoryInterface $user_repository
      */
-    public function __construct($repository = null)
+    public function __construct(UserRepositoryInterface $user_repository)
     {
-        if ($repository !== null) {
-            $this->user_repository = $repository;
-        } else {
-            $this->user_repository = Model_factory::make('user_model');
-        }
+        $this->user_repository = $user_repository;
     }
 
     /**
      * Activate the user.
      *
      * @param int $user_id User ID
-     * @return void
+     * @return User
      * @throws NotFoundException When user not found
      */
-    public function execute(int $user_id): void
+    public function execute(int $user_id): User
     {
         $user = $this->user_repository->find_by_id($user_id);
         if ($user === null) {
-            throw new NotFoundException("Usuário não encontrado");
+            throw new NotFoundException("User not found");
         }
 
         $user->set_active(true);
-        $this->user_repository->save($user);
+        return $this->user_repository->save($user);
     }
 }
