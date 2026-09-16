@@ -1,5 +1,7 @@
 <?php
 
+use app\domain\exceptions\NotFoundException;
+
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 /**
@@ -23,6 +25,13 @@ class MY_Model extends CI_Model
 	 * @var string
 	 */
 	protected string $primary_key = 'id';
+
+	/**
+	 * Whether the table uses soft deletes.
+	 *
+	 * @var bool
+	 */
+	protected bool $soft_delete = false;
 
 	/**
 	 * Target Domain Entity class FQCN for automatic row hydration (optional).
@@ -67,14 +76,18 @@ class MY_Model extends CI_Model
 	 */
 	protected function to_entities(array $rows): array
 	{
-		if (empty($rows) || empty($this->entity_class) || !method_exists($this->entity_class, 'from_database')) {
+		if (empty($rows)) {
 			return $rows;
 		}
 
-		$class = $this->entity_class;
-		return array_map(static function (array $row) use ($class) {
-			return $class::from_database($row);
-		}, $rows);
+		if (!empty($this->entity_class) && method_exists($this->entity_class, 'from_database')) {
+			$class = $this->entity_class;
+			return array_map(static function (array $row) use ($class) {
+				return $class::from_database($row);
+			}, $rows);
+		}
+
+		return $rows;
 	}
 
 	/**
@@ -86,10 +99,14 @@ class MY_Model extends CI_Model
 	 */
 	public function find_all(): array
 	{
-		if ($this->table !== '') {
-			$this->db->from($this->table);
+		if ($this->table === '') {
+			return [];
 		}
-		$rows = $this->db->get()->result_array();
+
+		$rows = $this->db->from($this->table)
+			->get()
+			->result_array();
+		
 		return $this->to_entities($rows);
 	}
 
@@ -99,7 +116,7 @@ class MY_Model extends CI_Model
 	 * @param int|string $id Primary key ID
 	 * @return object|array|null Record entity, raw row array, or null if not found
 	 */
-	public function find_by_id($id)
+	public function find_by_id(int|string $id)
 	{
 		if ($this->table === '') {
 			return null;
@@ -121,10 +138,14 @@ class MY_Model extends CI_Model
 	 */
 	public function count_all(): int
 	{
-		if ($this->table !== '') {
-			$this->db->from($this->table);
+		if ($this->table === '') {
+			return 0;
 		}
-		return $this->db->count_all_results();
+
+		$count = $this->db->from($this->table)
+			->count_all_results();
+		
+		return $count;
 	}
 
 	/**
@@ -135,6 +156,10 @@ class MY_Model extends CI_Model
 	 */
 	public function insert(array $data)
 	{
+		if ($this->table === '') {
+			return null;
+		}
+
 		$this->db->insert($this->table, $data);
 		$insert_id = $this->db->insert_id();
 		
@@ -152,7 +177,7 @@ class MY_Model extends CI_Model
 	{
 		$inserted_count = $this->db->insert_batch($this->table, $data);
 		$this->log_audit('insert_batch', 'batch', null, $data);
-		return (int) $inserted_count;
+		return $inserted_count;
 	}
 
 	/**
@@ -170,16 +195,24 @@ class MY_Model extends CI_Model
 		$sql = $this->db->get_compiled_select($this->table, FALSE);
 		// Execute the raw query to get the 'before' state
 		$before = $this->db->query($sql)->result_array();
+
+		if (empty($before)) {
+			throw new NotFoundException();
+		}
 		
 		// Execute the UPDATE which will consume the Query Builder state
 		$result = $this->db->update($this->table, $data);
 		
 		if ($result) {
-			$row_identifier = isset($where[$this->primary_key]) ? $where[$this->primary_key] : json_encode($where);
+			$row_identifier = $before[0][$this->primary_key];
+			if (count($before) > 1) {
+				$row_identifier = 'batch';
+			}
+
 			$this->log_audit('update', $row_identifier, $before, $data);
 		}
 		
-		return (bool) $result;
+		return $result;
 	}
 
 	/**
@@ -195,53 +228,88 @@ class MY_Model extends CI_Model
 		// Build the SELECT query string without resetting the Query Builder state
 		$sql = $this->db->get_compiled_select($this->table, FALSE);
 		$before = $this->db->query($sql)->result_array();
+
+		if (empty($before)) {
+			throw new NotFoundException();
+		}
 		
 		// Execute the DELETE which will consume the Query Builder state
 		$result = $this->db->delete($this->table);
 		
 		if ($result) {
-			$row_identifier = isset($where[$this->primary_key]) ? $where[$this->primary_key] : json_encode($where);
+			$row_identifier = $before[0][$this->primary_key];
+			if (count($before) > 1) {
+				$row_identifier = 'batch';
+			}
+
 			$this->log_audit('delete', $row_identifier, $before, null);
 		}
 		
-		return (bool) $result;
+		return $result;
 	}
 
 	/**
 	 * Audit log for successful operations into the `logs` table.
 	 *
 	 * @param string $action Database action context
-	 * @param mixed $row_identifier The affected row identifier or conditions
-	 * @param mixed $before Data before the operation
-	 * @param mixed $after Data after the operation
+	 * @param int|string $row_identifier The affected row identifier or conditions
+	 * @param array|null $before Data before the operation
+	 * @param array|null $after Data after the operation
 	 * @return void
 	 */
-	protected function log_audit(string $action, $row_identifier, $before = null, $after = null): void
+	protected function log_audit(string $action, int|string $row_identifier, ?array $before, ?array $after): void
 	{
 		if ($this->table === 'logs' || empty($this->table)) {
 			return;
 		}
 
-		$user_id = null;
-		if (isset($this->session) && $this->session->userdata('user_id')) {
-			$user_id = $this->session->userdata('user_id');
+		$user_id = $this->session->userdata('user_id') ?? null;
+
+		if ($action === 'update' && is_array($before) && is_array($after)) {
+			$diff_before = [];
+			$diff_after = [];
+
+			$is_batch = count($before) > 1;
+
+			foreach ($before as $row) {
+				$row_diff_before = [];
+				$row_diff_after = [];
+
+				foreach ($after as $key => $value) {
+					if (array_key_exists($key, $row)) {
+						if ($row[$key] != $value) {
+							$row_diff_before[$key] = $row[$key];
+							$row_diff_after[$key] = $value;
+						}
+					} else {
+						$row_diff_after[$key] = $value;
+					}
+				}
+
+				if ($is_batch) {
+					$diff_before[] = $row_diff_before;
+					$diff_after[] = $row_diff_after;
+				} else {
+					$diff_before = $row_diff_before;
+					$diff_after = $row_diff_after;
+				}
+			}
+	
+			$before = $diff_before;
+			$after = $diff_after;
 		}
 
 		$content = json_encode([
 			'action' => $action,
 			'before' => $before,
-			'after'  => $after
+			'after' => $after
 		], JSON_UNESCAPED_UNICODE);
 
-		$row_str = is_array($row_identifier) ? json_encode($row_identifier) : (string) $row_identifier;
-
-		$log_data = [
+		$this->db->insert('logs', [
 			'user_execute' => $user_id,
 			'table' => $this->table,
-			'row' => $row_str,
+			'row' => $row_identifier,
 			'content' => $content
-		];
-
-		$this->db->insert('logs', $log_data);
+		]);
 	}
 }

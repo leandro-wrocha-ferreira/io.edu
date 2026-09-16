@@ -16,7 +16,7 @@ class NotFoundException extends AppException
      * @param array $errors Additional error details
      * @param \Throwable|null $previous Previous exception
      */
-    public function __construct(string $message = "Recurso não encontrado", array $errors = [], ?\Throwable $previous = null)
+    public function __construct(string $message = "Record not found", array $errors = [], ?\Throwable $previous = null)
     {
         parent::__construct($message, 404, $errors, $previous);
     }
