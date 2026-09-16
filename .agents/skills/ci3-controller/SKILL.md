@@ -134,4 +134,5 @@ class Users extends MY_Controller
 ❌ **Manual Try/Catch for standard exceptions**: Catching `NotFoundException`, `ValidationException`, `ConflictException`, etc. inside controllers instead of letting `MY_Controller::_remap()` handle them globally.
 ❌ **Manual language loading**: Calling `$this->lang->load()` or checking `HTTP_ACCEPT_LANGUAGE` in controllers instead of relying on the global `Language_check` hook.
 ❌ **Manual JSON formatting**: Calling `$this->output->set_output(json_encode(...))` instead of `json_response($data, $status_code)`.
+❌ **Single-Letter Variables**: Using single-letter variables (e.g., `$i`, `$k`, `$v`, `$u`) is strictly forbidden, even in loops or tests. Always use descriptive variable names (e.g., `$index`, `$user`, `$key`).
 

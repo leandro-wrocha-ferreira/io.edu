@@ -81,7 +81,7 @@ class Example_model extends MY_Model implements ExampleRepositoryInterface
 	 * @param int|string $id Entity ID
 	 * @return Example|null
 	 */
-	public function find_by_id($id): ?Example
+	public function find_by_id(int|string $id): ?Example
 	{
 		return parent::find_by_id($id);
 	}
@@ -125,7 +125,7 @@ class Example_model extends MY_Model implements ExampleRepositoryInterface
 
 1. **Inheritance**: All models MUST extend `MY_Model` (`application/core/MY_Model.php`).
 2. **Interface Implementation**: Models MUST implement their respective Domain Repository Interface (`implements UserRepositoryInterface`).
-3. **Compatible Signatures**: Method signatures MUST match `MY_Model` exactly: `find_by_id($id)` with untyped parameter and `delete(array $where): bool`.
+3. **Strict Typing**: Method signatures MUST be strictly typed in parameters and return types exactly as defined by the Interfaces, and correctly documented in Docblocks. Use manual casts only when strictly necessary.
 4. **No `created_at` / `updated_at` in Save**: Timestamps are managed by **database triggers**. Models MUST NOT set these fields in insert/update data arrays.
 5. **KISS Over GROUP_CONCAT**: Never use `GROUP_CONCAT`, `ANY_VALUE()`, or JSON string concatenations inside queries to fetch relations. Use clean single-table queries and dedicated relation helpers (`_hydrate_user_roles`, `_hydrate_batch_user_roles`).
 6. **Explicit Scopes Only**: Do not use global scopes (no `$before_get` arrays). Apply filters explicitly inside your repository methods by calling internal helpers (e.g., `$this->apply_tenant_filter()`).
@@ -144,6 +144,7 @@ class Example_model extends MY_Model implements ExampleRepositoryInterface
 ❌ **Setting `created_at` / `updated_at` in Model**: Manually inserting or updating timestamps in `$data` instead of letting database triggers manage them.
 ❌ **`GROUP_CONCAT` for Relations**: Building complex multi-join SQL queries with `GROUP_CONCAT` and `ANY_VALUE` instead of using KISS relation hydration methods.
 ❌ **Global Magic Scopes**: Adding `$before_get` or global query interception hooks. Models must apply filters explicitly.
-❌ **Type-narrowed `find_by_id` or legacy `delete`**: Narrowing `find_by_id(int $id)` or declaring `delete(int $id): void` breaks PHP 8.2 method inheritance against `MY_Model` (`find_by_id($id)` and `delete(array $where): bool`).
+❌ **Untyped Parameters**: Leaving parameters untyped in method signatures or omitting proper Docblocks. Avoid untyped parameters and only use internal casting (e.g., `$id = (int) $id;`) when strictly necessary.
 ❌ **Vertical Alignment**: Using extra spaces to align `=` or `=>` vertically in arrays or variable assignments.
+❌ **Single-Letter Variables**: Using single-letter variables (e.g., `$i`, `$k`, `$v`, `$u`) is strictly forbidden, even in loops or tests. Always use descriptive variable names (e.g., `$index`, `$user`, `$key`).
 

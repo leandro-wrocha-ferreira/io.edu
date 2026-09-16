@@ -137,4 +137,5 @@ public function __construct(?UserRepositoryInterface $repository = null)
 ❌ **Direct `get_instance()` Coupling**: Calling `$CI =& get_instance()` directly inside Use Cases instead of using constructor dependency injection with `Model_factory` fallback.
 ❌ **Returning Raw Arrays**: Returning raw database rows or untyped associative arrays from `execute()` when representing domain models.
 ❌ **Multiple Business Actions in One Use Case**: Creating a monolithic service with multiple unrelated public methods instead of dedicated single-action Use Cases.
+❌ **Single-Letter Variables**: Using single-letter variables (e.g., `$i`, `$k`, `$v`, `$u`) is strictly forbidden, even in loops or tests. Always use descriptive variable names (e.g., `$index`, `$user`, `$key`).
 

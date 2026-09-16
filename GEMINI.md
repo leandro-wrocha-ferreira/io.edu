@@ -136,6 +136,11 @@ public static function create(string $name, Email $email, string $password): sel
 - O uso de espaços extras apenas para alinhar símbolos como `=>` ou `=` é **proibido**, pois gera diffs ruidosos no controle de versão.
 - Siga a PSR-12: utilize apenas **um espaço** antes e depois do símbolo.
 
+### No Single-Letter Variables
+
+- **NÃO** utilize variáveis de uma única letra (como `$i`, `$k`, `$v`, `$u`, etc.).
+- Variáveis devem ser **sempre descritivas**, mesmo em loops ou em testes. Exemplo: use `$index` em vez de `$i`, `$user` em vez de `$u`.
+
 Exemplo correto:
 ```php
 $data = [

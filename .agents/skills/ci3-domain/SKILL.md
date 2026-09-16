@@ -202,7 +202,7 @@ interface UserRepositoryInterface
      * @param int|string $id User ID
      * @return User|null
      */
-    public function find_by_id($id): ?User;
+    public function find_by_id(int|string $id): ?User;
 
     /**
      * Find a user by email.
@@ -238,7 +238,7 @@ interface UserRepositoryInterface
 4. Use `private` properties with getters (no setters for immutable fields).
 5. Factory methods: `create()` for new entities, `from_database()` for hydration.
 6. Value Objects must be immutable and implement `__toString()`.
-7. Repository Interfaces define contracts matching `MY_Model` signatures (`find_by_id($id)`, `delete(array $where): bool`).
+7. Repository Interfaces define strict contracts with fully typed parameters and return types (e.g., `find_by_id(int|string $id)`, `delete(array $where): bool`).
 8. Models never persist `created_at` or `updated_at` (database triggers manage timestamps).
 9. All classes and methods MUST have docblocks with `@param` and `@return` — **always in English**.
 10. Opening braces `{` on the NEXT line for classes and methods (PSR-12).
@@ -252,7 +252,8 @@ interface UserRepositoryInterface
 ❌ **Framework Coupling in Domain**: Calling `get_instance()`, `CI_Model`, `CI_Controller`, or database helpers inside Domain classes.
 ❌ **Using `Model_factory` in Domain**: Domain entities and value objects must be pure PHP and must never instantiate models.
 ❌ **Mutable Value Objects**: Adding setters to Value Objects or modifying internal state after construction.
-❌ **Typed `$id` in Repository Interfaces**: Declaring `find_by_id(int $id)` creates PHP 8.2 type incompatibility with `MY_Model::find_by_id($id)`. Keep `$id` untyped in parameter.
+❌ **Untyped Parameters**: Leaving parameters untyped in method signatures or omitting proper Docblocks. Avoid untyped parameters and only use internal casting when strictly necessary.
 ❌ **Legacy `delete(int $id)` signature**: Declaring `delete(int $id): void` in repository interfaces or models causes PHP 8.2 fatal compile error against `MY_Model::delete(array $where): bool`.
 ❌ **Portuguese Docblocks**: Writing `@param`, `@return`, or summaries in Portuguese instead of English.
+❌ **Single-Letter Variables**: Using single-letter variables (e.g., `$i`, `$k`, `$v`, `$u`) is strictly forbidden, even in loops or tests. Always use descriptive variable names (e.g., `$index`, `$user`, `$key`).
 
