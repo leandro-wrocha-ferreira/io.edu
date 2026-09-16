@@ -68,9 +68,9 @@ O projeto usa Composer PSR-4 para autoloading:
     }
 },
 "autoload-dev": {
-    "psr-4": {
-        "Tests\\": "tests/"
-    }
+    "classmap": [
+        "tests/"
+    ]
 }
 ```
 

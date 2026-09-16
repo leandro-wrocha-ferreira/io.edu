@@ -14,126 +14,34 @@ Test domain entities and use cases in isolation. No database, no HTTP.
 ```php
 <?php
 
+namespace tests\unit\usecases\admin;
+
+use app\domain\exceptions\NotFoundException;
 use app\domain\identity\Email;
 use app\domain\identity\User;
+use app\usecases\admin\ActivateUserUseCase;
+use tests\unit\mocks\repositories\MockUserRepository;
 
-class UserTest extends \PHPUnit\Framework\TestCase
+class ActivateUserUseCaseTest extends \PHPUnit\Framework\TestCase
 {
-    public function test_create_user_with_valid_data()
-    {
-        $email = new Email('test@example.com');
-        $user = User::create('John', $email, 'password123');
-
-        $this->assertEquals('John', $user->get_name());
-        $this->assertEquals('test@example.com', (string) $user->get_email());
-        $this->assertTrue($user->verify_password('password123'));
-    }
-
-    public function test_create_user_with_invalid_email_throws_exception()
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        new Email('invalid-email');
-    }
-}
-```
-
-### Integration Tests (tests/integration/)
-
-Test persistence mapping, database schemas, and entity hydration using SQLite in-memory:
-
-> [!NOTE]
-> **CI3 & SQLite Test Strategy**:
-> In CI3 DDD-lite, models extend `MY_Model` and depend on `$this->db`. Integration tests in `tests/integration/persistence/` test schema constraints and `from_database()` entity hydration using SQLite PDO. Direct model engine logic (CRUD execution, query compilation, audit logs) is verified in `tests/unit/MY_ModelTest.php` by mocking the query builder.
-
-```php
-<?php
-
-use app\domain\identity\Email;
-use app\domain\identity\User;
-
-/**
- * Integration test for User persistence mapping and hydration.
- */
-class User_modelTest extends \PHPUnit\Framework\TestCase
-{
-    private \PDO $pdo;
+    private $mock_user_repository;
 
     protected function setUp(): void
     {
-        if (!in_array('sqlite', \PDO::getAvailableDrivers())) {
-            $this->markTestSkipped('SQLite PDO driver is not available.');
-            return;
-        }
-
-        $this->pdo = new \PDO('sqlite::memory:');
-        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
-        // Test schema mirroring the application users table (timestamps handled automatically)
-        $this->pdo->exec("
-            CREATE TABLE users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name VARCHAR(100) NOT NULL,
-                email VARCHAR(255) NOT NULL UNIQUE,
-                password VARCHAR(255) NOT NULL,
-                role VARCHAR(50) DEFAULT 'student',
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT NULL,
-                deleted_at DATETIME DEFAULT NULL
-            )
-        ");
+        $this->mock_user_repository = new MockUserRepository();
     }
 
-    public function test_insert_and_hydrate_user_entity(): void
+    public function test_activate_user_success()
     {
-        $email = new Email('test@example.com');
-        $user = User::create('Test User', $email, 'password123');
-
-        // Note: Models never pass created_at/updated_at; DB defaults/triggers populate them
-        $stmt = $this->pdo->prepare("
-            INSERT INTO users (name, email, password, role)
-            VALUES (?, ?, ?, ?)
-        ");
-        $stmt->execute([
-            $user->get_name(),
-            (string) $user->get_email(),
-            $user->get_password(),
-            'student',
-        ]);
-
-        $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->execute(['test@example.com']);
-        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        $this->assertNotNull($row);
-        $hydrated = User::from_database($row);
-
-        $this->assertEquals('Test User', $hydrated->get_name());
-        $this->assertEquals('test@example.com', (string) $hydrated->get_email());
-        $this->assertTrue($hydrated->verify_password('password123'));
-    }
-}
-```
-
-### E2E Tests (tests/acceptance/)
-
-Test complete user flows with Codeception (PHP native).
-
-```php
-<?php
-
-namespace Tests\Acceptance;
-
-use Tests\AcceptanceTester;
-
-class LoginCest
-{
-    public function loginPageLoadsCorrectly(AcceptanceTester $I)
-    {
-        $I->amOnPage('/entrar');
-        $I->see('Login');
-        $I->seeElement('#email');
-        $I->seeElement('#password');
-        $I->seeElement('button[type="submit"]');
+        $email = new Email('inactive@example.com');
+        $user = User::create('Inactive User', $email, 'password123');
+        $user->set_active(false);
+        
+        $user = $this->mock_user_repository->save($user);
+        $use_case = new ActivateUserUseCase($this->mock_user_repository);
+        $user = $use_case->execute($user->get_id());
+        
+        $this->assertTrue($user->is_active());
     }
 }
 ```
@@ -142,16 +50,10 @@ class LoginCest
 
 ```bash
 # Unit tests only
-vendor/bin/phpunit tests/unit/
-
-# Integration tests only
-vendor/bin/phpunit tests/integration/
+docker compose exec app vendor/bin/phpunit tests/unit/
 
 # All PHPUnit tests with coverage
-composer test:coverage
-
-# E2E acceptance tests
-vendor/bin/codecept run acceptance
+docker compose exec app composer test:coverage
 ```
 
 ## File Structure
@@ -159,48 +61,25 @@ vendor/bin/codecept run acceptance
 ```
 tests/
 ├── bootstrap.php
-├── codeception.yml
-├── acceptance.suite.yml
 ├── unit/
 │   ├── domain/
-│   │   └── Identity/
+│   │   └── identity/
 │   │       ├── UserTest.php
 │   │       └── EmailTest.php
+|   ├── mocks/
+|   |   └── repositories/
+|   |       └── MockUserRepository.php
 │   └── usecases/
-│       └── Identity/
-│           └── AuthenticateUserUseCaseTest.php
-├── integration/
-│   └── persistence/
-│       └── User_modelTest.php
-├── acceptance/
-│   ├── LoginCest.php
-│   ├── DashboardCest.php
-│   └── LogoutCest.php
-└── _support/
-    ├── AcceptanceTester.php
-    └── Helper/
-        └── Acceptance.php
+│       └── admin/
+│           └── ActivateUserUseCaseTest.php
 ```
 
 ## Rules
 
-1. **Unit tests**: NO database, NO HTTP, use mocks/stubs for repositories.
-2. **Integration tests**: Use SQLite in-memory to test schema persistence and entity hydration.
-3. **Database Timestamps**: Models never persist `created_at` or `updated_at`. Test schemas must rely on `DEFAULT CURRENT_TIMESTAMP` or leave timestamps to triggers.
-4. **E2E tests**: Use Codeception for browser tests against actual application routes (e.g. `/entrar`).
-5. **One test class per source class**.
-6. **Test both success and failure scenarios**.
-7. **Use descriptive test method names**: `test_create_user_with_invalid_email_throws_exception`.
-8. **Use PSR-4 namespaces**: `app\domain\...` for domain classes and `Tests\Acceptance\` for Codeception.
-9. **Coverage requirement**: Automated tests MUST cover at least **80%** of application code.
-
----
-
-## Anti-Patterns
-
-❌ **Uppercase `Application\` in Namespaces**: Writing `use Application\Domain\...` instead of `use app\domain\...` (breaks PSR-4 composer autoloading).
-❌ **Raw SQL Assertions Without Hydration**: Testing persistence without verifying Domain Entity hydration (`from_database()`).
-❌ **Manual Timestamps in Test Inserts**: Manually passing `created_at` in insert queries as if models set them. Models NEVER persist timestamps.
-❌ **Stale Routes in Acceptance Tests**: Using legacy routes like `/autenticacao/login` instead of the configured route `/entrar`.
-❌ **Real Database Calls in Unit Tests**: Querying SQLite or MySQL in `tests/unit/` (mock repositories instead).
-
+1. Unit tests: NO database, NO HTTP.
+2. Repositories must be mocked and centralized in `tests/unit/mocks/repositories/`. Mocks must implement the exact methods defined in the interface, no more, no less.
+3. One test class per source class. Every UseCase must have its own 1:1 dedicated test file.
+4. Test both success and failure scenarios.
+5. Use descriptive test method names: `test_activate_user_not_found_throws_exception`.
+6. Use lowercase namespaces matching the directory structure: `tests\unit\usecases\admin`, `tests\unit\domain\identity`.
+7. **CRITICAL:** Tests use `classmap` autoloading. You MUST run `docker compose exec app composer dump-autoload` whenever a new test or mock file is created, moved, or renamed.

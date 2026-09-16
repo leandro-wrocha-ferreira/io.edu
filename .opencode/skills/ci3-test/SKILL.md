@@ -14,97 +14,34 @@ Test domain entities and use cases in isolation. No database, no HTTP.
 ```php
 <?php
 
-use Application\Domain\Identity\Email;
-use Application\Domain\Identity\User;
+namespace tests\unit\usecases\admin;
 
-class UserTest extends \PHPUnit\Framework\TestCase
+use app\domain\exceptions\NotFoundException;
+use app\domain\identity\Email;
+use app\domain\identity\User;
+use app\usecases\admin\ActivateUserUseCase;
+use tests\unit\mocks\repositories\MockUserRepository;
+
+class ActivateUserUseCaseTest extends \PHPUnit\Framework\TestCase
 {
-    public function test_create_user_with_valid_data()
-    {
-        $email = new Email('test@example.com');
-        $user = User::create('John', $email, 'password123');
-
-        $this->assertEquals('John', $user->get_name());
-        $this->assertEquals('test@example.com', (string) $user->get_email());
-        $this->assertTrue($user->verify_password('password123'));
-    }
-
-    public function test_create_user_with_invalid_email_throws_exception()
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        new Email('invalid-email');
-    }
-}
-```
-
-### Integration Tests (tests/integration/)
-
-Test models with real database (SQLite). Verify queries and persistence.
-
-```php
-<?php
-
-use Application\Domain\Identity\Email;
-use Application\Domain\Identity\User;
-
-class User_repositoryTest extends \PHPUnit\Framework\TestCase
-{
-    private $pdo;
+    private $mock_user_repository;
 
     protected function setUp(): void
     {
-        $this->pdo = new \PDO('sqlite::memory:');
-        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
-        $this->pdo->exec("
-            CREATE TABLE users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name VARCHAR(100) NOT NULL,
-                email VARCHAR(255) NOT NULL UNIQUE,
-                password VARCHAR(255) NOT NULL,
-                role VARCHAR(50) DEFAULT 'student',
-                created_at DATETIME,
-                updated_at DATETIME,
-                deleted_at DATETIME
-            )
-        ");
+        $this->mock_user_repository = new MockUserRepository();
     }
 
-    public function test_find_by_email_returns_user()
+    public function test_activate_user_success()
     {
-        // Insert test data
-        $this->pdo->exec("INSERT INTO users (name, email, password, role, created_at) VALUES ('Test', 'test@example.com', '" . password_hash('pass', PASSWORD_BCRYPT) . "', 'student', '2026-01-01 00:00:00')");
-
-        $stmt = $this->pdo->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->execute(['test@example.com']);
-        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        $this->assertNotNull($row);
-        $this->assertEquals('Test', $row['name']);
-    }
-}
-```
-
-### E2E Tests (tests/acceptance/)
-
-Test complete user flows with Codeception (PHP native).
-
-```php
-<?php
-
-namespace Tests\Acceptance;
-
-use Tests\AcceptanceTester;
-
-class LoginCest
-{
-    public function loginPageLoadsCorrectly(AcceptanceTester $I)
-    {
-        $I->amOnPage('/autenticacao/login');
-        $I->see('Login');
-        $I->seeElement('#email');
-        $I->seeElement('#password');
-        $I->seeElement('button[type="submit"]');
+        $email = new Email('inactive@example.com');
+        $user = User::create('Inactive User', $email, 'password123');
+        $user->set_active(false);
+        
+        $user = $this->mock_user_repository->save($user);
+        $use_case = new ActivateUserUseCase($this->mock_user_repository);
+        $user = $use_case->execute($user->get_id());
+        
+        $this->assertTrue($user->is_active());
     }
 }
 ```
@@ -113,16 +50,10 @@ class LoginCest
 
 ```bash
 # Unit tests only
-vendor/bin/phpunit tests/unit/
-
-# Integration tests only
-vendor/bin/phpunit tests/integration/
+docker compose exec app vendor/bin/phpunit tests/unit/
 
 # All PHPUnit tests with coverage
-composer test:coverage
-
-# E2E acceptance tests
-vendor/bin/codecept run acceptance
+docker compose exec app composer test:coverage
 ```
 
 ## File Structure
@@ -130,36 +61,25 @@ vendor/bin/codecept run acceptance
 ```
 tests/
 ├── bootstrap.php
-├── codeception.yml
-├── acceptance.suite.yml
 ├── unit/
 │   ├── domain/
-│   │   └── Identity/
+│   │   └── identity/
 │   │       ├── UserTest.php
 │   │       └── EmailTest.php
+|   ├── mocks/
+|   |   └── repositories/
+|   |       └── MockUserRepository.php
 │   └── usecases/
-│       └── Identity/
-│           └── AuthenticateUserUseCaseTest.php
-├── integration/
-│   └── persistence/
-│       └── User_modelTest.php
-├── acceptance/
-│   ├── LoginCest.php
-│   ├── DashboardCest.php
-│   └── LogoutCest.php
-└── _support/
-    ├── AcceptanceTester.php
-    └── Helper/
-        └── Acceptance.php
+│       └── admin/
+│           └── ActivateUserUseCaseTest.php
 ```
 
 ## Rules
 
-1. Unit tests: NO database, NO HTTP, use mocks for repositories
-2. Integration tests: use SQLite for database tests
-3. E2E tests: use Codeception for browser tests (PHP native, no Playwright)
-4. One test class per source class
-5. Test both success and failure scenarios
-6. Use descriptive test method names: `test_should_throw_exception_when_email_invalid`
-7. Use PSR-4 namespaces for test classes: `Tests\Acceptance\`, `Tests\Unit\`, etc.
-8. PHPUnit bootstrap loads Composer autoloader from `vendor/autoload.php`
+1. Unit tests: NO database, NO HTTP.
+2. Repositories must be mocked and centralized in `tests/unit/mocks/repositories/`. Mocks must implement the exact methods defined in the interface, no more, no less.
+3. One test class per source class. Every UseCase must have its own 1:1 dedicated test file.
+4. Test both success and failure scenarios.
+5. Use descriptive test method names: `test_activate_user_not_found_throws_exception`.
+6. Use lowercase namespaces matching the directory structure: `tests\unit\usecases\admin`, `tests\unit\domain\identity`.
+7. **CRITICAL:** Tests use `classmap` autoloading. You MUST run `docker compose exec app composer dump-autoload` whenever a new test or mock file is created, moved, or renamed.
