@@ -90,9 +90,9 @@ class Example_model extends MY_Model implements ExampleRepositoryInterface
 	 * Save (insert or update) an entity.
 	 *
 	 * @param Example $example
-	 * @return void
+	 * @return Example
 	 */
-	public function save(Example $example): void
+	public function save(Example $example): Example
 	{
 		$data = [
 			'name' => $example->get_name(),
@@ -104,6 +104,8 @@ class Example_model extends MY_Model implements ExampleRepositoryInterface
 			$new_id = $this->insert($data);
 			$example->set_id((int) $new_id);
 		}
+
+		return $example;
 	}
 
 	/**
@@ -130,11 +132,7 @@ class Example_model extends MY_Model implements ExampleRepositoryInterface
 5. **KISS Over GROUP_CONCAT**: Never use `GROUP_CONCAT`, `ANY_VALUE()`, or JSON string concatenations inside queries to fetch relations. Use clean single-table queries and dedicated relation helpers (`_hydrate_user_roles`, `_hydrate_batch_user_roles`).
 6. **Explicit Scopes Only**: Do not use global scopes (no `$before_get` arrays). Apply filters explicitly inside your repository methods by calling internal helpers (e.g., `$this->apply_tenant_filter()`).
 7. **No Namespaces**: CI3 models do NOT have a namespace. Use `use app\domain\...` for importing Domain classes.
-8. **Code Style**:
-   - Tab indentations (`.editorconfig`)
-   - PSR-12 bracket style (`{` on the next line for classes and methods)
-   - Mandatory English docblocks with `@param` and `@return`
-   - **No Vertical Alignment**: Never use extra spaces to align symbols like `=>` or `=`. Use exactly one space before and after the symbol to prevent noisy git diffs.
+8. **Global Style**: All style rules (PSR-12, docblocks, strict typing, vertical alignment, no single-letter variables) MUST follow the global conventions defined in `GEMINI.md`.
 
 ---
 
@@ -145,6 +143,5 @@ class Example_model extends MY_Model implements ExampleRepositoryInterface
 ❌ **`GROUP_CONCAT` for Relations**: Building complex multi-join SQL queries with `GROUP_CONCAT` and `ANY_VALUE` instead of using KISS relation hydration methods.
 ❌ **Global Magic Scopes**: Adding `$before_get` or global query interception hooks. Models must apply filters explicitly.
 ❌ **Untyped Parameters**: Leaving parameters untyped in method signatures or omitting proper Docblocks. Avoid untyped parameters and only use internal casting (e.g., `$id = (int) $id;`) when strictly necessary.
-❌ **Vertical Alignment**: Using extra spaces to align `=` or `=>` vertically in arrays or variable assignments.
-❌ **Single-Letter Variables**: Using single-letter variables (e.g., `$i`, `$k`, `$v`, `$u`) is strictly forbidden, even in loops or tests. Always use descriptive variable names (e.g., `$index`, `$user`, `$key`).
+❌ **Ignoring Global Styles**: Disregarding the global formatting and styling rules set forth in `GEMINI.md`.
 

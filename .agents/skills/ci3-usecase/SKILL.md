@@ -36,18 +36,16 @@ namespace app\usecases\admin;
 ```php
 <?php
 
-namespace app\usecases\identity;
+namespace app\usecases\admin;
 
-use app\domain\identity\Email;
+use app\domain\exceptions\NotFoundException;
 use app\domain\identity\User;
-use app\domain\exceptions\UnauthorizedException;
-use app\domain\exceptions\ForbiddenException;
-use app\factories\Model_factory;
+use app\domain\identity\UserRepositoryInterface;
 
 /**
- * Use case for authenticating a user in the system.
+ * Use case for activating a user.
  */
-class AuthenticateUserUseCase
+class ActivateUserUseCase
 {
     /** @var \app\domain\identity\UserRepositoryInterface */
     private $user_repository;
@@ -55,87 +53,49 @@ class AuthenticateUserUseCase
     /**
      * Constructor.
      *
-     * @param \app\domain\identity\UserRepositoryInterface|null $repository Repository for testing (optional)
+     * @param \app\domain\identity\UserRepositoryInterface $user_repository
      */
-    public function __construct($repository = null)
+    public function __construct(UserRepositoryInterface $user_repository)
     {
-        if ($repository !== null) {
-            $this->user_repository = $repository;
-        } else {
-            $this->user_repository = Model_factory::make('user_model');
-        }
+        $this->user_repository = $user_repository;
     }
 
     /**
-     * Execute user authentication.
+     * Activate the user.
      *
-     * @param string $email User email
-     * @param string $password Plain text password
-     * @return User Authenticated user entity
-     * @throws UnauthorizedException When credentials are invalid
-     * @throws ForbiddenException When account is deactivated
+     * @param int $user_id User ID
+     * @return User
+     * @throws NotFoundException When user not found
      */
-    public function execute(string $email, string $password): User
+    public function execute(int $user_id): User
     {
-        $user = $this->user_repository->find_by_email(new Email($email));
-
+        $user = $this->user_repository->find_by_id($user_id);
         if ($user === null) {
-            throw new UnauthorizedException("Credenciais inválidas");
+            throw new NotFoundException("User not found");
         }
 
-        if ($user->is_deleted()) {
-            throw new ForbiddenException("Conta desativada");
-        }
-
-        if (!$user->verify_password($password)) {
-            throw new UnauthorizedException("Credenciais inválidas");
-        }
-
-        return $user;
+        $user->set_active(true);
+        return $this->user_repository->save($user);
     }
 }
 ```
 
-## Composition & Model Factory Pattern
-
-The logical dependency of a Use Case is **always** the Domain Repository Interface (`UserRepositoryInterface`). 
-
-`Model_factory` is an infrastructure composition helper used solely as a default constructor fallback when no repository implementation is explicitly injected:
-
-```php
-use app\domain\identity\UserRepositoryInterface;
-use app\factories\Model_factory;
-
-// Inside use case constructor:
-public function __construct(?UserRepositoryInterface $repository = null)
-{
-    $this->user_repository = $repository ?? Model_factory::make('user_model');
-}
-```
-
-> [!IMPORTANT]
-> **Boundary Rule**: `Model_factory` belongs to the Infrastructure/Factory layer (`app\factories\`). It MUST NEVER be referenced or used inside the Domain layer (`app\domain\`).
-
 ## Rules
 
-1. **Logical Dependency**: Use Cases depend on Domain Repository Interfaces, accepting them in the constructor for testability.
-2. **Infrastructure Fallback**: Use `Model_factory::make('model_name')` solely for constructor default assignment.
-3. **Orchestration Only**: Use Cases orchestrate business rules and domain operations; they do NOT contain UI logic or direct SQL.
-4. **Single Responsibility**: One Use Case per business action with a standard `execute()` method.
-5. **Throw Semantic Domain Exceptions**: Always throw semantic exceptions from `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`). Never throw generic `\RuntimeException`.
-6. **Return Domain Entities**: Return hydrated Domain Entities or DTOs, not raw database associative arrays.
-7. **All Docblocks in English**: Classes, methods, `@param`, `@return`, and `@throws` MUST be in English.
-8. **PSR-12**: Opening braces `{` on the next line for classes and methods.
-9. **Namespaces & Paths**: Directory lowercase (`usecases/<context>/`), file PascalCase (`AuthenticateUserUseCase.php`).
+1. **Logical Dependency**: Use Cases depend on Domain Repository Interfaces via STRICT constructor dependency injection. (No more optional parameters or Model_factory fallbacks inside the Use Case itself).
+2. **Orchestration Only**: Use Cases orchestrate business rules and domain operations; they do NOT contain UI logic or direct SQL.
+3. **Single Responsibility**: One Use Case per business action with a standard `execute()` method.
+4. **Throw Semantic Domain Exceptions**: Always throw semantic exceptions from `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`). Never throw generic `\RuntimeException`.
+5. **Return Domain Entities**: Return hydrated Domain Entities or DTOs, not raw database associative arrays.
+6. **Global Style**: All style rules (PSR-12, docblocks, no single-letter variables) MUST follow the global conventions defined in `GEMINI.md`.
 
 ---
 
 ## Anti-Patterns
 
 ❌ **Throwing `\RuntimeException`**: Throwing generic unclassified exceptions instead of semantic exceptions from `app\domain\exceptions\`.
-❌ **Leaking `Model_factory` into Domain**: Referencing or calling `Model_factory` inside Entities or Value Objects.
-❌ **Direct `get_instance()` Coupling**: Calling `$CI =& get_instance()` directly inside Use Cases instead of using constructor dependency injection with `Model_factory` fallback.
+❌ **Direct `get_instance()` Coupling**: Calling `$CI =& get_instance()` directly inside Use Cases instead of using constructor dependency injection.
+❌ **Using Model_factory internally**: Instantiating repositories inside the Use Case constructor with `Model_factory::make()`. Dependency must be injected from the outside.
 ❌ **Returning Raw Arrays**: Returning raw database rows or untyped associative arrays from `execute()` when representing domain models.
 ❌ **Multiple Business Actions in One Use Case**: Creating a monolithic service with multiple unrelated public methods instead of dedicated single-action Use Cases.
-❌ **Single-Letter Variables**: Using single-letter variables (e.g., `$i`, `$k`, `$v`, `$u`) is strictly forbidden, even in loops or tests. Always use descriptive variable names (e.g., `$index`, `$user`, `$key`).
 

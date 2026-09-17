@@ -81,7 +81,6 @@ O projeto usa Composer PSR-4 para autoloading:
 | Domain | `app\domain\<context>` | `app\domain\identity\User` |
 | Use Cases | `app\usecases\<context>` | `app\usecases\identity\AuthenticateUserUseCase` |
 | Factories | `app\factories` | `app\factories\Model_factory` |
-| Tests | `Tests\<Type>` | `Tests\Acceptance\LoginCest` |
 
 ### Notas Importantes
 
@@ -150,126 +149,29 @@ $data = [
 ];
 ```
 
-## Domain Patterns
+## Presentation Layer (Controllers)
 
-### Entity
+Controller architecture, routing rules, and presentation flow are strictly delegated to the `ci3-controller` skill.
+**Before writing, modifying, or reviewing any controllers, you MUST read:**
+`.agents/skills/ci3-controller/SKILL.md`
 
-```php
-// application/domain/identity/User.php
-namespace app\domain\identity;
+## Domain Layer
 
-class User
-{
-    private $id;
-    private $name;
-    private $email;  // Value Object
+Domain rules (Entities, Value Objects, Exceptions, Repository Interfaces) are strictly delegated to the `ci3-domain` skill.
+**Before writing, modifying, or reviewing any domain code, you MUST read:**
+`.agents/skills/ci3-domain/SKILL.md`
 
-    public static function create(string $name, Email $email, string $password): self
-    {
-        $user = new self();
-        $user->name = $name;
-        $user->email = $email;
-        $user->password = password_hash($password, PASSWORD_BCRYPT);
-        $user->created_at = new \DateTime();
-        return $user;
-    }
-}
-```
+## Use Case Layer
 
-### Value Object
+Use Case orchestration and dependency injection rules are strictly delegated to the `ci3-usecase` skill.
+**Before writing, modifying, or reviewing any use cases, you MUST read:**
+`.agents/skills/ci3-usecase/SKILL.md`
 
-```php
-// application/domain/identity/Email.php
-namespace app\domain\identity;
+## Infrastructure Layer (Models)
 
-class Email
-{
-    private $value;
-
-    public function __construct(string $email)
-    {
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException("Email inválido");
-        }
-        $this->value = $email;
-    }
-
-    public function __toString(): string
-    {
-        return $this->value;
-    }
-}
-```
-
-### Repository Interface
-
-```php
-// application/domain/identity/UserRepositoryInterface.php
-namespace app\domain\identity;
-
-interface UserRepositoryInterface
-{
-    public function find_by_id($id): ?User;
-    public function find_by_email(Email $email): ?User;
-    public function save(User $user): void;
-    public function delete(array $where): bool;
-}
-```
-
-### Model Factory
-
-```php
-// application/factories/Model_factory.php
-namespace app\factories;
-
-class Model_factory
-{
-    public static function make(string $name)
-    {
-        $CI =& get_instance();
-        $CI->load->model($name);
-        return $CI->{$name};
-    }
-}
-```
-
-## Use Case Pattern
-
-```php
-// application/usecases/identity/AuthenticateUserUseCase.php
-namespace app\usecases\identity;
-
-use app\domain\identity\Email;
-use app\domain\identity\User;
-use app\domain\exceptions\UnauthorizedException;
-use app\factories\Model_factory;
-
-class AuthenticateUserUseCase
-{
-    private $user_repository;
-
-    public function __construct($repository = null)
-    {
-        if ($repository !== null) {
-            $this->user_repository = $repository;
-        } else {
-            $this->user_repository = Model_factory::make('user_model');
-        }
-    }
-
-    public function execute(string $email, string $password): User
-    {
-        $user = $this->user_repository->find_by_email(new Email($email));
-        if ($user === null) {
-            throw new UnauthorizedException("Credenciais inválidas");
-        }
-        if (!$user->verify_password($password)) {
-            throw new UnauthorizedException("Credenciais inválidas");
-        }
-        return $user;
-    }
-}
-```
+Database persistence, Query Builder usage, and explicit filtering are strictly delegated to the `ci3-model` skill.
+**Before writing, modifying, or reviewing any models, you MUST read:**
+`.agents/skills/ci3-model/SKILL.md`
 
 ## Auth Pattern
 
@@ -352,46 +254,16 @@ docker compose down            # stop containers
 ## Dev commands
 
 ```bash
-composer install          # install deps (phpunit 4-9, vfsstream, bootstrap, codeception)
-composer dump-autoload    # regenerate PSR-4 autoloader after adding/changing classes
-composer test:coverage    # run tests with coverage (sqlite config)
-vendor/bin/phpunit        # run all PHPUnit tests (unit + integration)
-vendor/bin/codecept run acceptance  # run Codeception E2E tests
+docker compose exec app composer install          # install deps
+docker compose exec app composer dump-autoload    # regenerate autoloader (required after creating tests/mocks via classmap)
+docker compose exec app vendor/bin/phpunit tests/unit/  # run unit tests
 ```
 
 ## Testing Strategy
 
-### Unit Tests
-
-- Testam domínio e use cases isolados
-- Sem banco, sem HTTP
-- Mocks para repositories
-- Pasta: `tests/unit/`
-
-### Integration Tests
-
-- Testam models com banco real (SQLite)
-- Verificam queries e persistência
-- Pasta: `tests/integration/`
-
-### E2E Tests (Codeception)
-
-- Codeception para fluxos completos (PHP nativo)
-- Login, navegação, CRUD
-- Pasta: `tests/acceptance/`
-
-### Cobertura de Testes (Coverage)
-
-- Os testes automatizados DEVEM cobrir no mínimo **80%** do código da aplicação (Domain, Use Cases, Core e Models).
-
-### Comandos
-
-```bash
-vendor/bin/phpunit                          # rodar todos os testes PHPUnit
-vendor/bin/phpunit tests/unit/              # só unit
-vendor/bin/phpunit tests/integration/       # só integration
-vendor/bin/codecept run acceptance           # e2e
-```
+Testing rules (Unit Tests, 1:1 Use Case mapping, Shared Mocks, classmap namespaces) are strictly delegated to the `ci3-test` skill.
+**Before writing, modifying, or reviewing any tests, you MUST read:**
+`.agents/skills/ci3-test/SKILL.md`
 
 ## Conventions
 
@@ -401,7 +273,7 @@ vendor/bin/codecept run acceptance           # e2e
 - **Database:** `mysqli` driver, Query Builder enabled; credentials read from env vars (`DB_HOSTNAME`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, `DB_DRIVER`) with localhost fallback
 - **Autoloads:** database, migration, form_validation, and session libraries auto-loaded; url, form, and response helpers auto-loaded (`application/config/autoload.php`)
 - **JSON & File Responses:** controllers MUST send JSON responses using `json_response($data, $status_code)` from `response_helper.php`. For file downloads (such as PDF/DOCX), use dedicated response helpers (e.g. `response_pdf()`).
-- **Composer PSR-4:** `app\` → `application/`, `Tests\` → `tests/`
+- **Composer PSR-4:** `app\` → `application/`
 - **Routing:** `translate_uri_dashes` is OFF; controller methods map directly to URL segments
 - **Frontend:** Bootstrap 5.3.8 (via composer); CSS/JS copied to `public/assets/` on install/update
 - **UI Animations**: Todas as views de página DEVEM aplicar as classes de animação de entrada (`animate-fade-up` no `.page-header` e `.animate-fade-up.animate-delay-1` nos contêineres principais de cards/formulários/tabelas).

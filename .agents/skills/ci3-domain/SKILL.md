@@ -216,9 +216,9 @@ interface UserRepositoryInterface
      * Save (insert or update) a user.
      *
      * @param User $user User entity to persist
-     * @return void
+     * @return User
      */
-    public function save(User $user): void;
+    public function save(User $user): User;
 
     /**
      * Delete users matching specified filter conditions.
@@ -232,18 +232,13 @@ interface UserRepositoryInterface
 
 ## Rules
 
-1. Domain classes MUST NOT depend on CI3 (no `get_instance()`, no `CI_Model`).
-2. Domain exceptions inherit from `app\domain\exceptions\AppException`.
-3. Value Object constructors throw `\InvalidArgumentException` for invalid scalar arguments.
-4. Use `private` properties with getters (no setters for immutable fields).
-5. Factory methods: `create()` for new entities, `from_database()` for hydration.
-6. Value Objects must be immutable and implement `__toString()`.
-7. Repository Interfaces define strict contracts with fully typed parameters and return types (e.g., `find_by_id(int|string $id)`, `delete(array $where): bool`).
-8. Models never persist `created_at` or `updated_at` (database triggers manage timestamps).
-9. All classes and methods MUST have docblocks with `@param` and `@return` — **always in English**.
-10. Opening braces `{` on the NEXT line for classes and methods (PSR-12).
-11. Use PSR-4 namespaces: `app\domain\<BoundedContext>\`.
-12. Directories are lowercase (`domain/`, `identity/`, `exceptions/`) and files are PascalCase (`User.php`, `Email.php`).
+1. Domain classes MUST NOT depend on CI3 (no `get_instance()`, no `CI_Model`)
+2. Domain exceptions inherit from `app\domain\exceptions\AppException`
+3. Use `private` properties with getters (no setters for immutable fields)
+4. Factory methods: `create()` for new entities, `from_database()` for hydration
+5. Value Objects must be immutable and implement `__toString()`
+6. Repository Interfaces define contracts, NOT implementations
+7. All style rules (PSR-12, docblocks, strict typing) MUST follow the global conventions defined in `GEMINI.md`.
 
 ---
 
