@@ -42,3 +42,6 @@ If no files specified, ask the user which files to review.
 
 > [!IMPORTANT]
 > **Strictly Grounded Findings**: Do NOT invent violations or report subjective preferences. Only report an issue when it directly maps to an explicit rule found in the fetched guideline document. If a component adheres to the guidelines or falls outside their scope, do not invent artificial findings.
+
+> [!WARNING]
+> **Context Translation (CodeIgniter 3 vs React)**: The fetched guidelines were written with the React/Next.js ecosystem in mind. Since this project is a raw CodeIgniter 3 application using HTML5, PHP, and native JS/AJAX, you MUST translate framework-specific terminology into their native equivalents before reporting. For example, instead of demanding `htmlFor`, require `for`; instead of `<Link>`, require `<a>`; instead of camelCase events like `onKeyDown`, require `onkeydown`; instead of `spellCheck={false}`, require `spellcheck="false"`. Do not suggest React components or JSX syntax.

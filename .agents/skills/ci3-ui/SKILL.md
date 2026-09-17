@@ -17,10 +17,11 @@ Este projeto usa um sistema de UI centralizado que suporta Light e Dark Mode atr
    - Use as variáveis globais (`--bg-main`, `--bg-card`, `--text-main`, `--brand-primary`, etc.) ao invés de cores hexadecimais (ex: `#ffffff` ou `#333`).
    - Você pode usar as classes utilitárias já existentes como `.bg-theme-main`, `.bg-theme-card`, `.text-theme-heading`, `.border-theme`.
 
-3. **Reutilização de Padrões de Botões e UI (Button Standardization)**:
-   - Se um botão ou elemento visual for utilizado mais de uma vez com o mesmo padrão, você DEVE centralizar seus estilos e nomear o tipo de botão no `theme.css` (ex: `.btn-theme-primary`, `.btn-theme-secondary`, `.btn-theme-outline`).
+3. **Reutilização de Padrões de Botões e UI (Button Standardization) e Estrutura de Pastas**:
+   - Se um botão ou elemento visual for utilizado mais de uma vez com o mesmo padrão, você DEVE centralizar seus estilos e nomeá-lo padronizado (ex: `.btn-theme-primary`, `.btn-theme-secondary`).
+   - **Componentes Gerais**: Estilos de componentes agnósticos (compartilhados) devem ficar em `public/assets/css/shared/components/` para evitar que o `theme.css` fique gigantesco e para que não fiquem restritos à área de `admin/`.
+   - **Componentes Específicos**: Estilos individuais para páginas ou áreas específicas devem ser isolados. Por exemplo, se uma classe exige um padrão único apenas no Dashboard do Admin, crie o arquivo `public/assets/css/admin/pages/dashboard.css` e defina as modificações lá.
    - Evite adicionar estilos inline ou classes ad-hoc repetitivas. Reutilize as camadas e classes criadas.
-   - Padronize elementos consistentes para gerar coesão.
 
 4. **Suporte a Dark Mode**:
    - Lembre-se que o atributo `data-theme="dark"` (gerenciado na raiz do HTML) inverte as variáveis de cor.
