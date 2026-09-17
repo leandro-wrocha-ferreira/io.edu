@@ -173,6 +173,12 @@ Database persistence, Query Builder usage, and explicit filtering are strictly d
 **Before writing, modifying, or reviewing any models, you MUST read:**
 `.agents/skills/ci3-model/SKILL.md`
 
+## UI Design Layer
+
+UI components, styling, centralized palette (Light/Dark mode), and layout rules are strictly delegated to the `ci3-ui` skill.
+**Before writing, modifying, or reviewing any UI code, you MUST read:**
+`.agents/skills/ci3-ui/SKILL.md`
+
 ## Auth Pattern
 
 - **Session-based** com CI3 session (driver: database)
