@@ -109,7 +109,7 @@ class User
 
 ### Docblocks
 
-Todas as classes, métodos e parâmetros devem ter docblocks:
+Todas as classes, métodos e parâmetros devem ter docblocks (com exceção das migrations, que não precisam ter docblocks por não fazerem parte da criação da aplicação):
 
 ```php
 /**
@@ -240,7 +240,7 @@ $route['aluno/painel'] = 'student/dashboard/index';
 
 - **Tabelas:** plural, snake_case, sem prefixo (`users`, `courses`, `lessons`)
 - **Colunas padrão:** `id` (INT unsigned AI), `created_at`, `updated_at`, `deleted_at` (soft delete)
-- **Migrations:** timestamp `YYYYMMDDHHIISS_name`, classe `Migration_Create_<table>`
+- **Migrations:** timestamp `YYYYMMDDHHIISS_name`, classe `Migration_Create_<table>`. Migrations não precisam ter docblocks, por não fazerem parte da criação da aplicação.
 - **Foreign keys:** migration separada, naming `fk_table_column`
 - **Driver:** `mysqli`, Query Builder habilitado
 
@@ -286,7 +286,7 @@ Testing rules (Unit Tests, 1:1 Use Case mapping, Shared Mocks, classmap namespac
 - **Cobertura de Testes:** Mínimo de 80% de cobertura de código em testes automatizados.
 - **Hooks:** habilitados para middleware de autenticação via `post_controller_constructor`
 - **PSR-12:** `{` on next line for classes and methods
-- **Docblocks:** obrigatórios em todas as classes e métodos
+- **Docblocks:** obrigatórios em todas as classes e métodos (com exceção das migrations, que não precisam ter docblocks por não fazerem parte da criação da aplicação)
 - **Directories:** lowercase para manter convenção CI3 (`domain/`, `usecases/`, `factories/`)
 - **Files:** PascalCase para classes namespaced (obrigação PSR-4)
 - **Comandos Git & Push:** Todas as operações do Git (status, add, commit, diff, log, push) DEVEM SEMPRE ser executadas utilizando o comando `git-leandro` (ex: `git-leandro push -u origin master`).

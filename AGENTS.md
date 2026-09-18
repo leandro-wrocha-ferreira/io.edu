@@ -116,7 +116,7 @@ class User
 
 ### Docblocks
 
-All classes, methods and parameters MUST have docblocks — **always in English**:
+All classes, methods and parameters MUST have docblocks — **always in English** (exception: migrations do not need docblocks, as they are not part of application runtime/creation code):
 
 ```php
 /**
@@ -351,7 +351,7 @@ $route['aluno/painel'] = 'student/dashboard/index';
 - **Tabelas:** plural, snake_case, sem prefixo (`users`, `courses`, `lessons`)
 - **Colunas padrão:** `id` (INT unsigned AI), `created_at`, `updated_at`, `deleted_at` (soft delete)
 - **Timestamps:** `created_at` e `updated_at` são gerenciados por **triggers do banco** (INSERT/UPDATE). Models NÃO devem setar essas colunas.
-- **Migrations:** timestamp `YYYYMMDDHHIISS_name`, classe `Migration_Create_<table>`
+- **Migrations:** timestamp `YYYYMMDDHHIISS_name`, classe `Migration_Create_<table>`. Migrations não precisam ter docblocks, por não fazerem parte da criação da aplicação.
 - **Foreign keys:** migration separada, naming `fk_table_column`
 - **Driver:** `mysqli`, Query Builder habilitado
 
@@ -426,7 +426,7 @@ vendor/bin/codecept run acceptance           # e2e
 - **UI Animations**: All page views MUST apply entry animation classes (`animate-fade-up` on `.page-header` and `.animate-fade-up.animate-delay-1` on main card/form containers).
 - **Hooks:** enabled for auth middleware via `post_controller_constructor`
 - **PSR-12:** `{` on next line for classes and methods
-- **Docblocks:** mandatory on all classes and methods — **always in English**
+- **Docblocks:** mandatory on all classes and methods — **always in English** (except migrations, which do not need docblocks as they are not part of application runtime/creation code)
 - **IDE Helper:** `_ide_helper.php` at project root provides type resolution for CI3 core classes. Do NOT add `@property` annotations to individual models or controllers — they are inherited from the base class stubs.
 - **Directories:** lowercase para manter convenção CI3 (`domain/`, `usecases/`, `factories/`)
 - **Files:** PascalCase para classes namespaced (obrigação PSR-4)
