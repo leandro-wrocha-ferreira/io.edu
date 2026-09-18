@@ -35,25 +35,6 @@ class Middleware
         'admin/perfis/novo' => 'roles.create',
         'admin/perfis/editar' => 'roles.edit',
         'admin/perfis/excluir' => 'roles.delete',
-
-        // Cursos
-        'admin/cursos' => 'courses.view',
-        'admin/cursos/novo' => 'courses.create',
-        'admin/cursos/editar' => 'courses.edit',
-        'admin/cursos/excluir' => 'courses.delete',
-
-        // Turmas
-        'admin/turmas' => 'classes.view',
-        'admin/turmas/novo' => 'classes.create',
-        'admin/turmas/nova' => 'classes.create',
-        'admin/turmas/editar' => 'classes.edit',
-        'admin/turmas/excluir' => 'classes.delete',
-
-        // Provedores de Vídeo
-        'admin/provedores-video' => 'video_providers.view',
-        'admin/provedores-video/novo' => 'video_providers.create',
-        'admin/provedores-video/editar' => 'video_providers.edit',
-        'admin/provedores-video/excluir' => 'video_providers.delete',
     ];
 
     /**
@@ -71,7 +52,7 @@ class Middleware
         $CI->load->library('session');
 
         $seg1 = $CI->uri->segment(1);
-        $public_routes = ['entrar', 'sair', 'welcome'];
+        $public_routes = ['entrar', 'sair'];
 
         if (in_array($seg1, $public_routes)) {
             return;

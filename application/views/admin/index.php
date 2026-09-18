@@ -93,7 +93,7 @@
 					</li>
 					<li class="nav-item" role="none">
 						<a class="nav-link <?= $this->uri->segment(2) == 'cursos' ? 'active' : '' ?>"
-						   href="<?= base_url('admin/cursos') ?>"
+						   href="#"
 						   role="menuitem"
 						   <?= $this->uri->segment(2) == 'cursos' ? 'aria-current="page"' : '' ?>>
 							<i class="bi bi-journal-bookmark" aria-hidden="true"></i> Gestão de Cursos
@@ -101,22 +101,10 @@
 					</li>
 					<li class="nav-item" role="none">
 						<a class="nav-link <?= $this->uri->segment(2) == 'turmas' ? 'active' : '' ?>"
-						   href="<?= base_url('admin/turmas') ?>"
+						   href="#"
 						   role="menuitem"
 						   <?= $this->uri->segment(2) == 'turmas' ? 'aria-current="page"' : '' ?>>
 							<i class="bi bi-mortarboard" aria-hidden="true"></i> Gestão de Turmas
-						</a>
-					</li>
-
-					<li class="nav-item nav-section" role="none">
-						<span class="nav-section-title">Configurações</span>
-					</li>
-					<li class="nav-item" role="none">
-						<a class="nav-link <?= $this->uri->segment(2) == 'provedores-video' ? 'active' : '' ?>"
-						   href="<?= base_url('admin/provedores-video') ?>"
-						   role="menuitem"
-						   <?= $this->uri->segment(2) == 'provedores-video' ? 'aria-current="page"' : '' ?>>
-							<i class="bi bi-play-btn" aria-hidden="true"></i> Provedores de Vídeo
 						</a>
 					</li>
 				</ul>
