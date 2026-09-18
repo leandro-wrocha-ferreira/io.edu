@@ -289,6 +289,7 @@ Testing rules (Unit Tests, 1:1 Use Case mapping, Shared Mocks, classmap namespac
 - **Docblocks:** obrigatórios em todas as classes e métodos (com exceção das migrations, que não precisam ter docblocks por não fazerem parte da criação da aplicação)
 - **Directories:** lowercase para manter convenção CI3 (`domain/`, `usecases/`, `factories/`)
 - **Files:** PascalCase para classes namespaced (obrigação PSR-4)
+- **Execução PHP e Ferramentas CLI:** O PHP, Composer e PHPUnit DEVEM SEMPRE ser executados dentro do container Docker (`docker compose exec app ...`), NUNCA localmente no host.
 - **Comandos Git & Push:** Todas as operações do Git (status, add, commit, diff, log, push) DEVEM SEMPRE ser executadas utilizando o comando `git-leandro` (ex: `git-leandro push -u origin master`).
 
 ## Gotchas

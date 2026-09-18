@@ -430,6 +430,7 @@ vendor/bin/codecept run acceptance           # e2e
 - **IDE Helper:** `_ide_helper.php` at project root provides type resolution for CI3 core classes. Do NOT add `@property` annotations to individual models or controllers — they are inherited from the base class stubs.
 - **Directories:** lowercase para manter convenção CI3 (`domain/`, `usecases/`, `factories/`)
 - **Files:** PascalCase para classes namespaced (obrigação PSR-4)
+- **PHP & CLI Execution:** PHP, Composer, and PHPUnit MUST ALWAYS be executed inside the Docker container (`docker compose exec app ...`), NEVER locally on the host machine.
 - **Git Commands & Push:** All Git operations (status, add, commit, diff, log, push) MUST ALWAYS be executed using the `git-leandro` command (e.g. `git-leandro push -u origin master`).
 
 ## Gotchas
