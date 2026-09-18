@@ -64,11 +64,12 @@ class MockUserRepository implements UserRepositoryInterface
      * Save (add) a user to the in-memory list.
      *
      * @param User $user User entity
-     * @return void
+     * @return User
      */
-    public function save(User $user): void
+    public function save(User $user): User
     {
         $this->users[] = $user;
+        return $user;
     }
 
     /**
