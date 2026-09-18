@@ -35,30 +35,19 @@ class Migration_Create_logs extends CI_Migration
 			],
 			'created_at' => [
 				'type' => 'DATETIME',
-				'null' => TRUE
+				'null' => FALSE
 			]
 		]);
 		
 		$this->dbforge->add_key('id', TRUE);
 		$this->dbforge->create_table('logs');
 
-		// Adicionando trigger para o created_at como estipulado nas diretrizes do projeto
-		$trigger = "
-			CREATE TRIGGER trg_logs_before_insert
-			BEFORE INSERT ON logs
-			FOR EACH ROW
-			BEGIN
-				IF NEW.created_at IS NULL THEN
-					SET NEW.created_at = CURRENT_TIMESTAMP;
-				END IF;
-			END;
-		";
-		$this->db->query($trigger);
+		$this->db->query("ALTER TABLE `logs` MODIFY `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP");
 	}
 
 	public function down()
 	{
-		$this->db->query("DROP TRIGGER IF EXISTS trg_logs_before_insert");
+		// No trigger to drop
 		$this->dbforge->drop_table('logs');
 	}
 }
