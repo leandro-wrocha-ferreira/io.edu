@@ -14,18 +14,7 @@ use app\domain\identity\UserRepositoryInterface;
  */
 class MockUserRepository implements UserRepositoryInterface
 {
-    public array $users = [];
-
-    /**
-     * Set the internal users array.
-     *
-     * @param array $users List of User entities
-     * @return void
-     */
-    public function set_users(array $users)
-    {
-        $this->users = $users;
-    }
+    private array $users = [];
 
     /**
      * Find a user by ID.
@@ -86,18 +75,13 @@ class MockUserRepository implements UserRepositoryInterface
     /**
      * Delete users matching conditions.
      *
-     * @param array $where Filter conditions
-     * @return bool
+     * @param User $user Filter conditions
+     * @return User
      */
-    public function delete(array $where): bool
+    public function delete(User $user): User
     {
-        $id = $where['id'] ?? null;
-        if ($id !== null) {
-            $this->users = array_values(array_filter($this->users, function ($user) use ($id) {
-                return $user->get_id() !== (int) $id;
-            }));
-        }
-        return true;
+        $user->delete();
+        return $this->save($user);
     }
 
     /**

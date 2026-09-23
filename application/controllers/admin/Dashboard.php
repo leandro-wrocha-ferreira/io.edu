@@ -2,6 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use app\usecases\admin\CountStudentsUseCase;
+use app\factories\ModelFactory;
 
 /**
  * Dashboard Controller (Admin)
@@ -16,7 +17,6 @@ class Dashboard extends MY_Controller
 	public function __construct()
 	{
 		parent::__construct();
-		$this->load->model('user_model');
 	}
 
 	/**
@@ -28,12 +28,12 @@ class Dashboard extends MY_Controller
 	 */
 	public function index()
 	{
-		$count_use_case = new CountStudentsUseCase();
+		$count_use_case = new CountStudentsUseCase(ModelFactory::make('user_model'));
 
 		$data = [
-			'page_name'      => 'admin/dashboard',
-			'user_name'      => $this->session->userdata('user_name'),
-			'title'          => 'Painel Administrativo',
+			'page_name' => 'admin/dashboard',
+			'user_name' => $this->session->userdata('user_name'),
+			'title' => 'Painel Administrativo',
 			'total_students' => $count_use_case->execute(),
 		];
 

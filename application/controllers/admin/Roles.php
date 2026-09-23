@@ -1,13 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-use app\usecases\admin\ListRolesUseCase;
 use app\usecases\admin\ListPaginatedRolesUseCase;
 use app\usecases\admin\GetRoleUseCase;
 use app\usecases\admin\CreateRoleUseCase;
 use app\usecases\admin\UpdateRoleUseCase;
 use app\usecases\admin\DeleteRoleUseCase;
 use app\usecases\admin\ListPermissionsUseCase;
+use app\factories\ModelFactory;
 
 /**
  * Roles Controller (Admin)
@@ -22,8 +22,6 @@ class Roles extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('role_model');
-        $this->load->model('permission_model');
     }
 
     /**

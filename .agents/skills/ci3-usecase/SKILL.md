@@ -40,62 +40,64 @@ namespace app\usecases\admin;
 
 use app\domain\exceptions\NotFoundException;
 use app\domain\identity\User;
-use app\domain\identity\UserRepositoryInterface;
+use app\domain\identity\repositories\UserRepositoryInterface;
 
 /**
  * Use case for activating a user.
  */
 class ActivateUserUseCase
 {
-    /** @var \app\domain\identity\UserRepositoryInterface */
-    private $user_repository;
+	/** @var UserRepositoryInterface */
+	private UserRepositoryInterface $user_repository;
 
-    /**
-     * Constructor.
-     *
-     * @param \app\domain\identity\UserRepositoryInterface $user_repository
-     */
-    public function __construct(UserRepositoryInterface $user_repository)
-    {
-        $this->user_repository = $user_repository;
-    }
+	/**
+	 * Constructor.
+	 *
+	 * @param UserRepositoryInterface $user_repository
+	 */
+	public function __construct(UserRepositoryInterface $user_repository)
+	{
+		$this->user_repository = $user_repository;
+	}
 
-    /**
-     * Activate the user.
-     *
-     * @param int $user_id User ID
-     * @return User
-     * @throws NotFoundException When user not found
-     */
-    public function execute(int $user_id): User
-    {
-        $user = $this->user_repository->find_by_id($user_id);
-        if ($user === null) {
-            throw new NotFoundException("User not found");
-        }
+	/**
+	 * Activate the user.
+	 *
+	 * @param int $user_id User ID
+	 * @return User
+	 * @throws NotFoundException When user not found
+	 */
+	public function execute(int $user_id): User
+	{
+		$user = $this->user_repository->find_by_id($user_id);
+		if ($user === null) {
+			throw new NotFoundException("User not found");
+		}
 
-        $user->set_active(true);
-        return $this->user_repository->save($user);
-    }
+		$user->activate();
+		return $this->user_repository->save($user);
+	}
 }
 ```
 
 ## Rules
 
-1. **Logical Dependency**: Use Cases depend on Domain Repository Interfaces via STRICT constructor dependency injection. (No more optional parameters or Model_factory fallbacks inside the Use Case itself).
-2. **Orchestration Only**: Use Cases orchestrate business rules and domain operations; they do NOT contain UI logic or direct SQL.
-3. **Single Responsibility**: One Use Case per business action with a standard `execute()` method.
-4. **Throw Semantic Domain Exceptions**: Always throw semantic exceptions from `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`). Never throw generic `\RuntimeException`.
-5. **Return Domain Entities**: Return hydrated Domain Entities or DTOs, not raw database associative arrays.
-6. **Global Style**: All style rules (PSR-12, docblocks, no single-letter variables) MUST follow the global conventions defined in `GEMINI.md`.
+1. **Logical Dependency**: Use Cases depend on Domain Repository Interfaces (`app\domain\<context>\repositories\...`) via STRICT constructor dependency injection. (No optional parameters or ModelFactory fallbacks inside the Use Case itself).
+2. **Domain Isolation from Infrastructure**: Use Cases coordinate Domain Entities and Value Objects (`app\domain\<context>\value_objects\...`). They MUST NOT interact with Mappers (`*Mapper`) or Database DTOs (`*Database`), which are internal to the Infrastructure layer.
+3. **Orchestration Only**: Use Cases orchestrate business rules and domain operations; they do NOT contain UI logic or direct SQL.
+4. **Single Responsibility**: One Use Case per business action with a standard `execute()` method.
+5. **Throw Semantic Domain Exceptions**: Always throw semantic exceptions from `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`). Never throw generic `\RuntimeException`.
+6. **Return Domain Entities**: Return hydrated Domain Entities or DTOs, not raw database associative arrays.
+7. **Global Style**: All style rules (PSR-12, docblocks, no single-letter variables) MUST follow the global conventions defined in `GEMINI.md`.
 
 ---
 
 ## Anti-Patterns
 
+❌ **Infrastructure Leakage into Use Cases**: Using Mappers (e.g. `UserMapper`) or Database DTOs (e.g. `UserDatabase`) inside Use Cases. Mapping is exclusively an Infrastructure/Model responsibility.
+❌ **Importing Repository from Context Root**: Importing `use app\domain\<context>\<Entity>RepositoryInterface` instead of `use app\domain\<context>\repositories\<Entity>RepositoryInterface`.
 ❌ **Throwing `\RuntimeException`**: Throwing generic unclassified exceptions instead of semantic exceptions from `app\domain\exceptions\`.
 ❌ **Direct `get_instance()` Coupling**: Calling `$CI =& get_instance()` directly inside Use Cases instead of using constructor dependency injection.
-❌ **Using Model_factory internally**: Instantiating repositories inside the Use Case constructor with `Model_factory::make()`. Dependency must be injected from the outside.
+❌ **Using ModelFactory internally**: Instantiating repositories inside the Use Case constructor with `ModelFactory::make()`. Dependencies must be injected from the outside.
 ❌ **Returning Raw Arrays**: Returning raw database rows or untyped associative arrays from `execute()` when representing domain models.
 ❌ **Multiple Business Actions in One Use Case**: Creating a monolithic service with multiple unrelated public methods instead of dedicated single-action Use Cases.
-

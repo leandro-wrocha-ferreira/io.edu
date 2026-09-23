@@ -24,7 +24,7 @@ Use this skill when creating or modifying:
 3. **No Business Logic**: All business rules, calculations, counting, or filtering belong in Use Cases (`app\usecases\...`). Controllers delegate logic to Use Cases.
 4. **Form Flow (Single View Load)**: DO NOT create private `_handle_*()` helper methods that duplicate view assembly and `$this->load->view()`. Evaluate `$this->form_validation->run() === TRUE` directly in the action. View preparation (`$data`) and rendering happen **ONCE** at the end of the action.
 5. **No Try/Catch for Standard Exceptions**: Uncaught semantic domain exceptions (`NotFoundException`, `ValidationException`, `ConflictException`, etc.) are intercepted by `MY_Controller::_remap()`, which returns JSON for AJAX or sets flashdata and redirects for HTML.
-6. **Controllers Delegate to Use Cases**: Controllers instantiate and call Use Cases (`app\usecases\...`) to orchestrate business actions. Models are resolved by Use Cases via `Model_factory`. Controllers do NOT need to preload models in `__construct()` unless a specific presentation helper requires it.
+6. **Controllers Delegate to Use Cases**: Controllers instantiate and call Use Cases (`app\usecases\...`) to orchestrate business actions. Controllers MUST NOT interact with Mappers (`*Mapper`) or Database DTOs (`*Database`), which belong exclusively to the Infrastructure layer.
 7. **Standardized Responses**:
    - For JSON output (e.g. DataTables, AJAX, API endpoints), ALWAYS use `json_response($data, $status_code)` from `response_helper.php`.
    - DO NOT call `$this->output->set_content_type('application/json')->set_output(json_encode(...))` manually.
@@ -42,7 +42,7 @@ Use this skill when creating or modifying:
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-use app\usecases\admin\ListUsersUseCase;
+use app\usecases\admin\ListPaginatedUsersUseCase;
 use app\usecases\admin\GetUserUseCase;
 use app\usecases\admin\CreateUserUseCase;
 use app\usecases\admin\UpdateUserUseCase;
@@ -52,75 +52,75 @@ use app\usecases\admin\UpdateUserUseCase;
  */
 class Users extends MY_Controller
 {
-    /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
+	/**
+	 * Constructor.
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+	}
 
-    /**
-     * List users view.
-     *
-     * @return void
-     */
-    public function index()
-    {
-        $data = [
-            'page_name' => 'admin/users/index',
-            'title'     => 'Gestão de Usuários',
-        ];
+	/**
+	 * List users view.
+	 *
+	 * @return void
+	 */
+	public function index()
+	{
+		$data = [
+			'page_name' => 'admin/users/index',
+			'title'     => 'Gestão de Usuários',
+		];
 
-        $this->load->view('admin/index', $data);
-    }
+		$this->load->view('admin/index', $data);
+	}
 
-    /**
-     * Create user form and action.
-     *
-     * @return void
-     */
-    public function create()
-    {
-        $this->form_validation->set_rules('name', 'Name', 'required|trim|min_length[3]');
-        $this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
+	/**
+	 * Create user form and action.
+	 *
+	 * @return void
+	 */
+	public function create()
+	{
+		$this->form_validation->set_rules('name', 'Name', 'required|trim|min_length[3]');
+		$this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
 
-        if ($this->form_validation->run() === TRUE) {
-            $use_case = new CreateUserUseCase();
-            $use_case->execute(
-                $this->input->post('name', TRUE),
-                $this->input->post('email', TRUE),
-                $this->input->post('password', TRUE)
-            );
+		if ($this->form_validation->run() === TRUE) {
+			$use_case = new CreateUserUseCase();
+			$use_case->execute(
+				$this->input->post('name', TRUE),
+				$this->input->post('email', TRUE),
+				$this->input->post('password', TRUE)
+			);
 
-            $this->session->set_flashdata('success', 'Usuário criado com sucesso.');
-            redirect('admin/usuarios');
-        }
+			$this->session->set_flashdata('success', 'Usuário criado com sucesso.');
+			redirect('admin/usuarios');
+		}
 
-        $data = [
-            'page_name' => 'admin/users/form',
-            'title'     => 'Novo Usuário',
-            'user'      => null,
-        ];
+		$data = [
+			'page_name' => 'admin/users/form',
+			'title'     => 'Novo Usuário',
+			'user'      => null,
+		];
 
-        $this->load->view('admin/index', $data);
-    }
+		$this->load->view('admin/index', $data);
+	}
 
-    /**
-     * AJAX endpoint returning JSON.
-     *
-     * @return void
-     */
-    public function ajax_data()
-    {
-        $use_case = new ListUsersUseCase();
-        $result = $use_case->execute();
+	/**
+	 * AJAX endpoint returning JSON.
+	 *
+	 * @return void
+	 */
+	public function ajax_data()
+	{
+		$use_case = new ListPaginatedUsersUseCase();
+		$result = $use_case->execute(0, 10, '', 'name', 'ASC');
 
-        json_response([
-            'status' => 'success',
-            'data'   => $result,
-        ]);
-    }
+		json_response([
+			'status' => 'success',
+			'data'   => $result,
+		]);
+	}
 }
 ```
 
@@ -128,6 +128,7 @@ class Users extends MY_Controller
 
 ## Anti-Patterns
 
+❌ **Direct Infrastructure/Mapper Access**: Using Mappers (`UserMapper`) or Database DTOs (`UserDatabase`) in controllers. Controllers communicate solely with Use Cases and presentation views/JSON.
 ❌ **Business logic in Controller**: Calculating metrics, sorting/filtering domain objects, or validating domain invariants directly in controllers instead of delegating to Use Cases.
 ❌ **Direct Model manipulation**: Invoking model CRUD queries directly from controllers for business workflows instead of calling Use Cases.
 ❌ **Private `_handle_*` methods**: Duplicating `$data` assembly and view loading in private helpers instead of keeping a single `$this->load->view()` at the end of the action.
@@ -135,4 +136,3 @@ class Users extends MY_Controller
 ❌ **Manual language loading**: Calling `$this->lang->load()` or checking `HTTP_ACCEPT_LANGUAGE` in controllers instead of relying on the global `Language_check` hook.
 ❌ **Manual JSON formatting**: Calling `$this->output->set_output(json_encode(...))` instead of `json_response($data, $status_code)`.
 ❌ **Ignoring Global Styles**: All style rules (PSR-12, docblocks, strict typing, no single-letter variables) MUST follow the global conventions defined in `GEMINI.md`.
-

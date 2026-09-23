@@ -2,26 +2,19 @@
 
 ## Overview
 
-In DDD-lite architecture, Models bridge database tables and Domain Entities (`app\domain\...`). Models are responsible for retrieving data from database tables and mapping them into rich, encapsulated Domain Entities.
+In DDD-lite architecture, Models bridge database tables and Domain Entities (`app\domain\...`). Models are responsible for retrieving data from database tables and delegating to dedicated Mappers (`application/models/mappers/`) and Database DTOs (`application/models/dtos/`) to produce rich, encapsulated Domain Entities.
 
 ---
 
-## Entity Hydration Basics
+## Entity Hydration via Mappers & Database DTOs
 
-Models define `$entity_class` to specify their target Domain Entity:
+Rather than coupling hydration logic inside `MY_Model` or the domain entities, hydration is strictly handled by:
+1. **Database DTO** (`application/models/dtos/<Entity>Database.php`): strongly types the columns returned from the table.
+2. **Mapper** (`application/models/mappers/<Entity>Mapper.php`): translates between the DTO and the Domain Entity using the entity's unified `create()` factory method.
 
-```php
-class User_model extends MY_Model implements UserRepositoryInterface
-{
-	protected string $table = 'users';
-	protected ?string $entity_class = User::class;
-}
 ```
-
-When `$entity_class` is defined, `MY_Model` automatically converts raw database row arrays into Domain Entities using the static factory method `from_database(array $row)` on the entity class. This is used internally by `find_by_id()` and `find_all()`, but you can also use these helpers for custom queries:
-
-- **Single Record**: `to_entity(?array $row): ?object`
-- **Multiple Records**: `to_entities(array $rows): array`
+Database Query ──► Raw Array ──► <Entity>Database DTO ──► <Entity>Mapper::to_entity() ──► Domain Entity
+```
 
 ---
 
@@ -50,7 +43,7 @@ GROUP BY users.id
 
 ### ✅ KISS Pattern: Clean Single-Table Query + Dedicated Relation Helper
 
-Keep base database queries simple, fast, and unpolluted. Perform a direct table lookup and populate associated relations using dedicated helper methods before hydrating the entity.
+Keep base database queries simple, fast, and unpolluted. Perform a direct table lookup and populate associated relations using dedicated helper methods before translating via the Mapper.
 
 #### 1. Single Record Relation Hydration (`_hydrate_user_roles`)
 
@@ -69,8 +62,8 @@ public function find_by_email(Email $email): ?User
     // 2. Hydrate roles via clean helper query
     $row = $this->_hydrate_user_roles($row);
 
-    // 3. Hydrate User Domain Entity
-    return $this->to_entity($row);
+    // 3. Convert to Database DTO and map to User Domain Entity
+    return UserMapper::to_entity(new UserDatabase($row));
 }
 
 private function _hydrate_user_roles(array $row): array
@@ -107,8 +100,8 @@ public function find_active_users(): array
     // 2. Hydrate relations in batch
     $rows = $this->_hydrate_batch_user_roles($rows);
 
-    // 3. Convert all arrays to entities
-    return $this->to_entities($rows);
+    // 3. Convert all rows to entities via Mapper
+    return UserMapper::to_entities($rows);
 }
 
 private function _hydrate_batch_user_roles(array $rows): array

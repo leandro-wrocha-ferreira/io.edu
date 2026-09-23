@@ -4,33 +4,28 @@ namespace app\usecases\identity;
 
 use app\domain\identity\Email;
 use app\domain\identity\User;
+use app\domain\identity\UserRepositoryInterface;
 use app\domain\exceptions\UnauthorizedException;
 use app\domain\exceptions\ForbiddenException;
-use app\factories\Model_factory;
 
 /**
  * Use case for authenticating a user in the system.
  *
  * Validates credentials and checks for deactivated accounts.
- * Accepts an optional repository for dependency injection (testing).
  */
 class AuthenticateUserUseCase
 {
-	/** @var \app\domain\identity\UserRepositoryInterface */
+	/** @var UserRepositoryInterface */
 	private $user_repository;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param \app\domain\identity\UserRepositoryInterface|null $repository Repository for testing (optional)
+	 * @param UserRepositoryInterface $user_repository
 	 */
-	public function __construct($repository = null)
+	public function __construct(UserRepositoryInterface $user_repository)
 	{
-		if ($repository !== null) {
-			$this->user_repository = $repository;
-		} else {
-			$this->user_repository = Model_factory::make('user_model');
-		}
+		$this->user_repository = $user_repository;
 	}
 
 	/**
@@ -49,15 +44,15 @@ class AuthenticateUserUseCase
 	{
 		$user = $this->user_repository->find_by_email(new Email($email));
 		if ($user === null) {
-			throw new UnauthorizedException("Credenciais inválidas");
+			throw new UnauthorizedException("Invalid credentials");
 		}
 
 		if ($user->is_deleted()) {
-			throw new ForbiddenException("Conta desativada");
+			throw new ForbiddenException("Invalid credentials");
 		}
 
 		if (!$user->verify_password($password)) {
-			throw new UnauthorizedException("Credenciais inválidas");
+			throw new UnauthorizedException("Invalid credentials");
 		}
 
 		return $user;

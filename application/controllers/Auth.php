@@ -2,6 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 use app\usecases\identity\AuthenticateUserUseCase;
+use app\factories\ModelFactory;
 
 /**
  * Authentication Controller
@@ -16,7 +17,6 @@ class Auth extends MY_Controller
 	public function __construct()
 	{
 		parent::__construct();
-		$this->load->model('user_model');
 	}
 
 	/**
@@ -32,7 +32,6 @@ class Auth extends MY_Controller
 	{
 		if ($this->session->userdata('user_id')) {
 			$this->_redirect_by_role();
-			return;
 		}
 
 		$this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
@@ -42,15 +41,15 @@ class Auth extends MY_Controller
 			$email = $this->input->post('email', TRUE);
 			$password = $this->input->post('password', TRUE);
 
-			$use_case = new AuthenticateUserUseCase();
+			$use_case = new AuthenticateUserUseCase(ModelFactory::make('user_model'));
 			$user = $use_case->execute($email, $password);
 
 			$session_data = [
-				'user_id'    => $user->get_id(),
-				'user_name'  => $user->get_name(),
+				'user_id' => $user->get_id(),
+				'user_name' => $user->get_name(),
 				'user_email' => (string) $user->get_email(),
-				'user_role'  => $user->get_role(),
-				'logged_in'  => TRUE,
+				'user_role' => $user->get_role(),
+				'logged_in' => TRUE,
 			];
 			$this->session->set_userdata($session_data);
 
