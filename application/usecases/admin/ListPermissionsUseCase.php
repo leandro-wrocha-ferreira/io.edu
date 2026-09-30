@@ -2,39 +2,34 @@
 
 namespace app\usecases\admin;
 
-use app\domain\admin\permission\Permission;
-use app\domain\admin\permission\PermissionRepositoryInterface;
-use app\factories\Model_factory;
+use app\domain\authorization\Permission;
+use app\domain\authorization\repositories\PermissionRepositoryInterface;
 
 /**
  * Use case for listing all permissions.
  */
 class ListPermissionsUseCase
 {
-    /** @var PermissionRepositoryInterface */
-    private $permission_repository;
+	/** @var PermissionRepositoryInterface */
+	private $permission_repository;
 
-    /**
-     * Constructor.
-     *
-     * @param PermissionRepositoryInterface|null $repository Repository for testing (optional)
-     */
-    public function __construct($repository = null)
-    {
-        if ($repository !== null) {
-            $this->permission_repository = $repository;
-        } else {
-            $this->permission_repository = Model_factory::make('permission_model');
-        }
-    }
+	/**
+	 * Constructor.
+	 *
+	 * @param PermissionRepositoryInterface $permission_repository
+	 */
+	public function __construct(PermissionRepositoryInterface $permission_repository)
+	{
+		$this->permission_repository = $permission_repository;
+	}
 
-    /**
-     * Execute the use case.
-     *
-     * @return array List of Permission entities
-     */
-    public function execute(): array
-    {
-        return $this->permission_repository->find_all();
-    }
+	/**
+	 * Execute the use case.
+	 *
+	 * @return array List of Permission entities
+	 */
+	public function execute(): array
+	{
+		return $this->permission_repository->find_all();
+	}
 }

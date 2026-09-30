@@ -2,9 +2,9 @@
 
 namespace app\usecases\identity;
 
-use app\domain\identity\Email;
+use app\domain\identity\value_objects\Email;
 use app\domain\identity\User;
-use app\domain\identity\UserRepositoryInterface;
+use app\domain\identity\repositories\UserRepositoryInterface;
 use app\domain\exceptions\UnauthorizedException;
 use app\domain\exceptions\ForbiddenException;
 
@@ -16,7 +16,7 @@ use app\domain\exceptions\ForbiddenException;
 class AuthenticateUserUseCase
 {
 	/** @var UserRepositoryInterface */
-	private $user_repository;
+	private UserRepositoryInterface $user_repository;
 
 	/**
 	 * Constructor.
@@ -30,9 +30,6 @@ class AuthenticateUserUseCase
 
 	/**
 	 * Execute authentication.
-	 *
-	 * Finds the user by email, validates the account is active,
-	 * and verifies the password.
 	 *
 	 * @param string $email User email
 	 * @param string $password Plain text password
@@ -51,7 +48,7 @@ class AuthenticateUserUseCase
 			throw new ForbiddenException("Invalid credentials");
 		}
 
-		if (!$user->verify_password($password)) {
+		if (!$user->get_password()->verify($password)) {
 			throw new UnauthorizedException("Invalid credentials");
 		}
 

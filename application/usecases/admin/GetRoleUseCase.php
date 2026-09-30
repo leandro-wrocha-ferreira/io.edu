@@ -2,47 +2,42 @@
 
 namespace app\usecases\admin;
 
-use app\domain\admin\role\Role;
-use app\domain\admin\role\RoleRepositoryInterface;
+use app\domain\identity\Role;
+use app\domain\identity\repositories\RoleRepositoryInterface;
 use app\domain\exceptions\NotFoundException;
-use app\factories\Model_factory;
 
 /**
  * Use case for retrieving a single role by ID.
  */
 class GetRoleUseCase
 {
-    /** @var RoleRepositoryInterface */
-    private $role_repository;
+	/** @var RoleRepositoryInterface */
+	private RoleRepositoryInterface $role_repository;
 
-    /**
-     * Constructor.
-     *
-     * @param RoleRepositoryInterface|null $repository Repository for testing (optional)
-     */
-    public function __construct($repository = null)
-    {
-        if ($repository !== null) {
-            $this->role_repository = $repository;
-        } else {
-            $this->role_repository = Model_factory::make('role_model');
-        }
-    }
+	/**
+	 * Constructor.
+	 *
+	 * @param RoleRepositoryInterface $role_repository
+	 */
+	public function __construct(RoleRepositoryInterface $role_repository)
+	{
+		$this->role_repository = $role_repository;
+	}
 
-    /**
-     * Execute the use case.
-     *
-     * @param int $role_id Role ID
-     * @return Role Role entity
-     * @throws NotFoundException When role not found
-     */
-    public function execute(int $role_id): Role
-    {
-        $role = $this->role_repository->find_by_id($role_id);
-        if ($role === null) {
-            throw new NotFoundException("Perfil não encontrado");
-        }
+	/**
+	 * Execute the use case.
+	 *
+	 * @param int $role_id Role ID
+	 * @return Role Role entity
+	 * @throws NotFoundException When role not found
+	 */
+	public function execute(int $role_id): Role
+	{
+		$role = $this->role_repository->find_by_id($role_id);
+		if ($role === null) {
+			throw new NotFoundException("Perfil não encontrado");
+		}
 
-        return $role;
-    }
+		return $role;
+	}
 }

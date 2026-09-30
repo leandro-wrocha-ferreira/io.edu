@@ -2,11 +2,13 @@
 
 namespace app\usecases\admin;
 
-use app\domain\identity\Email;
-use app\domain\identity\User;
 use app\domain\exceptions\NotFoundException;
 use app\domain\exceptions\ValidationException;
-use app\factories\Model_factory;
+use app\domain\identity\constants\RoleSlug;
+use app\domain\identity\repositories\RoleRepositoryInterface;
+use app\domain\identity\repositories\UserRepositoryInterface;
+use app\domain\identity\User;
+use app\domain\identity\value_objects\Email;
 
 /**
  * Use case for updating an existing user.
@@ -15,53 +17,75 @@ use app\factories\Model_factory;
  */
 class UpdateUserUseCase
 {
-    /** @var \app\domain\identity\UserRepositoryInterface */
-    private $user_repository;
+	/** @var UserRepositoryInterface */
+	private UserRepositoryInterface $user_repository;
 
-    /**
-     * Constructor.
-     *
-     * @param \app\domain\identity\UserRepositoryInterface|null $repository Repository for testing (optional)
-     */
-    public function __construct($repository = null)
-    {
-        if ($repository !== null) {
-            $this->user_repository = $repository;
-        } else {
-            $this->user_repository = Model_factory::make('user_model');
-        }
-    }
+	/** @var RoleRepositoryInterface|null */
+	private ?RoleRepositoryInterface $role_repository;
 
-    /**
-     * Execute the use case.
-     *
-     * @param int $user_id User ID
-     * @param string $name New name
-     * @param string $email New email
-     * @param array $role_ids Role IDs to assign
-     * @return User Updated user entity
-     * @throws NotFoundException|ValidationException When user not found or email already in use
-     */
-    public function execute(int $user_id, string $name, string $email, array $role_ids = []): User
-    {
-        $user = $this->user_repository->find_by_id($user_id);
-        if ($user === null) {
-            throw new NotFoundException("Usuário não encontrado");
-        }
+	/**
+	 * Constructor.
+	 *
+	 * @param UserRepositoryInterface $user_repository
+	 * @param RoleRepositoryInterface|null $role_repository
+	 */
+	public function __construct(
+		UserRepositoryInterface $user_repository,
+		?RoleRepositoryInterface $role_repository = null
+	)
+	{
+		$this->user_repository = $user_repository;
+		$this->role_repository = $role_repository;
+	}
 
-        $email_vo = new Email($email);
+	/**
+	 * Execute the use case.
+	 *
+	 * @param int $user_id User ID
+	 * @param string $name New name
+	 * @param string $email New email
+	 * @param array<int> $role_ids Role IDs to assign
+	 * @param bool $is_admin Whether the executing user has admin privileges
+	 * @return User Updated user entity
+	 * @throws NotFoundException|ValidationException When user not found or email already in use
+	 */
+	public function execute(
+		int $user_id,
+		string $name,
+		string $email,
+		array $role_ids = [],
+		bool $is_admin = false
+	): User
+	{
+		$user = $this->user_repository->find_by_id($user_id);
+		if ($user === null) {
+			throw new NotFoundException("Usuário não encontrado");
+		}
 
-        $existing = $this->user_repository->find_by_email($email_vo);
-        if ($existing !== null && $existing->get_id() !== $user_id) {
-            throw new ValidationException("E-mail já está em uso");
-        }
+		$email_vo = new Email($email);
 
-        $user->set_name($name);
-        $user->set_email($email_vo);
-        $user->set_role_ids($role_ids);
+		$existing = $this->user_repository->find_by_email($email_vo);
+		if ($existing !== null && $existing->get_id() !== $user_id) {
+			throw new ValidationException("E-mail já está em uso");
+		}
 
-        $this->user_repository->save($user);
+		if (!$is_admin && !empty($role_ids) && $this->role_repository !== null) {
+			$admin_role = $this->role_repository->find_by_slug(RoleSlug::ADMIN);
+			if ($admin_role !== null) {
+				$admin_role_id = $admin_role->get_id();
+				$role_ids = array_values(array_filter($role_ids, function (int $role_id) use ($admin_role_id) {
+					return $role_id !== $admin_role_id;
+				}));
+			}
+		}
 
-        return $user;
-    }
+		$user->set_name($name);
+		$user->set_email($email_vo);
+
+		$saved_user = $this->user_repository->save($user);
+
+		$this->user_repository->sync_user_roles($user_id, $role_ids);
+
+		return $saved_user;
+	}
 }

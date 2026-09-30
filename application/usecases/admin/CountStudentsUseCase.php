@@ -2,7 +2,7 @@
 
 namespace app\usecases\admin;
 
-use app\domain\identity\UserRepositoryInterface;
+use app\domain\identity\repositories\UserRepositoryInterface;
 
 /**
  * Use case for counting all active students in the system.
@@ -22,13 +22,13 @@ class CountStudentsUseCase
 		$this->user_repository = $user_repository;
 	}
 
-    /**
-     * Execute the use case.
-     *
-     * @return int Total number of active students
-     */
-    public function execute(): int
-    {
-        return $this->user_repository->count_by_role('student');
-    }
+	/**
+	 * Execute the use case.
+	 *
+	 * @return int Total number of active students
+	 */
+	public function execute(): int
+	{
+		return $this->user_repository->count_by_role('student');
+	}
 }
