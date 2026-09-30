@@ -22,7 +22,11 @@
 			"app\\domain\\": "application/domain/",
 			"app\\usecases\\": "application/usecases/",
 			"app\\factories\\": "application/factories/"
-		}
+		},
+		"classmap": [
+			"application/models/mappers/",
+			"application/models/dtos/"
+		]
 	},
 	"autoload-dev": {
 		"classmap": [

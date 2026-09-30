@@ -2,6 +2,9 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use app\domain\authorization\constants\PermissionSlug;
+use app\domain\identity\constants\RoleSlug;
+
 /**
  * Authentication and RBAC Middleware
  *
@@ -18,23 +21,23 @@ class Middleware
      * @var array
      */
     private array $route_permission_map = [
-        'admin/painel' => 'dashboard.view',
+        'admin/painel' => PermissionSlug::DASHBOARD_VIEW,
 
         // Usuários
-        'admin/usuarios' => 'users.view',
-        'admin/usuarios/dados' => 'users.view',
-        'admin/usuarios/novo' => 'users.create',
-        'admin/usuarios/editar' => 'users.edit',
-        'admin/usuarios/ativar' => 'users.toggle_status',
-        'admin/usuarios/desativar' => 'users.toggle_status',
-        'admin/usuarios/excluir' => 'users.delete',
+        'admin/usuarios' => PermissionSlug::USERS_VIEW,
+        'admin/usuarios/dados' => PermissionSlug::USERS_VIEW,
+        'admin/usuarios/novo' => PermissionSlug::USERS_CREATE,
+        'admin/usuarios/editar' => PermissionSlug::USERS_EDIT,
+        'admin/usuarios/ativar' => PermissionSlug::USERS_TOGGLE_STATUS,
+        'admin/usuarios/desativar' => PermissionSlug::USERS_TOGGLE_STATUS,
+        'admin/usuarios/excluir' => PermissionSlug::USERS_DELETE,
 
         // Perfis
-        'admin/perfis' => 'roles.view',
-        'admin/perfis/dados' => 'roles.view',
-        'admin/perfis/novo' => 'roles.create',
-        'admin/perfis/editar' => 'roles.edit',
-        'admin/perfis/excluir' => 'roles.delete',
+        'admin/perfis' => PermissionSlug::ROLES_VIEW,
+        'admin/perfis/dados' => PermissionSlug::ROLES_VIEW,
+        'admin/perfis/novo' => PermissionSlug::ROLES_CREATE,
+        'admin/perfis/editar' => PermissionSlug::ROLES_EDIT,
+        'admin/perfis/excluir' => PermissionSlug::ROLES_DELETE,
     ];
 
     /**
@@ -88,7 +91,7 @@ class Middleware
                 }
             }
         } elseif ($seg1 === 'aluno') {
-            if ($user_role !== 'student') {
+            if ($user_role !== RoleSlug::STUDENT) {
                 $this->_render_403();
             }
         }
