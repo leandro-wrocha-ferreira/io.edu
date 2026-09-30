@@ -34,7 +34,7 @@ class DisableUserUseCase
 	{
 		$user = $this->user_repository->find_by_id($user_id);
 		if ($user === null) {
-			throw new NotFoundException("Usuário não encontrado");
+			throw new NotFoundException("User not found");
 		}
 
 		$user->inactivate();

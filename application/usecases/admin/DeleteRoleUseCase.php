@@ -38,11 +38,11 @@ class DeleteRoleUseCase
 	{
 		$role = $this->role_repository->find_by_id($role_id);
 		if ($role === null) {
-			throw new NotFoundException("Perfil não encontrado");
+			throw new NotFoundException("Role not found");
 		}
 
 		if ($role->get_slug() === 'admin-master' || in_array($role->get_slug(), RoleSlug::ALL, true)) {
-			throw new ConflictException("Perfis padrão do sistema não podem ser excluídos.");
+			throw new ConflictException("Default system roles cannot be deleted");
 		}
 
 		$this->role_repository->delete(['id' => $role_id]);

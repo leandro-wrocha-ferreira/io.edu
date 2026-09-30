@@ -50,11 +50,11 @@ class UpdateRoleUseCase
 	{
 		$role = $this->role_repository->find_by_id($role_id);
 		if ($role === null) {
-			throw new NotFoundException("Perfil não encontrado");
+			throw new NotFoundException("Role not found");
 		}
 
 		if ($role->get_slug() === 'admin-master') {
-			throw new ConflictException("O perfil AdminMaster é protegido e não pode ser alterado.");
+			throw new ConflictException("The AdminMaster role is protected and cannot be modified");
 		}
 
 		$role->set_name($name);

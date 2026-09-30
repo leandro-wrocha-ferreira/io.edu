@@ -59,14 +59,14 @@ class UpdateUserUseCase
 	{
 		$user = $this->user_repository->find_by_id($user_id);
 		if ($user === null) {
-			throw new NotFoundException("Usuário não encontrado");
+			throw new NotFoundException("User not found");
 		}
 
 		$email_vo = new Email($email);
 
 		$existing = $this->user_repository->find_by_email($email_vo);
 		if ($existing !== null && $existing->get_id() !== $user_id) {
-			throw new ValidationException("E-mail já está em uso");
+			throw new ValidationException("Email is already in use");
 		}
 
 		if (!$is_admin && !empty($role_ids) && $this->role_repository !== null) {

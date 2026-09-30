@@ -58,7 +58,7 @@ class CreateUserUseCase
 
 		$existing = $this->user_repository->find_by_email($email_vo);
 		if ($existing !== null) {
-			throw new ValidationException("E-mail já está em uso");
+			throw new ValidationException("Email is already in use");
 		}
 
 		if (!$is_admin && !empty($role_ids)) {

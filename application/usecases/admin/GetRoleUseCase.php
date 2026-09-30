@@ -35,7 +35,7 @@ class GetRoleUseCase
 	{
 		$role = $this->role_repository->find_by_id($role_id);
 		if ($role === null) {
-			throw new NotFoundException("Perfil não encontrado");
+			throw new NotFoundException("Role not found");
 		}
 
 		return $role;
