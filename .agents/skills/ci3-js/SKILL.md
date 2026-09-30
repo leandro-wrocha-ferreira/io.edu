@@ -16,10 +16,11 @@ This project uses a modular, clean, and hybrid approach for organizing JavaScrip
    - All logic must reside in static `.js` files within the `public/assets/js/` structure.
 
 2. **Folder Structure**:
-   - **Global/Theme:** `public/assets/js/theme.js` (essential scripts loaded in `<head>` before DOM render).
-   - **Layout/Module:** `public/assets/js/admin/layout.js` (global logic for menu, sidebar, and modals).
-   - **Reusable Components:** `public/assets/js/components/` (reusable scripts such as delete confirmation, toasts, etc.). *Note: if this folder does not exist yet, create it when implementing your first reusable component.*
-   - **Page-Specific:** `public/assets/js/pages/<module>/<controller>/<action>.js` (exclusive view logic loaded dynamically via `$page_js` in the controller).
+    - **Global/Theme:** `public/assets/js/theme.js` (essential scripts loaded in `<head>` before DOM render).
+    - **Global HTTP Client:** `public/assets/js/http.js` (centralized HTTP Fetch client loaded in base layout).
+    - **Layout/Module:** `public/assets/js/admin/layout.js` (global logic for menu, sidebar, and modals).
+    - **Reusable Components:** `public/assets/js/components/` (reusable scripts such as delete confirmation, toasts, etc.).
+    - **Page-Specific:** `public/assets/js/pages/<module>/<controller>/<action>.js` (exclusive view logic loaded dynamically via `$page_js` in the controller).
 
 3. **Dynamic Page Loading (`$page_js`)**:
    - In Controller:
@@ -52,99 +53,61 @@ The project adopts a **Hybrid Strategy** to balance the convenience of legacy co
 
 ### When to Use Vanilla JS (ES6+):
 - **Layout & Theme Scripts:** Sidebar toggle, theme switcher, backdrop handlers, and animations.
-- **Custom `fetch()` Calls:** Asynchronous requests that do not go through DataTables abstractions.
+- **Custom Asynchronous Requests:** All custom asynchronous operations via `Http` (`public/assets/js/http.js`).
 - **Modern Web APIs:** `IntersectionObserver`, `localStorage`, `sessionStorage`, `CustomEvent`.
 
 ---
 
 ## 3. Modern Fetch & Custom Header Pattern
 
-Instead of relying solely on the default CI3 `is_ajax_request()` check, we focus on native `fetch()` requests and use a custom header to instruct the backend to return JSON.
+Instead of relying solely on the default CI3 `is_ajax_request()` check or scattered raw `fetch()` calls, all frontend network requests MUST use the centralized native client located at `public/assets/js/http.js`.
 
 ### Mandatory Fetch Standards:
-1. **Centralization**: The `fetch()` utility function must NOT be rewritten in every `page_js` file. Abstract generic network requests (e.g., `submitData`, `apiFetch`) into a global file like `public/assets/js/components/http.js` and reuse it across pages.
-2. **Custom JSON Header**: Always include a custom header (e.g., `'X-App-Response': 'json'`) in custom `fetch()` calls so the CI3 controller/MY_Controller knows it must return a JSON response instead of the default HTML flow.
-3. **Always check `response.ok`**: The `fetch()` promise resolves on HTTP 4xx and 5xx. You must check `if (!response.ok)` before processing JSON data.
-4. **Modern Form Data**: When submitting forms via Vanilla JS `fetch()`, use `new FormData(formElement)` natively. **DO NOT** use jQuery's `$(form).serialize()`.
-5. **Manage Button Loading & Disabled States**: Always disable submit/action buttons during in-flight async requests to prevent duplicate submissions.
+1. **Centralized Client**: Raw `fetch()` or jQuery `$.ajax` calls are **strictly prohibited** in page scripts. Always use the global `Http` (or `HttpClient`) utility.
+2. **Canonical Standard Headers**: The client automatically attaches:
+   - `X-App-Json: application/json` (canonical header instructing `MY_Controller` to process and respond as JSON)
+   - `X-Requested-With: XMLHttpRequest` (identifies request as an AJAX operation)
+   - `Accept: application/json`
+3. **Automatic CSRF Handling**: Automatically resolves the CSRF token from `<meta name="csrf-token">` or `csrf_cookie_name` cookie and injects it via `X-CSRF-TOKEN` header (and inside `FormData` when applicable).
+4. **Data Formats**:
+   - **JSON Objects**: Automatically serialized with `Content-Type: application/json; charset=utf-8`.
+   - **FormData**: Native `FormData` supported without overriding the multipart boundary.
+5. **Button Loading & Disabled States**: Pass the button element directly or via `{ button: buttonEl }` to automatically disable the trigger and render an animated spinner (`<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Processando...`) during request execution.
+6. **HTTP Error Handling**: Rejects automatically on status >= 400, parsing structured error responses (`result.message` or `result.error`) for easy consumption in `try/catch` blocks.
 
-### The `http.js` Utility (public/assets/js/components/http.js):
+### The `Http` Client Interface (`public/assets/js/http.js`):
 
-When you need to make API calls, you MUST use or create the global `Http` utility. If the file doesn't exist, create it with this structure:
-
-```javascript
-/**
- * Global HTTP Utility wrapper for fetch.
- * File: public/assets/js/components/http.js
- */
-const Http = {
-    async post(url, payload, buttonEl = null) {
-        if (buttonEl) {
-            buttonEl.dataset.originalContent = buttonEl.innerHTML;
-            buttonEl.disabled = true;
-            buttonEl.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Processando...';
-        }
-
-        try {
-            const isFormData = payload instanceof FormData;
-            
-            const headers = {
-                'X-App-Response': 'json', // Custom header for JSON response
-                'Accept': 'application/json'
-            };
-            
-            if (!isFormData) {
-                headers['Content-Type'] = 'application/json';
-            }
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: headers,
-                body: isFormData ? payload : JSON.stringify(payload)
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || `Erro na requisição (${response.status})`);
-            }
-
-            return result;
-        } catch (error) {
-            console.error('Fetch error:', error);
-            throw error;
-        } finally {
-            if (buttonEl) {
-                buttonEl.disabled = false;
-                buttonEl.innerHTML = buttonEl.dataset.originalContent;
-            }
-        }
-    },
-    // Add get, put, delete etc. as needed...
-};
-```
+Available methods on `window.Http`:
+- `Http.get(url, options = {})`
+- `Http.post(url, data, optionsOrButton = {})`
+- `Http.put(url, data, optionsOrButton = {})`
+- `Http.patch(url, data, optionsOrButton = {})`
+- `Http.delete(url, options = {})`
+- `Http.request(url, options = {})`
 
 ### Usage in Page Scripts (`public/assets/js/pages/...`):
 
-In your specific page logic, DO NOT call `fetch()` directly. Use the `Http` utility:
+In your specific page logic, use `Http` directly:
 
 ```javascript
 document.addEventListener('DOMContentLoaded', () => {
     const saveBtn = document.getElementById('btn-save');
-    const myForm = document.getElementById('my-form');
+    const userForm = document.getElementById('form-user');
 
-    if (saveBtn && myForm) {
-        saveBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const payload = new FormData(myForm); // Use native FormData
-            
+    if (saveBtn && userForm) {
+        userForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const payload = new FormData(userForm);
+
             try {
-                // Use the centralized Http utility
-                const response = await Http.post(window.location.origin + '/admin/module/save', payload, saveBtn);
-                
-                alert('Success: ' + response.message);
-                // Redirect or update UI...
+                // Pass button element as 3rd parameter to manage loading/disabled states
+                const response = await Http.post(userForm.action, payload, saveBtn);
+
+                if (response.success) {
+                    window.location.href = response.redirect || '/admin/users';
+                }
             } catch (error) {
+                console.error('Request failed:', error);
                 alert(error.message || 'Ocorreu um erro ao processar a solicitação.');
             }
         });
@@ -159,23 +122,22 @@ document.addEventListener('DOMContentLoaded', () => {
 When creating or modifying JavaScript code, verify the following:
 
 - [ ] **Zero Inline Scripts:** The `.php` view contains no inline `<script>` blocks with business logic or library initializations.
-- [ ] **Custom JSON Header:** Every `fetch()` call includes the `'X-App-Response': 'json'` (or similar chosen custom header) to ensure JSON replies.
+- [ ] **Centralized HTTP Client:** Asynchronous requests use exclusively the centralized `Http` client (`public/assets/js/http.js`), with zero ad-hoc `fetch()` or jQuery AJAX calls.
+- [ ] **Canonical Headers:** The client automatically issues `X-App-Json: application/json` and `X-Requested-With: XMLHttpRequest` (obsolete headers like `X-App-Response` are prohibited).
 - [ ] **Native FormData:** Form submissions use `new FormData(element)` rather than jQuery `.serialize()`.
-- [ ] **Centralized Network Logic:** `fetch` calls are abstracted into a shared file (e.g., `components/http.js`) rather than duplicated in `pages/`.
-- [ ] **HTTP Response Status Check:** Code explicitly verifies `if (!response.ok)` before consuming the body.
-- [ ] **Loading & Disabled States:** Buttons and interactive triggers are disabled during ongoing network calls.
+- [ ] **Loading & Disabled States:** Buttons and interactive triggers are disabled with spinner feedback during ongoing network calls.
 - [ ] **Null Checks (Guards):** Scripts verify DOM element existence before manipulating them (`if (!tableEl) return;`).
 - [ ] **Scoped Execution:** Event listeners are bound to `DOMContentLoaded` or scoped to page-specific IDs/classes.
-- [ ] **Error Handling:** Promises and HTTP requests handle failures cleanly using `try/catch` or `.catch()`.
+- [ ] **Clean Error Handling:** Network calls handle exceptions cleanly using `try/catch` blocks.
 
 ---
 
 ## Anti-Patterns
 
 ❌ **Inline Scripts in Views**: Placing `<script>` tags with JavaScript logic inside `.php` files in `application/views/`.
-❌ **`fetch()` without Custom Header**: Calling `fetch()` without the custom JSON header (`X-App-Response: json`), causing the backend to return HTML/redirects instead of JSON.
-❌ **jQuery Serialize for AJAX**: Using `$(form).serialize()` in new fetch calls instead of native `new FormData(form)`.
-❌ **Ignoring `response.ok`**: Assuming HTTP 200 on every resolved `fetch()` promise without checking `response.ok`.
+❌ **Ad-hoc `fetch()` or `$.ajax()` Calls**: Invoking raw `fetch()` or jQuery AJAX directly in page scripts instead of using `public/assets/js/http.js`.
+❌ **Obsolete Headers (`X-App-Response`)**: Using deprecated header names instead of the canonical `X-App-Json: application/json`.
+❌ **jQuery Serialize for AJAX**: Using `$(form).serialize()` instead of native `new FormData(form)`.
+❌ **Ignoring Button States**: Triggering asynchronous actions without disabling the trigger element, leading to duplicate submissions.
 ❌ **Unguarded DOM Selectors**: Executing queries like `document.getElementById('my-el').addEventListener(...)` without null checks (`if (!el) return;`).
-❌ **Missing Loading / Disabled States**: Triggering asynchronous actions without disabling the trigger element, resulting in multiple concurrent submissions.
 
