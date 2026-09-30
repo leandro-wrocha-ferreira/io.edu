@@ -10,19 +10,22 @@ description: Use when creating domain entities, value objects, domain exceptions
 Use this skill when creating:
 - Entity classes (e.g., User.php, Course.php)
 - Value Objects (e.g., Email.php, Password.php)
+- Domain Constants (e.g., RoleSlug.php, PermissionSlug.php)
 - Domain Exception classes (e.g., AppException.php, NotFoundException.php)
 - Repository Interfaces (e.g., UserRepositoryInterface.php)
 
 ## Location & Directory Structure
 
-Domain files go in `application/domain/<BoundedContext>/` using dedicated subdirectories for Value Objects and Repositories, or `application/domain/exceptions/`:
+Domain files go in `application/domain/<BoundedContext>/` using dedicated subdirectories for Value Objects, Constants, and Repositories, or `application/domain/exceptions/`:
 
 Example:
 ```
 application/domain/identity/User.php
+application/domain/identity/constants/RoleSlug.php
 application/domain/identity/value_objects/Email.php
 application/domain/identity/value_objects/Password.php
 application/domain/identity/repositories/UserRepositoryInterface.php
+application/domain/authorization/constants/PermissionSlug.php
 application/domain/exceptions/AppException.php
 application/domain/exceptions/NotFoundException.php
 application/domain/exceptions/ValidationException.php
@@ -35,6 +38,7 @@ Domain classes use PSR-4 namespaces matching their subdirectory:
 
 ```php
 namespace app\domain\<BoundedContext>;
+namespace app\domain\<BoundedContext>\constants;
 namespace app\domain\<BoundedContext>\value_objects;
 namespace app\domain\<BoundedContext>\repositories;
 namespace app\domain\exceptions;
@@ -43,8 +47,10 @@ namespace app\domain\exceptions;
 Examples:
 ```php
 namespace app\domain\identity;
+namespace app\domain\identity\constants;
 namespace app\domain\identity\value_objects;
 namespace app\domain\identity\repositories;
+namespace app\domain\authorization\constants;
 namespace app\domain\exceptions;
 ```
 
@@ -213,6 +219,92 @@ class Email
 }
 ```
 
+## Domain Constants Pattern
+
+Domain Constants define system-controlled identifiers, immutable role slugs, and permission keys governed by business rules. They eliminate magic strings and decouple business logic from unpredictable database autoincrement primary keys (e.g., avoiding hardcoded `id === 1` or `id === 3`).
+
+### Location & Structure
+
+- Placed in `application/domain/<BoundedContext>/constants/`.
+- Declared as `final class` with `public const` members.
+- Never instantiate domain constant classes.
+
+### Example: Role Slugs
+
+```php
+<?php
+
+namespace app\domain\identity\constants;
+
+/**
+ * Constants representing system role slugs.
+ */
+final class RoleSlug
+{
+	public const ADMIN = 'admin';
+	public const STUDENT = 'student';
+
+	public const ALL = [
+		self::ADMIN,
+		self::STUDENT,
+	];
+
+	/**
+	 * Check if a given slug is a valid system role.
+	 *
+	 * @param string $slug Slug to validate
+	 * @return bool
+	 */
+	public static function is_valid(string $slug): bool
+	{
+		return in_array($slug, self::ALL, true);
+	}
+}
+```
+
+### Example: Permission Slugs
+
+```php
+<?php
+
+namespace app\domain\authorization\constants;
+
+/**
+ * Constants representing system permission slugs.
+ */
+final class PermissionSlug
+{
+	public const DASHBOARD_VIEW = 'dashboard.view';
+
+	public const USERS_VIEW = 'users.view';
+	public const USERS_CREATE = 'users.create';
+	public const USERS_EDIT = 'users.edit';
+	public const USERS_TOGGLE_STATUS = 'users.toggle_status';
+	public const USERS_DELETE = 'users.delete';
+
+	public const ROLES_VIEW = 'roles.view';
+	public const ROLES_CREATE = 'roles.create';
+	public const ROLES_EDIT = 'roles.edit';
+	public const ROLES_DELETE = 'roles.delete';
+}
+```
+
+### Decoupling from Database IDs (Slug-Based Repository Lookups)
+
+Database IDs can shift between environments, seeders, or migrations. Domain logic and Use Cases must **NEVER** hardcode integer primary keys (e.g., `$role_id === 1`). Instead, Repositories provide slug-based lookup methods:
+
+```php
+// In Repository Interface:
+public function find_by_slug(string $slug): ?Role;
+
+// In Use Case:
+$admin_role = $this->role_repository->find_by_slug(RoleSlug::ADMIN);
+if ($admin_role !== null) {
+	// Dynamically resolve ID from entity instead of hardcoding
+	$admin_role_id = $admin_role->get_id();
+}
+```
+
 ## Repository Interface Pattern
 
 Repository Interfaces define persistence contracts and are placed in `repositories/`:
@@ -278,17 +370,21 @@ interface UserRepositoryInterface
 2. **Domain Exceptions**: Custom exceptions inherit from `app\domain\exceptions\AppException`.
 3. **Encapsulation**: Use `private` properties with getters.
 4. **Unified Factory Method**: Entities provide a unified `create()` factory method accepting all properties necessary to exist (with sensible defaults for optional/lifecycle properties). No `from_database()` or `reconstitute()` methods inside domain entities.
-5. **Subdirectories**: Value Objects MUST reside in `value_objects/` and Repository Interfaces MUST reside in `repositories/`.
+5. **Subdirectories**: Value Objects MUST reside in `value_objects/`, Repository Interfaces in `repositories/`, and Domain Constants in `constants/`.
 6. **Immutable Value Objects**: Value Objects must be immutable and implement `__toString()`.
 7. **Repository Interfaces**: Repository Interfaces define contracts, NOT implementations.
 8. **Global Style**: All style rules (PSR-12, docblocks, strict typing) MUST follow the global conventions defined in `GEMINI.md`.
+9. **Domain Constants for Fixed Slugs**: System roles, immutable identifiers, and permission slugs MUST be declared as constants in `domain/<context>/constants/<Name>Slug.php` (or `<Name>Constants.php`) instead of using magic strings throughout the codebase.
+10. **No Hardcoded Database IDs**: Never couple domain rules, use cases, or controllers to arbitrary autoincrement database IDs (e.g., checking `id === 1` to identify administrators). Use repository slug lookup with Domain Constants (e.g., `$role_repository->find_by_slug(RoleSlug::ADMIN)`).
 
 ---
 
 ## Anti-Patterns
 
+❌ **Hardcoding Database IDs for Business Roles**: Checking `id === 1` or `role_id === 3` in use cases or controllers. Database IDs are autoincrement implementation details and must not dictate business rules. Always look up or identify roles using `RoleSlug` constants and repository slug finders.
 ❌ **Database Hydration in Entities (`from_database` / `reconstitute`)**: Entities must NOT contain database hydration methods or reconstitution methods. Converting database DTOs into entities is exclusively the responsibility of Mappers in the Infrastructure/Model layer.
-❌ **Root-level Value Objects or Repositories**: Placing Value Objects or Repository Interfaces directly in `domain/<context>/` instead of `domain/<context>/value_objects/` and `domain/<context>/repositories/`.
+❌ **Root-level Value Objects, Repositories, or Constants**: Placing Value Objects, Repository Interfaces, or Constants directly in `domain/<context>/` instead of `domain/<context>/value_objects/`, `domain/<context>/repositories/`, and `domain/<context>/constants/`.
+❌ **Magic Strings for Domain Slugs/Roles**: Writing hardcoded strings (e.g., `'admin'`, `'student'`, `'users.create'`) in controllers, use cases, or models instead of referencing domain constants in `domain/<context>/constants/`.
 ❌ **Framework Coupling in Domain**: Calling `get_instance()`, `CI_Model`, `CI_Controller`, or database helpers inside Domain classes.
 ❌ **Using `ModelFactory` in Domain**: Domain entities and value objects must be pure PHP and must never instantiate models.
 ❌ **Mutable Value Objects**: Adding setters to Value Objects or modifying internal state after construction.

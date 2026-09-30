@@ -34,6 +34,45 @@ Use this skill when creating or modifying:
    - Language detection and loading is handled globally via the `Language_check` hook (`post_controller_constructor`).
 9. **Autoloaded Resources**:
    - DO NOT manually load `session`, `url`, `form`, `database`, or `response` helpers/libraries — they are registered in `$autoload`.
+10. **No `$this->input->post('field', TRUE)` (Input XSS Filtering is Forbidden)**:
+   - NEVER pass `TRUE` as the second parameter to `$this->input->post()`, `$this->input->get()`, or `$this->input->cookie()`.
+   - Passing `TRUE` triggers CI3's internal regex-heavy XSS filtering on each captured field, making requests excessively heavy and slow.
+   - Receiving raw data via form submissions is acceptable; XSS protection MUST be handled exclusively when outputting data to views using CodeIgniter's built-in `html_escape()` helper (or `htmlspecialchars()`).
+   - Always capture form inputs cleanly without the second argument: `$this->input->post('name')`.
+
+## Form Input Handling & XSS Strategy
+
+### 1. Ingestion (Controllers): Never Use `TRUE`
+
+Controllers must capture form and query parameters **without** passing `TRUE` as the second argument:
+
+```php
+// ✅ CORRECT: Fast, clean raw input retrieval
+$name = $this->input->post('name');
+$email = $this->input->post('email');
+$role_ids = $this->input->post('role_ids');
+
+// ❌ FORBIDDEN: Heavy regex processing degrades request performance
+$name = $this->input->post('name', TRUE);
+$email = $this->input->post('email', TRUE);
+```
+
+**Why is `TRUE` forbidden?**
+- Passing `TRUE` invokes CodeIgniter's `$this->security->xss_clean()`.
+- `xss_clean()` executes dozens of complex, CPU-intensive regular expressions on every single field.
+- This creates severe latency on form submissions and API endpoints.
+- Storing raw user input (even if it contains special characters or script tags) is standard practice and completely safe in application and database layers (SQL injection is prevented by parameterized queries/Query Builder).
+
+### 2. Rendering (Views): Always Use `html_escape()`
+
+XSS protection belongs exclusively to the **presentation/view output layer**. When displaying dynamic data in views, always escape it using CodeIgniter's native `html_escape()` helper:
+
+```php
+<!-- In view files (e.g. application/views/admin/users/form.php) -->
+<input type="text" name="name" class="form-control" value="<?= html_escape($user ? $user->get_name() : set_value('name')); ?>">
+
+<p class="user-display"><?= html_escape($user->get_email()); ?></p>
+```
 
 ## Controller Pattern Example
 
@@ -88,9 +127,9 @@ class Users extends MY_Controller
 		if ($this->form_validation->run() === TRUE) {
 			$use_case = new CreateUserUseCase();
 			$use_case->execute(
-				$this->input->post('name', TRUE),
-				$this->input->post('email', TRUE),
-				$this->input->post('password', TRUE)
+				$this->input->post('name'),
+				$this->input->post('email'),
+				$this->input->post('password')
 			);
 
 			$this->session->set_flashdata('success', 'Usuário criado com sucesso.');
@@ -135,4 +174,5 @@ class Users extends MY_Controller
 ❌ **Manual Try/Catch for standard exceptions**: Catching `NotFoundException`, `ValidationException`, `ConflictException`, etc. inside controllers instead of letting `MY_Controller::_remap()` handle them globally.
 ❌ **Manual language loading**: Calling `$this->lang->load()` or checking `HTTP_ACCEPT_LANGUAGE` in controllers instead of relying on the global `Language_check` hook.
 ❌ **Manual JSON formatting**: Calling `$this->output->set_output(json_encode(...))` instead of `json_response($data, $status_code)`.
+❌ **Input XSS Filtering (`$this->input->post('field', TRUE)`)**: Passing `TRUE` to `$this->input->post()`, `$this->input->get()`, etc. CI3's input XSS filter degrades request performance significantly. Capture inputs without `TRUE` and escape output when rendering in the view using the `html_escape()` helper.
 ❌ **Ignoring Global Styles**: All style rules (PSR-12, docblocks, strict typing, no single-letter variables) MUST follow the global conventions defined in `GEMINI.md`.

@@ -1,5 +1,23 @@
 ---
 description: "Agent encarregado de revisar o código recém-implementado contra as regras do AGENTS.md e GEMINI.md."
+mode: primary
+temperature: 0.1
+permission:
+  read: allow
+  edit: deny
+  bash:
+    "*": deny
+    "git-leandro status*": allow
+    "git-leandro diff*": allow
+    "git-leandro log*": allow
+    "git-leandro git status*": allow
+    "git-leandro git diff*": allow
+    "git-leandro git log*": allow
+    "docker compose exec app vendor/bin/phpunit*": allow
+    "docker compose exec app vendor/bin/codecept*": allow
+  glob: allow
+  grep: allow
+  todowrite: allow
 ---
 
 # Code Reviewer

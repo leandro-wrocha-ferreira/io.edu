@@ -35,6 +35,7 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
 - **Controllers** extend `MY_Controller` (in `application/core/MY_Controller.php`).
 - **Controllers** delegam lógica para Use Cases, nunca direto para Models.
 - **Controllers** NÃO devem conter regra de negócio — toda lógica de contagem, filtro ou processamento pertence ao Use Case.
+- **Proibição de Soluções de Contorno / "Bypass" Arquitetural Entre Fluxos**: É estritamente proibido criar atalhos, soluções improvisadas ou violar limites de camadas (ex: consultar models diretamente a partir de um controller) para compensar falhas ou ausência de dados de outro fluxo (ex: ausência de chaves na sessão). Se um dado necessário não estiver presente, ou a responsabilidade pertencer a outro fluxo, deve-se identificar a camada correta e corrigir a origem do dado (na sessão, autenticação ou caso de uso), jamais contornar o problema cometendo um erro arquitetural subsequente.
 - **Controllers (Form Flow)**: Sem métodos privados `_handle_*()` duplicando carregamento de views. Checar `$this->form_validation->run() === TRUE` diretamente na ação. A montagem do `$data` e a renderização da view acontecem em ponto único no final do método.
 - **Tratamento Global de Exceções**: `MY_Controller::_remap()` intercepta todas as chamadas de ações. Exceções não capturadas são tratadas automaticamente:
   - **Requisições AJAX**: Retornam JSON via `json_response()` com código HTTP equivalente (404, 409, 422, 500).
@@ -55,7 +56,7 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
 | Entities | `PascalCase` (com namespace) | `User.php`, `Course.php` |
 | Value Objects | `PascalCase` (com namespace) | `Email.php`, `Role.php` |
 | Interfaces | `NameInterface` (com namespace) | `UserRepositoryInterface.php` |
-| Factories | `PascalCase` (com namespace) | `Model_factory.php` |
+| Factories | `PascalCase` (com namespace) | `ModelFactory.php` |
 
 ## PSR-4 Autoloading
 
