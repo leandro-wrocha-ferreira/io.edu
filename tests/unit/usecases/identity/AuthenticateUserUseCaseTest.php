@@ -4,8 +4,8 @@ namespace tests\unit\usecases\identity;
 
 use app\domain\exceptions\ForbiddenException;
 use app\domain\exceptions\UnauthorizedException;
-use app\domain\identity\Email;
 use app\domain\identity\User;
+use app\domain\identity\value_objects\Email;
 use app\usecases\identity\AuthenticateUserUseCase;
 use tests\unit\mocks\repositories\MockUserRepository;
 
@@ -92,9 +92,9 @@ class AuthenticateUserUseCaseTest extends \PHPUnit\Framework\TestCase
 	{
 		$email = new Email('deleted@example.com');
 		$user = User::create('Deleted User', $email, 'password123');
-		
-		$this->mock_repository->save($user);
-		$this->mock_repository->delete($user);
+
+		$saved_user = $this->mock_repository->save($user);
+		$this->mock_repository->delete($saved_user);
 
 		$use_case = new AuthenticateUserUseCase($this->mock_repository);
 
