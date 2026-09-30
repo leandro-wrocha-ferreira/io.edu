@@ -21,12 +21,10 @@
 		"psr-4": {
 			"app\\domain\\": "application/domain/",
 			"app\\usecases\\": "application/usecases/",
-			"app\\factories\\": "application/factories/"
-		},
-		"classmap": [
-			"application/models/mappers/",
-			"application/models/dtos/"
-		]
+			"app\\factories\\": "application/factories/",
+			"app\\models\\dtos\\": "application/models/dtos/",
+			"app\\models\\mappers\\": "application/models/mappers/"
+		}
 	},
 	"autoload-dev": {
 		"classmap": [
