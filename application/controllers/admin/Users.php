@@ -189,7 +189,7 @@ class Users extends MY_Controller
 		$is_admin = (bool) $this->session->userdata('is_admin');
 
 		if ($id === $current_user_id) {
-			throw new ConflictException("Você não pode editar ou alterar as configurações do seu próprio usuário nesta tela.");
+			throw new ConflictException("You cannot edit your own user on this screen");
 		}
 
 		$user_model = ModelFactory::make('user_model');
@@ -247,7 +247,7 @@ class Users extends MY_Controller
 		$current_user_id = (int) $this->session->userdata('user_id');
 
 		if ($id === $current_user_id) {
-			throw new ConflictException("Você não pode alterar o status do seu próprio usuário.");
+			throw new ConflictException("You cannot alter the status of your own user");
 		}
 
 		$user_model = ModelFactory::make('user_model');
@@ -269,7 +269,7 @@ class Users extends MY_Controller
 		$current_user_id = (int) $this->session->userdata('user_id');
 
 		if ($id === $current_user_id) {
-			throw new ConflictException("Você não pode alterar o status do seu próprio usuário.");
+			throw new ConflictException("You cannot alter the status of your own user");
 		}
 
 		$user_model = ModelFactory::make('user_model');
@@ -291,7 +291,7 @@ class Users extends MY_Controller
 		$current_user_id = (int) $this->session->userdata('user_id');
 
 		if ($id === $current_user_id) {
-			throw new ConflictException("Você não pode excluir o seu próprio usuário.");
+			throw new ConflictException("You cannot delete your own user");
 		}
 
 		$user_model = ModelFactory::make('user_model');

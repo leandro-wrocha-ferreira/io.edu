@@ -28,10 +28,10 @@ class MY_Controller extends CI_Controller
 
 		try {
 			return call_user_func_array([$this, $method], $params);
-		} catch (AppException $e) {
-			$this->handle_app_exception($e);
-		} catch (\Throwable $e) {
-			$this->handle_generic_exception($e);
+		} catch (AppException $exception) {
+			$this->handle_app_exception($exception);
+		} catch (\Throwable $exception) {
+			$this->handle_generic_exception($exception);
 		}
 	}
 
@@ -55,59 +55,111 @@ class MY_Controller extends CI_Controller
 	}
 
 	/**
+	 * Translate exception message according to the active user language.
+	 *
+	 * Looks up direct phrase or exception key in loaded language files.
+	 * Falls back safely to the canonical English message if translation is missing.
+	 *
+	 * @param string $message English message or exception key
+	 * @return string Translated message or original fallback
+	 */
+	public function translate_exception_message(string $message): string
+	{
+		if ($message === '') {
+			return $message;
+		}
+
+		// 1. Direct language line lookup
+		$translated = $this->lang->line($message);
+		if ($translated !== false && $translated !== '') {
+			return $translated;
+		}
+
+		// 2. Normalized key lookup (e.g. "User not found" -> "exception_user_not_found")
+		$normalized_key = 'exception_' . strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', trim($message)));
+		$translated_key = $this->lang->line($normalized_key);
+		if ($translated_key !== false && $translated_key !== '') {
+			return $translated_key;
+		}
+
+		return $message;
+	}
+
+	/**
 	 * Handle domain and application exceptions (AppException and subclasses).
 	 *
 	 * Uses the exception's getStatusCode() (e.g. 404, 422, 409, 401, 403)
 	 * and error details for JSON responses, or sets flashdata and redirects for HTML.
+	 * Translates messages according to the user's detected locale.
 	 *
-	 * @param AppException $e
+	 * @param AppException $exception
 	 * @return void
 	 */
-	protected function handle_app_exception(AppException $e): void
+	protected function handle_app_exception(AppException $exception): void
 	{
+		$translated_message = $this->translate_exception_message($exception->getMessage());
+
 		if ($this->wants_json()) {
 			$response = [
 				'error' => true,
-				'message' => $e->getMessage(),
+				'message' => $translated_message,
 			];
 
-			$errors = $e->getErrors();
+			$errors = $exception->getErrors();
 			if (!empty($errors)) {
-				$response['errors'] = $errors;
+				$translated_errors = [];
+				foreach ($errors as $field => $field_error) {
+					if (is_string($field_error)) {
+						$translated_errors[$field] = $this->translate_exception_message($field_error);
+					} else {
+						$translated_errors[$field] = $field_error;
+					}
+				}
+				$response['errors'] = $translated_errors;
 			}
 
-			json_response($response, $e->getStatusCode());
+			json_response($response, $exception->getStatusCode());
 			return;
 		}
 
-		$this->session->set_flashdata('error', $e->getMessage());
+		$this->session->set_flashdata('error', $translated_message);
 		redirect($this->get_redirect_back_url());
 	}
 
 	/**
 	 * Handle unexpected server errors and uncaught throwables (HTTP 500).
 	 *
-	 * @param \Throwable $e
+	 * @param \Throwable $exception
 	 * @return void
 	 * @throws \Throwable
 	 */
-	protected function handle_generic_exception(\Throwable $e): void
+	protected function handle_generic_exception(\Throwable $exception): void
 	{
-		log_message('error', $e->getMessage() . "\n" . $e->getTraceAsString());
+		log_message('error', $exception->getMessage() . "\n" . $exception->getTraceAsString());
+
+		$internal_error_message = $this->lang->line('exception_internal_server_error');
+		if ($internal_error_message === false || $internal_error_message === '') {
+			$internal_error_message = 'An internal server error occurred.';
+		}
 
 		if ($this->wants_json()) {
 			json_response([
 				'error' => true,
-				'message' => 'Ocorreu um erro interno no servidor.',
+				'message' => $internal_error_message,
 			], 500);
 			return;
 		}
 
 		if (ENVIRONMENT === 'development') {
-			throw $e;
+			throw $exception;
 		}
 
-		show_error('Ocorreu um erro inesperado ao processar sua solicitação.', 500);
+		$unexpected_error_message = $this->lang->line('exception_unexpected_error');
+		if ($unexpected_error_message === false || $unexpected_error_message === '') {
+			$unexpected_error_message = 'An unexpected error occurred while processing your request.';
+		}
+
+		show_error($unexpected_error_message, 500);
 	}
 
 	/**
