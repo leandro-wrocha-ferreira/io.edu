@@ -163,6 +163,7 @@
 	<script src="<?= base_url('public/assets/js/bootstrap.bundle.min.js') ?>"></script>
 	<script src="//cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 	<script src="//cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+	<script src="<?= base_url('public/assets/js/http.js') ?>"></script>
 	<script src="<?= base_url('public/assets/js/admin/layout.js') ?>"></script>
 
 	<!-- Page-Specific Scripts -->
