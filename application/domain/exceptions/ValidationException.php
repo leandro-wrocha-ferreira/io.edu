@@ -2,6 +2,8 @@
 
 namespace app\domain\exceptions;
 
+use Throwable;
+
 /**
  * Exception thrown when domain validation or business rules fail.
  *
@@ -9,15 +11,15 @@ namespace app\domain\exceptions;
  */
 class ValidationException extends AppException
 {
-    /**
-     * Constructor.
-     *
-     * @param string $message Error message
-     * @param array $errors Field-specific validation errors
-     * @param \Throwable|null $previous Previous exception
-     */
-    public function __construct(string $message = "Dados inválidos", array $errors = [], ?\Throwable $previous = null)
-    {
-        parent::__construct($message, 422, $errors, $previous);
-    }
+	/**
+	 * Constructor.
+	 *
+	 * @param string $message Error message
+	 * @param array<string, mixed> $errors Field-specific validation errors
+	 * @param Throwable|null $previous Previous exception
+	 */
+	public function __construct(string $message = "Dados inválidos", array $errors = [], ?Throwable $previous = null)
+	{
+		parent::__construct($message, 422, $errors, $previous);
+	}
 }

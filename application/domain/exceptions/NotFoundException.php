@@ -2,6 +2,8 @@
 
 namespace app\domain\exceptions;
 
+use Throwable;
+
 /**
  * Exception thrown when a requested domain entity or resource is not found.
  *
@@ -9,15 +11,15 @@ namespace app\domain\exceptions;
  */
 class NotFoundException extends AppException
 {
-    /**
-     * Constructor.
-     *
-     * @param string $message Error message
-     * @param array $errors Additional error details
-     * @param \Throwable|null $previous Previous exception
-     */
-    public function __construct(string $message = "Record not found", array $errors = [], ?\Throwable $previous = null)
-    {
-        parent::__construct($message, 404, $errors, $previous);
-    }
+	/**
+	 * Constructor.
+	 *
+	 * @param string $message Error message
+	 * @param array<string, mixed> $errors Additional error details
+	 * @param Throwable|null $previous Previous exception
+	 */
+	public function __construct(string $message = "Record not found", array $errors = [], ?Throwable $previous = null)
+	{
+		parent::__construct($message, 404, $errors, $previous);
+	}
 }

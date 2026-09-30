@@ -2,6 +2,8 @@
 
 namespace app\domain\exceptions;
 
+use Throwable;
+
 /**
  * Exception thrown when an authenticated user does not have permission to perform an action.
  *
@@ -9,15 +11,15 @@ namespace app\domain\exceptions;
  */
 class ForbiddenException extends AppException
 {
-    /**
-     * Constructor.
-     *
-     * @param string $message Error message
-     * @param array $errors Additional error details
-     * @param \Throwable|null $previous Previous exception
-     */
-    public function __construct(string $message = "Acesso negado", array $errors = [], ?\Throwable $previous = null)
-    {
-        parent::__construct($message, 403, $errors, $previous);
-    }
+	/**
+	 * Constructor.
+	 *
+	 * @param string $message Error message
+	 * @param array<string, mixed> $errors Additional error details
+	 * @param Throwable|null $previous Previous exception
+	 */
+	public function __construct(string $message = "Acesso negado", array $errors = [], ?Throwable $previous = null)
+	{
+		parent::__construct($message, 403, $errors, $previous);
+	}
 }
