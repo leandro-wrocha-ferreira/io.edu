@@ -52,7 +52,7 @@ class DeleteRoleUseCaseTest extends \PHPUnit\Framework\TestCase
 		$use_case = new DeleteRoleUseCase($this->mock_role_repository);
 
 		$this->expectException(NotFoundException::class);
-		$this->expectExceptionMessage('Perfil não encontrado');
+		$this->expectExceptionMessage('Role not found');
 
 		$use_case->execute(999);
 	}
@@ -70,7 +70,7 @@ class DeleteRoleUseCaseTest extends \PHPUnit\Framework\TestCase
 		$use_case = new DeleteRoleUseCase($this->mock_role_repository);
 
 		$this->expectException(ConflictException::class);
-		$this->expectExceptionMessage('Perfis padrão do sistema não podem ser excluídos.');
+		$this->expectExceptionMessage('Default system roles cannot be deleted');
 
 		$use_case->execute($admin_master->get_id());
 	}

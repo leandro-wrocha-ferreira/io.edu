@@ -60,7 +60,7 @@ class UpdateRoleUseCaseTest extends \PHPUnit\Framework\TestCase
 		$use_case = new UpdateRoleUseCase($this->mock_role_repository, $this->mock_permission_repository);
 
 		$this->expectException(NotFoundException::class);
-		$this->expectExceptionMessage('Perfil não encontrado');
+		$this->expectExceptionMessage('Role not found');
 
 		$use_case->execute(999, 'Name', 'slug');
 	}
@@ -78,7 +78,7 @@ class UpdateRoleUseCaseTest extends \PHPUnit\Framework\TestCase
 		$use_case = new UpdateRoleUseCase($this->mock_role_repository, $this->mock_permission_repository);
 
 		$this->expectException(ConflictException::class);
-		$this->expectExceptionMessage('O perfil AdminMaster é protegido e não pode ser alterado.');
+		$this->expectExceptionMessage('The AdminMaster role is protected and cannot be modified');
 
 		$use_case->execute($admin_master->get_id(), 'New Master', 'new-master');
 	}

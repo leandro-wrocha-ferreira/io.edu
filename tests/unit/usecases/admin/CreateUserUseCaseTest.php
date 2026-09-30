@@ -96,7 +96,7 @@ class CreateUserUseCaseTest extends \PHPUnit\Framework\TestCase
 		$use_case = new CreateUserUseCase($this->mock_user_repository, $this->mock_role_repository);
 
 		$this->expectException(ValidationException::class);
-		$this->expectExceptionMessage('E-mail já está em uso');
+		$this->expectExceptionMessage('Email is already in use');
 
 		$use_case->execute('Another Name', 'duplicate@example.com', 'newpass123');
 	}

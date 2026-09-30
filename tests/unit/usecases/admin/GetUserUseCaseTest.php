@@ -53,7 +53,7 @@ class GetUserUseCaseTest extends \PHPUnit\Framework\TestCase
 		$use_case = new GetUserUseCase($this->mock_user_repository);
 
 		$this->expectException(NotFoundException::class);
-		$this->expectExceptionMessage('Usuário não encontrado');
+		$this->expectExceptionMessage('User not found');
 
 		$use_case->execute(999);
 	}

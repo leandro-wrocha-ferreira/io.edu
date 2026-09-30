@@ -108,7 +108,7 @@ class UpdateUserUseCaseTest extends \PHPUnit\Framework\TestCase
 		$use_case = new UpdateUserUseCase($this->mock_user_repository);
 
 		$this->expectException(NotFoundException::class);
-		$this->expectExceptionMessage('Usuário não encontrado');
+		$this->expectExceptionMessage('User not found');
 
 		$use_case->execute(999, 'Name', 'valid@example.com');
 	}
@@ -128,7 +128,7 @@ class UpdateUserUseCaseTest extends \PHPUnit\Framework\TestCase
 		$use_case = new UpdateUserUseCase($this->mock_user_repository);
 
 		$this->expectException(ValidationException::class);
-		$this->expectExceptionMessage('E-mail já está em uso');
+		$this->expectExceptionMessage('Email is already in use');
 
 		$use_case->execute($user_two->get_id(), 'User Two Updated', 'user1@example.com');
 	}

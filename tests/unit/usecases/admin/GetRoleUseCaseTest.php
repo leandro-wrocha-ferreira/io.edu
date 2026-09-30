@@ -52,7 +52,7 @@ class GetRoleUseCaseTest extends \PHPUnit\Framework\TestCase
 		$use_case = new GetRoleUseCase($this->mock_role_repository);
 
 		$this->expectException(NotFoundException::class);
-		$this->expectExceptionMessage('Perfil não encontrado');
+		$this->expectExceptionMessage('Role not found');
 
 		$use_case->execute(999);
 	}

@@ -19,10 +19,10 @@ class DomainExceptionsTest extends \PHPUnit\Framework\TestCase
 	 */
 	public function test_app_exception(): void
 	{
-		$exception = new AppException('Erro genérico', 400, ['field' => 'erro']);
+		$exception = new AppException('Generic error', 400, ['field' => 'error']);
 		$this->assertEquals(400, $exception->getStatusCode());
-		$this->assertEquals('Erro genérico', $exception->getMessage());
-		$this->assertEquals(['field' => 'erro'], $exception->getErrors());
+		$this->assertEquals('Generic error', $exception->getMessage());
+		$this->assertEquals(['field' => 'error'], $exception->getErrors());
 	}
 
 	/**
@@ -32,9 +32,9 @@ class DomainExceptionsTest extends \PHPUnit\Framework\TestCase
 	 */
 	public function test_not_found_exception(): void
 	{
-		$exception = new NotFoundException('Registro não encontrado');
+		$exception = new NotFoundException('Record not found');
 		$this->assertEquals(404, $exception->getStatusCode());
-		$this->assertEquals('Registro não encontrado', $exception->getMessage());
+		$this->assertEquals('Record not found', $exception->getMessage());
 	}
 
 	/**
@@ -44,10 +44,10 @@ class DomainExceptionsTest extends \PHPUnit\Framework\TestCase
 	 */
 	public function test_validation_exception(): void
 	{
-		$exception = new ValidationException('Dados inválidos', ['email' => 'invalido']);
+		$exception = new ValidationException('Invalid data', ['email' => 'invalid']);
 		$this->assertEquals(422, $exception->getStatusCode());
-		$this->assertEquals('Dados inválidos', $exception->getMessage());
-		$this->assertEquals(['email' => 'invalido'], $exception->getErrors());
+		$this->assertEquals('Invalid data', $exception->getMessage());
+		$this->assertEquals(['email' => 'invalid'], $exception->getErrors());
 	}
 
 	/**
@@ -57,9 +57,9 @@ class DomainExceptionsTest extends \PHPUnit\Framework\TestCase
 	 */
 	public function test_conflict_exception(): void
 	{
-		$exception = new ConflictException('Já cadastrado');
+		$exception = new ConflictException('Already registered');
 		$this->assertEquals(409, $exception->getStatusCode());
-		$this->assertEquals('Já cadastrado', $exception->getMessage());
+		$this->assertEquals('Already registered', $exception->getMessage());
 	}
 
 	/**
@@ -69,9 +69,9 @@ class DomainExceptionsTest extends \PHPUnit\Framework\TestCase
 	 */
 	public function test_forbidden_exception(): void
 	{
-		$exception = new ForbiddenException('Acesso negado');
+		$exception = new ForbiddenException('Access denied');
 		$this->assertEquals(403, $exception->getStatusCode());
-		$this->assertEquals('Acesso negado', $exception->getMessage());
+		$this->assertEquals('Access denied', $exception->getMessage());
 	}
 
 	/**
@@ -81,8 +81,8 @@ class DomainExceptionsTest extends \PHPUnit\Framework\TestCase
 	 */
 	public function test_unauthorized_exception(): void
 	{
-		$exception = new UnauthorizedException('Não autenticado');
+		$exception = new UnauthorizedException('Not authenticated');
 		$this->assertEquals(401, $exception->getStatusCode());
-		$this->assertEquals('Não autenticado', $exception->getMessage());
+		$this->assertEquals('Not authenticated', $exception->getMessage());
 	}
 }
