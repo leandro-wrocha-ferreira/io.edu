@@ -1,6 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use app\domain\identity\constants\RoleSlug;
 use app\usecases\identity\AuthenticateUserUseCase;
 use app\factories\ModelFactory;
 
@@ -38,17 +39,19 @@ class Auth extends MY_Controller
 		$this->form_validation->set_rules('password', 'Password', 'required');
 
 		if ($this->form_validation->run() === TRUE) {
-			$email = $this->input->post('email', TRUE);
-			$password = $this->input->post('password', TRUE);
+			$email = $this->input->post('email');
+			$password = $this->input->post('password');
 
 			$use_case = new AuthenticateUserUseCase(ModelFactory::make('user_model'));
 			$user = $use_case->execute($email, $password);
 
+			$role = $user->get_role() ?? RoleSlug::STUDENT;
 			$session_data = [
 				'user_id' => $user->get_id(),
 				'user_name' => $user->get_name(),
 				'user_email' => (string) $user->get_email(),
-				'user_role' => $user->get_role(),
+				'user_role' => $role,
+				'is_admin' => $role === RoleSlug::ADMIN,
 				'logged_in' => TRUE,
 			];
 			$this->session->set_userdata($session_data);
@@ -81,7 +84,7 @@ class Auth extends MY_Controller
 	private function _redirect_by_role()
 	{
 		$role = $this->session->userdata('user_role');
-		if ($role === 'admin-master' || $role === 'admin') {
+		if ($role === RoleSlug::ADMIN) {
 			redirect('admin/painel');
 		} else {
 			redirect('aluno/painel');

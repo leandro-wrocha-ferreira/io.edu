@@ -52,7 +52,7 @@
 					<div class="brand-logo-icon" aria-hidden="true">
 						<i class="bi bi-lightning-fill"></i>
 					</div>
-					<span class="brand-logo-text">Inver<span>ta</span></span>
+					<span class="brand-logo-text">IO<span>edu</span></span>
 				</a>
 			</div>
 
@@ -116,7 +116,7 @@
 						<?= strtoupper(substr($this->session->userdata('user_name') ?? 'U', 0, 1)) ?>
 					</div>
 					<div class="details">
-						<span class="name"><?= htmlspecialchars($this->session->userdata('user_name') ?? 'Usuário') ?></span>
+						<span class="name"><?= html_escape($this->session->userdata('user_name') ?? 'Usuário') ?></span>
 						<span class="role">Administrador</span>
 					</div>
 				</div>

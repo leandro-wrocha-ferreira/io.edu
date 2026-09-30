@@ -21,7 +21,7 @@
 		</div>
 
 		<div class="alert alert-info">
-			Olá, <strong><?= htmlspecialchars($user_name) ?></strong>! Bem-vindo à sua área.
+			Olá, <strong><?= html_escape($user_name) ?></strong>! Bem-vindo à sua área.
 		</div>
 
 		<div class="row">

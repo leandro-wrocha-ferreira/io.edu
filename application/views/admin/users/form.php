@@ -23,7 +23,7 @@
 <?php if (isset($error)): ?>
 	<div class="alert alert-flash alert-flash-danger alert-dismissible fade show mb-4 animate-fade-up" role="alert" aria-live="polite">
 		<i class="bi bi-exclamation-circle-fill alert-flash-icon" aria-hidden="true"></i>
-		<div class="alert-flash-body"><?= htmlspecialchars($error) ?></div>
+		<div class="alert-flash-body"><?= html_escape($error) ?></div>
 		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
 	</div>
 <?php endif; ?>
@@ -53,7 +53,7 @@
 					       class="form-control <?= form_error('name') ? 'is-invalid' : '' ?>"
 					       id="name"
 					       name="name"
-					       value="<?= htmlspecialchars($user ? $user->get_name() : set_value('name')) ?>"
+					       value="<?= html_escape($user ? $user->get_name() : set_value('name')) ?>"
 					       autocomplete="name"
 					       required>
 					<?php if (form_error('name')): ?>
@@ -66,7 +66,7 @@
 					       class="form-control <?= form_error('email') ? 'is-invalid' : '' ?>"
 					       id="email"
 					       name="email"
-					       value="<?= htmlspecialchars($user ? (string) $user->get_email() : set_value('email')) ?>"
+					       value="<?= html_escape($user ? (string) $user->get_email() : set_value('email')) ?>"
 					       autocomplete="email"
 					       spellcheck="false"
 					       required>
@@ -123,9 +123,9 @@
 							       name="role_ids[]"
 							       id="role_<?= $role->get_id() ?>"
 							       value="<?= $role->get_id() ?>"
-							       <?= $user && in_array($role->get_id(), $user->get_role_ids()) ? 'checked' : '' ?>>
+							       <?= (!empty($user_role_ids) && in_array($role->get_id(), $user_role_ids)) ? 'checked' : '' ?>>
 							<label class="form-check-label" for="role_<?= $role->get_id() ?>">
-								<?= htmlspecialchars($role->get_name()) ?>
+								<?= html_escape($role->get_name()) ?>
 							</label>
 						</div>
 					</div>

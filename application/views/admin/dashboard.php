@@ -8,7 +8,7 @@
 			<span class="sep">›</span>
 			<span>Dashboard</span>
 		</p>
-		<h1 class="page-header-title">Bem-vindo, <?= htmlspecialchars($user_name ?? $this->session->userdata('user_name')) ?>!</h1>
+		<h1 class="page-header-title">Bem-vindo, <?= html_escape($user_name ?? $this->session->userdata('user_name')) ?>!</h1>
 		<p class="page-header-subtitle">Acompanhe os números da sua plataforma de educação.</p>
 	</div>
 </div>

@@ -23,7 +23,7 @@
 <?php if (isset($error)): ?>
 	<div class="alert alert-flash alert-flash-danger alert-dismissible fade show mb-4 animate-fade-up" role="alert" aria-live="polite">
 		<i class="bi bi-exclamation-circle-fill alert-flash-icon" aria-hidden="true"></i>
-		<div class="alert-flash-body"><?= htmlspecialchars($error) ?></div>
+		<div class="alert-flash-body"><?= html_escape($error) ?></div>
 		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
 	</div>
 <?php endif; ?>
@@ -53,7 +53,7 @@
 					       class="form-control <?= form_error('name') ? 'is-invalid' : '' ?>"
 					       id="name"
 					       name="name"
-					       value="<?= htmlspecialchars($role ? $role->get_name() : set_value('name')) ?>"
+					       value="<?= html_escape($role ? $role->get_name() : set_value('name')) ?>"
 					       autocomplete="off"
 					       required>
 					<?php if (form_error('name')): ?>
@@ -66,7 +66,7 @@
 					       class="form-control <?= form_error('slug') ? 'is-invalid' : '' ?>"
 					       id="slug"
 					       name="slug"
-					       value="<?= htmlspecialchars($role ? $role->get_slug() : set_value('slug')) ?>"
+					       value="<?= html_escape($role ? $role->get_slug() : set_value('slug')) ?>"
 					       autocomplete="off"
 					       spellcheck="false"
 					       required>
@@ -82,7 +82,7 @@
 					<textarea class="form-control"
 					          id="description"
 					          name="description"
-					          rows="2"><?= htmlspecialchars($role ? $role->get_description() ?? '' : set_value('description')) ?></textarea>
+					          rows="2"><?= html_escape($role ? $role->get_description() ?? '' : set_value('description')) ?></textarea>
 				</div>
 			</div>
 		</div>
@@ -106,9 +106,9 @@
 								       name="permission_ids[]"
 								       id="perm_<?= $permission->get_id() ?>"
 								       value="<?= $permission->get_id() ?>"
-								       <?= $role && in_array($permission->get_id(), $role->get_permission_ids()) ? 'checked' : '' ?>>
+								       <?= (!empty($role_permission_ids) && in_array($permission->get_id(), $role_permission_ids)) ? 'checked' : '' ?>>
 								<label class="form-check-label" for="perm_<?= $permission->get_id() ?>">
-									<?= htmlspecialchars($permission->get_name()) ?>
+									<?= html_escape($permission->get_name()) ?>
 								</label>
 							</div>
 						</div>

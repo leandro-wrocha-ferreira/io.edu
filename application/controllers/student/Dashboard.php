@@ -27,7 +27,7 @@ class Dashboard extends MY_Controller
 	{
 		$data = [
 			'user_name' => $this->session->userdata('user_name'),
-			'title'     => 'Painel do Aluno',
+			'title' => 'Painel do Aluno',
 		];
 
 		$this->load->view('student/dashboard', $data);
