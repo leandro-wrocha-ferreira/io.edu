@@ -1,5 +1,12 @@
 <?php
 
+namespace app\models\dtos;
+
+use DateTime;
+
+/**
+ * Database DTO representing a raw user record.
+ */
 final class UserDatabase
 {
 	public int $id;
@@ -13,6 +20,8 @@ final class UserDatabase
 	public ?DateTime $deleted_at;
 
 	/**
+	 * Constructor.
+	 *
 	 * @param array{id: int|string, name: string, email: string, password: string, is_active: int|string|bool, role?: ?string, created_at?: ?string, updated_at?: ?string, deleted_at?: ?string} $data
 	 */
 	public function __construct(array $data)

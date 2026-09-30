@@ -1,6 +1,9 @@
 <?php
 
+namespace app\models\mappers;
+
 use app\domain\identity\Role;
+use app\models\dtos\RoleDatabase;
 
 /**
  * Mapper for converting between raw database data and Role domain entity.
@@ -10,8 +13,8 @@ class RoleMapper
 	/**
 	 * Convert a raw database row into a Role domain entity.
 	 *
-	 * @param ?RoleDatabase $row
-	 * @return ?Role
+	 * @param RoleDatabase|null $row
+	 * @return Role|null
 	 */
 	public static function to_entity(?RoleDatabase $row): ?Role
 	{
@@ -32,7 +35,7 @@ class RoleMapper
 	/**
 	 * Convert multiple raw database rows into an array of Role domain entities.
 	 *
-	 * @param array $rows
+	 * @param array<array<string, mixed>> $rows
 	 * @return array<Role>
 	 */
 	public static function to_entities(array $rows): array

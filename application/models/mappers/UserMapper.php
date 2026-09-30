@@ -1,9 +1,11 @@
 <?php
 
+namespace app\models\mappers;
+
 use app\domain\identity\User;
 use app\domain\identity\value_objects\Email;
 use app\domain\identity\value_objects\Password;
-
+use app\models\dtos\UserDatabase;
 
 /**
  * Mapper for converting between raw database data and User domain entity.
@@ -11,10 +13,10 @@ use app\domain\identity\value_objects\Password;
 class UserMapper
 {
 	/**
-	 * Convert a raw database row array into a User domain entity.
+	 * Convert a raw database row into a User domain entity.
 	 *
-	 * @param UserDatabase $row Raw database row array
-	 * @return User User domain entity or null
+	 * @param UserDatabase $row Raw database row DTO
+	 * @return User User domain entity
 	 */
 	public static function to_entity(UserDatabase $row): User
 	{
@@ -34,7 +36,7 @@ class UserMapper
 	/**
 	 * Convert multiple raw database rows into an array of User domain entities.
 	 *
-	 * @param array $rows
+	 * @param array<array<string, mixed>> $rows
 	 * @return array<User>
 	 */
 	public static function to_entities(array $rows): array

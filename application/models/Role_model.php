@@ -3,6 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 use app\domain\identity\Role;
 use app\domain\identity\repositories\RoleRepositoryInterface;
+use app\models\dtos\RoleDatabase;
+use app\models\mappers\RoleMapper;
 
 /**
  * Role model implementing RoleRepositoryInterface.

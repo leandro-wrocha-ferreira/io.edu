@@ -1,6 +1,9 @@
 <?php
 
+namespace app\models\mappers;
+
 use app\domain\authorization\Permission;
+use app\models\dtos\PermissionDatabase;
 
 /**
  * Mapper for converting between raw database data and Permission domain entity.
@@ -10,8 +13,8 @@ class PermissionMapper
 	/**
 	 * Convert a raw database row into a Permission domain entity.
 	 *
-	 * @param ?PermissionDatabase $row
-	 * @return ?Permission
+	 * @param PermissionDatabase|null $row
+	 * @return Permission|null
 	 */
 	public static function to_entity(?PermissionDatabase $row): ?Permission
 	{
@@ -32,7 +35,7 @@ class PermissionMapper
 	/**
 	 * Convert multiple raw database rows into an array of Permission domain entities.
 	 *
-	 * @param array $rows
+	 * @param array<array<string, mixed>> $rows
 	 * @return array<Permission>
 	 */
 	public static function to_entities(array $rows): array

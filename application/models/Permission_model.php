@@ -3,6 +3,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 use app\domain\authorization\Permission;
 use app\domain\authorization\repositories\PermissionRepositoryInterface;
+use app\models\dtos\PermissionDatabase;
+use app\models\mappers\PermissionMapper;
 
 /**
  * Permission model implementing PermissionRepositoryInterface.

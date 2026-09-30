@@ -1,5 +1,12 @@
 <?php
 
+namespace app\models\dtos;
+
+use DateTime;
+
+/**
+ * Database DTO representing a raw role record.
+ */
 final class RoleDatabase
 {
 	public int $id;
@@ -10,7 +17,9 @@ final class RoleDatabase
 	public ?DateTime $updated_at;
 
 	/**
-	 * @param array{id: int, name: string, slug: string, description: ?string, created_at: string, updated_at: ?string} $data
+	 * Constructor.
+	 *
+	 * @param array{id: int|string, name: string, slug: string, description?: ?string, created_at?: ?string, updated_at?: ?string} $data
 	 */
 	public function __construct(array $data)
 	{

@@ -4,6 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 use app\domain\identity\User;
 use app\domain\identity\repositories\UserRepositoryInterface;
 use app\domain\identity\value_objects\Email;
+use app\models\dtos\UserDatabase;
+use app\models\mappers\UserMapper;
 
 /**
  * User model implementing UserRepositoryInterface.
