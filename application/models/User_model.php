@@ -1,16 +1,15 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-use app\domain\identity\Email;
 use app\domain\identity\User;
-use app\domain\identity\UserRepositoryInterface;
+use app\domain\identity\repositories\UserRepositoryInterface;
+use app\domain\identity\value_objects\Email;
 
 /**
  * User model implementing UserRepositoryInterface.
  *
- * Handles persistence for the User entity using MY_Model explicit CRUD engine.
- * Follows KISS principles: uses clean single-table queries and separate
- * helper queries for RBAC role hydration.
+ * Handles persistence for the User entity using MY_Model pure data CRUD engine
+ * and delegates entity-database mapping exclusively to UserMapper.
  */
 class User_model extends MY_Model implements UserRepositoryInterface
 {
@@ -22,13 +21,6 @@ class User_model extends MY_Model implements UserRepositoryInterface
 	protected string $table = 'users';
 
 	/**
-	 * Target entity class for automatic hydration.
-	 *
-	 * @var string|null
-	 */
-	protected ?string $entity_class = User::class;
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct()
@@ -37,123 +29,123 @@ class User_model extends MY_Model implements UserRepositoryInterface
 	}
 
 	/**
-	 * Explicit filter helper to exclude admin-master users from listing queries.
-	 *
-	 * Uses a subquery to avoid polluting the main query with outer JOINs.
-	 *
-	 * @return void
-	 */
-	public function scope_exclude_admin_master(): void
-	{
-		$this->db->where("users.id NOT IN (
-			SELECT ur.user_id 
-			FROM user_roles ur 
-			INNER JOIN roles r ON r.id = ur.role_id 
-			WHERE r.slug = 'admin-master'
-		)", NULL, FALSE);
-	}
-
-	/**
 	 * Find a user by their ID.
 	 *
-	 * @param int|string $id User ID
+	 * @param int $id User ID
 	 * @return User|null User entity or null if not found
 	 */
-	public function find_by_id($id): ?User
+	public function find_by_id(int $id): ?User
 	{
-		$row = $this->db
-			->where('users.id', (int) $id)
-			->get($this->table)
+		$row = $this->db->select('users.*, roles.slug as role')
+			->from($this->table)
+			->join('user_roles', 'user_roles.user_id = users.id', 'left')
+			->join('roles', 'roles.id = user_roles.role_id', 'left')
+			->where('users.id', $id)
+			->get()
 			->row_array();
 
 		if ($row === null) {
 			return null;
 		}
 
-		$row = $this->_hydrate_user_roles($row);
-		return $this->to_entity($row);
+		return UserMapper::to_entity(new UserDatabase($row));
 	}
 
 	/**
 	 * Find a user by their email address.
-	 *
-	 * Queries directly without admin-master exclusion so authentication succeeds for all roles.
 	 *
 	 * @param Email $email User email (Value Object)
 	 * @return User|null User entity or null if not found
 	 */
 	public function find_by_email(Email $email): ?User
 	{
-		$row = $this->db
+		$row = $this->db->select('users.*, roles.slug as role')
+			->from($this->table)
+			->join('user_roles', 'user_roles.user_id = users.id', 'left')
+			->join('roles', 'roles.id = user_roles.role_id', 'left')
 			->where('users.email', (string) $email)
-			->get($this->table)
+			->get()
 			->row_array();
 
 		if ($row === null) {
 			return null;
 		}
 
-		$row = $this->_hydrate_user_roles($row);
-		return $this->to_entity($row);
+		return UserMapper::to_entity(new UserDatabase($row));
+	}
+
+	/**
+	 * Create a new user record in the database and return the hydrated entity.
+	 *
+	 * Converts the domain entity to database array via UserMapper, inserts into
+	 * the database, and hydrates the newly inserted record back into a User entity.
+	 *
+	 * @param User $user User entity to persist
+	 * @return User Reconstituted User entity from database
+	 */
+	public function create(User $user): User
+	{
+		$data = UserMapper::to_database_create($user);
+		$insert_id = $this->insert($data);
+
+		$row = $this->db->where($this->primary_key, $insert_id)
+			->get($this->table)
+			->row_array();
+
+		return UserMapper::to_entity(new UserDatabase($row));
 	}
 
 	/**
 	 * Save (insert or update) a user.
 	 *
-	 * If the user has an ID, performs an update; otherwise inserts a new record.
-	 * Also syncs the user_roles association.
+	 * If the user has an ID, performs an update; otherwise creates a new record.
 	 *
 	 * @param User $user User entity to persist
-	 * @return User
+	 * @return User Reconstituted User entity from database
 	 */
 	public function save(User $user): User
 	{
-		$data = [
-			'name' => $user->get_name(),
-			'email' => (string) $user->get_email(),
-			'password' => $user->get_password(),
-			'is_active' => $user->is_active() ? 1 : 0,
-		];
-
-		if ($user->get_id() !== null) {
-			$data['deleted_at'] = $user->is_deleted() ? date('Y-m-d H:i:s') : null;
-			$this->update($data, ['id' => $user->get_id()]);
-		} else {
-			$new_id = $this->insert($data);
-			$user->set_id((int) $new_id);
+		if ($user->get_id() === null) {
+			return $this->create($user);
 		}
 
-		return $user;
+		$data = UserMapper::to_database_update($user);
+		$this->update($data, [$this->primary_key => $user->get_id()]);
+
+		$row = $this->db->where($this->primary_key, $user->get_id())
+			->get($this->table)
+			->row_array();
+
+		return UserMapper::to_entity(new UserDatabase($row));
 	}
 
 	/**
-	 * Soft delete users matching specified conditions.
+	 * Soft delete a user entity.
 	 *
-	 * Sets the deleted_at timestamp instead of removing records.
+	 * Sets the deleted_at timestamp on the entity and persists it.
 	 *
-	 * @param array $where Filter conditions. Usually the primary key (e.g. ['id' => $id])
-	 * @return bool
+	 * @param User $user User entity to delete
+	 * @return User Deleted user entity
 	 */
-	public function delete(array $where): bool
+	public function delete(User $user): User
 	{
-		return $this->update(['deleted_at' => date('Y-m-d H:i:s')], $where);
+		$user->delete();
+		return $this->save($user);
 	}
 
 	/**
 	 * Find all non-deleted users, ordered by creation date DESC.
 	 *
-	 * @return array User entities
+	 * @return array<User> User entities
 	 */
 	public function find_all(): array
 	{
-		$this->db
-			->where('users.deleted_at', NULL)
+		$this->db->where('users.deleted_at', NULL)
 			->order_by('users.created_at', 'DESC');
 
 		$rows = $this->db->get($this->table)->result_array();
-		$rows = $this->_hydrate_batch_user_roles($rows);
 
-		return $this->to_entities($rows);
+		return UserMapper::to_entities($rows);
 	}
 
 	/**
@@ -164,8 +156,7 @@ class User_model extends MY_Model implements UserRepositoryInterface
 	 */
 	public function count_by_role(string $role): int
 	{
-		return (int) $this->db
-			->join('user_roles', 'user_roles.user_id = users.id')
+		return $this->db->join('user_roles', 'user_roles.user_id = users.id')
 			->join('roles', 'roles.id = user_roles.role_id')
 			->where('roles.slug', $role)
 			->where('users.deleted_at', NULL)
@@ -181,8 +172,7 @@ class User_model extends MY_Model implements UserRepositoryInterface
 	 */
 	public function has_permission(int $user_id, string $permission_slug): bool
 	{
-		$count = (int) $this->db
-			->join('user_roles', 'user_roles.user_id = users.id')
+		$count = $this->db->join('user_roles', 'user_roles.user_id = users.id')
 			->join('role_permissions', 'role_permissions.role_id = user_roles.role_id')
 			->join('permissions', 'permissions.id = role_permissions.permission_id')
 			->where('users.id', $user_id)
@@ -190,114 +180,6 @@ class User_model extends MY_Model implements UserRepositoryInterface
 			->count_all_results('users');
 
 		return $count > 0;
-	}
-
-	/**
-	 * Hydrate role information for a single user database row array.
-	 *
-	 * Runs a separate simple query to fetch roles and attach role_ids and primary role slug.
-	 *
-	 * @param array $row
-	 * @return array
-	 */
-	private function _hydrate_user_roles(array $row): array
-	{
-		$roles = $this->db
-			->select('roles.id, roles.slug')
-			->join('roles', 'roles.id = user_roles.role_id')
-			->where('user_roles.user_id', (int) $row['id'])
-			->get('user_roles')
-			->result_array();
-
-		$role_ids = array_map('intval', array_column($roles, 'id'));
-		$row['role_ids'] = json_encode($role_ids);
-		$row['role'] = !empty($roles) ? $roles[0]['slug'] : null;
-
-		return $row;
-	}
-
-	/**
-	 * Hydrate role information for multiple user row arrays in batch.
-	 *
-	 * @param array $rows
-	 * @return array
-	 */
-	private function _hydrate_batch_user_roles(array $rows): array
-	{
-		if (empty($rows)) {
-			return [];
-		}
-
-		$user_ids = array_map('intval', array_column($rows, 'id'));
-		$user_ids = array_filter(array_unique($user_ids));
-
-		if (empty($user_ids)) {
-			return $rows;
-		}
-
-		$roles_data = $this->db
-			->select('user_roles.user_id, roles.id as role_id, roles.slug')
-			->join('roles', 'roles.id = user_roles.role_id')
-			->where_in('user_roles.user_id', $user_ids)
-			->get('user_roles')
-			->result_array();
-
-		$user_roles_map = [];
-		foreach ($roles_data as $item) {
-			$uid = (int) $item['user_id'];
-			if (!isset($user_roles_map[$uid])) {
-				$user_roles_map[$uid] = [
-					'role_ids' => [],
-					'primary_role' => $item['slug'],
-				];
-			}
-			$user_roles_map[$uid]['role_ids'][] = (int) $item['role_id'];
-		}
-
-		foreach ($rows as &$row) {
-			$uid = (int) $row['id'];
-			if (isset($user_roles_map[$uid])) {
-				$row['role_ids'] = json_encode($user_roles_map[$uid]['role_ids']);
-				$row['role'] = $user_roles_map[$uid]['primary_role'];
-			} else {
-				$row['role_ids'] = json_encode([]);
-				$row['role'] = null;
-			}
-		}
-		unset($row);
-
-		return $rows;
-	}
-
-	/**
-	 * Sync user_roles for a user.
-	 *
-	 * Replaces all existing role associations with the current role_ids from the entity.
-	 *
-	 * @param User $user
-	 * @return void
-	 */
-	private function _sync_user_roles(User $user): void
-	{
-		$user_id = $user->get_id();
-		if ($user_id === null) {
-			return;
-		}
-
-		$this->db->where('user_id', $user_id)->delete('user_roles');
-
-		$role_ids = $user->get_role_ids();
-
-		if (!empty($role_ids)) {
-			$batch = [];
-			foreach ($role_ids as $role_id) {
-				$batch[] = [
-					'user_id' => $user_id,
-					'role_id' => (int) $role_id,
-				];
-			}
-			$this->db->insert_batch('user_roles', $batch);
-		}
 	}
 
 	/**
@@ -319,7 +201,7 @@ class User_model extends MY_Model implements UserRepositoryInterface
 	 * @param string $search Global search term
 	 * @param string $order_col Column name to order by
 	 * @param string $order_dir ASC or DESC
-	 * @return array ['data' => array, 'recordsFiltered' => int]
+	 * @return array{data: array<User>, recordsFiltered: int}
 	 */
 	public function find_paginated(int $start, int $length, string $search, string $order_col, string $order_dir): array
 	{
@@ -329,7 +211,11 @@ class User_model extends MY_Model implements UserRepositoryInterface
 		$col = in_array($order_col, $allowed) ? 'users.' . $order_col : 'users.created_at';
 		$dir = strtoupper($order_dir) === 'ASC' ? 'ASC' : 'DESC';
 
-		$this->db->where('users.deleted_at', NULL);
+		$this->db->select('users.*, roles.slug as role')
+			->from($this->table)
+			->join('user_roles', 'user_roles.user_id = users.id', 'left')
+			->join('roles', 'roles.id = user_roles.role_id', 'left')
+			->where('users.deleted_at', NULL);
 
 		if ($search !== '') {
 			$this->db->group_start()
@@ -340,10 +226,9 @@ class User_model extends MY_Model implements UserRepositoryInterface
 
 		$this->db->order_by($col, $dir)->limit($length, $start);
 
-		$rows = $this->db->get($this->table)->result_array();
-		$rows = $this->_hydrate_batch_user_roles($rows);
+		$rows = $this->db->get()->result_array();
 
-		return ['data' => $rows, 'recordsFiltered' => $total];
+		return ['data' => UserMapper::to_entities($rows), 'recordsFiltered' => $total];
 	}
 
 	/**
@@ -364,5 +249,63 @@ class User_model extends MY_Model implements UserRepositoryInterface
 		}
 
 		return parent::count_all();
+	}
+
+	/**
+	 * Sync assigned roles for a user in the user_roles association table.
+	 *
+	 * @param int $user_id User ID
+	 * @param array<int> $role_ids Role IDs to associate
+	 * @return void
+	 */
+	public function sync_user_roles(int $user_id, array $role_ids): void
+	{
+		parent::destroy_many(['user_id' => $user_id], 'user_roles');
+
+		if (!empty($role_ids)) {
+			$batch = [];
+			foreach ($role_ids as $role_id) {
+				$batch[] = [
+					'user_id' => $user_id,
+					'role_id' => (int) $role_id,
+				];
+			}
+			parent::insert_many($batch, 'user_roles');
+		}
+	}
+
+	/**
+	 * Find all role slugs assigned to a user ID.
+	 *
+	 * @param int $user_id User ID
+	 * @return array<string> List of role slugs (e.g. ['admin', 'student'])
+	 */
+	public function find_role_slugs_by_user_id(int $user_id): array
+	{
+		$rows = $this->db->select('roles.slug')
+			->from('user_roles')
+			->join('roles', 'roles.id = user_roles.role_id')
+			->where('user_roles.user_id', $user_id)
+			->get()
+			->result_array();
+
+		return array_column($rows, 'slug');
+	}
+
+	/**
+	 * Find all role IDs assigned to a user ID.
+	 *
+	 * @param int $user_id User ID
+	 * @return array<int> List of role IDs
+	 */
+	public function find_role_ids_by_user_id(int $user_id): array
+	{
+		$rows = $this->db->select('role_id')
+			->from('user_roles')
+			->where('user_id', $user_id)
+			->get()
+			->result_array();
+
+		return array_map('intval', array_column($rows, 'role_id'));
 	}
 }

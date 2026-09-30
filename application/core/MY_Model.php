@@ -101,20 +101,23 @@ class MY_Model extends CI_Model
 	 * Insert a new record into the database.
 	 *
 	 * @param array<string, mixed> $data Column => value map
+	 * @param string|null $table Optional table name override
 	 * @return int|string|null Inserted ID or null if table is not set
 	 */
-	public function insert(array $data): int|string|null
+	public function insert(array $data, ?string $table = null): int|string|null
 	{
-		if ($this->table === '') {
+		$target_table = $table ?? $this->table;
+
+		if ($target_table === '') {
 			return null;
 		}
 
-		$this->db->insert($this->table, $data);
+		$this->db->insert($target_table, $data);
 		$insert_id = $this->db->insert_id();
-		
+
 		if ($insert_id === false) return null;
 
-		$this->log_audit('insert', $insert_id, null, $data);
+		$this->log_audit('insert', $insert_id, null, $data, $target_table);
 
 		return $insert_id;
 	}
@@ -123,14 +126,17 @@ class MY_Model extends CI_Model
 	 * Insert multiple records in a batch.
 	 *
 	 * @param array<int, array<string, mixed>> $data Array of column => value maps
+	 * @param string|null $table Optional table name override
 	 * @return int|null Number of inserted rows
 	 */
-	public function insert_many(array $data): int|null
+	public function insert_many(array $data, ?string $table = null): int|null
 	{
-		if ($this->table === '') return null;
+		$target_table = $table ?? $this->table;
 
-		$inserted_count = $this->db->insert_batch($this->table, $data);
-		$this->log_audit('insert_many', 'batch', null, $data);
+		if ($target_table === '') return null;
+
+		$inserted_count = $this->db->insert_batch($target_table, $data);
+		$this->log_audit('insert_many', 'batch', null, $data, $target_table);
 		return $inserted_count;
 	}
 
@@ -139,23 +145,26 @@ class MY_Model extends CI_Model
 	 *
 	 * @param array<string, mixed> $data Data to update
 	 * @param array<string, mixed> $where Filter conditions. Usually the primary key (e.g. ['id' => $id])
+	 * @param string|null $table Optional table name override
 	 * @return bool
 	 */
-	public function update(array $data, array $where): bool
+	public function update(array $data, array $where, ?string $table = null): bool
 	{
+		$target_table = $table ?? $this->table;
+
 		$this->db->where($where);
 
 		// Build the SELECT query string without resetting the Query Builder state
-		$sql = $this->db->get_compiled_select($this->table, FALSE);
+		$sql = $this->db->get_compiled_select($target_table, FALSE);
 		// Execute the raw query to get the 'before' state of the single record
 		$before = $this->db->query($sql)->row_array();
 
 		// Execute the UPDATE which will consume the Query Builder state
-		$result = $this->db->update($this->table, $data);
+		$result = $this->db->update($target_table, $data);
 
 		if ($result) {
 			$row_identifier = $before[$this->primary_key] ?? null;
-			$this->log_audit('update', $row_identifier, $before, $data);
+			$this->log_audit('update', $row_identifier, $before, $data, $target_table);
 		}
 
 		return $result;
@@ -170,35 +179,39 @@ class MY_Model extends CI_Model
 	 *
 	 * @param array $data List of row arrays OR single column-value map
 	 * @param string|array $where_or_index Index column name for batch OR filter conditions array
+	 * @param string|null $table Optional table name override
 	 * @return int Number of affected rows
 	 */
-	public function update_many(array $data, string|array $where_or_index = 'id'): int
+	public function update_many(array $data, string|array $where_or_index = 'id', ?string $table = null): int
 	{
 		if (empty($data)) {
 			return 0;
 		}
 
+		$target_table = $table ?? $this->table;
+
 		if (is_array($where_or_index)) {
 			$this->db->where($where_or_index);
-			$sql = $this->db->get_compiled_select($this->table, FALSE);
+			$sql = $this->db->get_compiled_select($target_table, FALSE);
 			$before = $this->db->query($sql)->result_array();
 
 			if (empty($before)) {
+				$this->db->reset_query();
 				return 0;
 			}
 
-			$this->db->update($this->table, $data);
+			$this->db->update($target_table, $data);
 			$affected = $this->db->affected_rows();
 
 			if ($affected > 0) {
-				$this->log_audit('update_many', 'batch', $before, $data);
+				$this->log_audit('update_many', 'batch', $before, $data, $target_table);
 			}
 
 			return $affected;
 		}
 
-		$affected = $this->db->update_batch($this->table, $data, $where_or_index);
-		$this->log_audit('update_many', 'batch', null, $data);
+		$affected = $this->db->update_batch($target_table, $data, $where_or_index);
+		$this->log_audit('update_many', 'batch', null, $data, $target_table);
 
 		return (int) $affected;
 	}
@@ -207,22 +220,25 @@ class MY_Model extends CI_Model
 	 * Destroy a single record matching specified conditions.
 	 *
 	 * @param array<string, mixed> $where Filter conditions. Usually the primary key (e.g. ['id' => $id])
+	 * @param string|null $table Optional table name override
 	 * @return bool
 	 */
-	public function destroy(array $where): bool
+	public function destroy(array $where, ?string $table = null): bool
 	{
+		$target_table = $table ?? $this->table;
+
 		$this->db->where($where);
 
 		// Build the SELECT query string without resetting the Query Builder state
-		$sql = $this->db->get_compiled_select($this->table, FALSE);
+		$sql = $this->db->get_compiled_select($target_table, FALSE);
 		$before = $this->db->query($sql)->row_array();
 
 		// Execute the DELETE which will consume the Query Builder state
-		$result = $this->db->delete($this->table);
+		$result = $this->db->delete($target_table);
 
 		if ($result) {
 			$row_identifier = $before[$this->primary_key] ?? null;
-			$this->log_audit('destroy', $row_identifier, $before, null);
+			$this->log_audit('destroy', $row_identifier, $before, null, $target_table);
 		}
 
 		return $result;
@@ -232,24 +248,28 @@ class MY_Model extends CI_Model
 	 * Destroy multiple records matching specified conditions.
 	 *
 	 * @param array<string, mixed> $where Filter conditions (e.g. ['role_id' => $id])
+	 * @param string|null $table Optional table name override
 	 * @return int Number of affected rows
 	 */
-	public function destroy_many(array $where): int
+	public function destroy_many(array $where, ?string $table = null): int
 	{
+		$target_table = $table ?? $this->table;
+
 		$this->db->where($where);
 
-		$sql = $this->db->get_compiled_select($this->table, FALSE);
+		$sql = $this->db->get_compiled_select($target_table, FALSE);
 		$before = $this->db->query($sql)->result_array();
 
 		if (empty($before)) {
+			$this->db->reset_query();
 			return 0;
 		}
 
-		$this->db->delete($this->table);
+		$this->db->delete($target_table);
 		$affected = $this->db->affected_rows();
 
 		if ($affected > 0) {
-			$this->log_audit('destroy_many', 'batch', $before, null);
+			$this->log_audit('destroy_many', 'batch', $before, null, $target_table);
 		}
 
 		return $affected;
@@ -262,11 +282,14 @@ class MY_Model extends CI_Model
 	 * @param int|string|null $row_identifier The affected row identifier or conditions
 	 * @param array|null $before Data before the operation
 	 * @param array|null $after Data after the operation
+	 * @param string|null $table Optional table name override
 	 * @return void
 	 */
-	protected function log_audit(string $action, int|string|null $row_identifier, ?array $before, ?array $after): void
+	protected function log_audit(string $action, int|string|null $row_identifier, ?array $before, ?array $after, ?string $table = null): void
 	{
-		if ($this->table === 'logs' || empty($this->table)) {
+		$target_table = $table ?? $this->table;
+
+		if ($target_table === 'logs' || empty($target_table)) {
 			return;
 		}
 
@@ -314,7 +337,7 @@ class MY_Model extends CI_Model
 
 		$this->db->insert('logs', [
 			'user_execute' => $user_id,
-			'table' => $this->table,
+			'table' => $target_table,
 			'row' => $row_identifier,
 			'content' => $content,
 		]);

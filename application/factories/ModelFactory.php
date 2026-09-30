@@ -8,7 +8,7 @@ namespace app\factories;
  * Provides a clean way for use cases to load models
  * without directly coupling to CI3's get_instance().
  */
-class Model_factory
+class ModelFactory
 {
     /**
      * Load and return a CI3 model instance.
