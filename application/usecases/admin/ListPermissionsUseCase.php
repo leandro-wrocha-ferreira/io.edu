@@ -32,4 +32,15 @@ class ListPermissionsUseCase
 	{
 		return $this->permission_repository->find_all();
 	}
+
+	/**
+	 * Find permission IDs associated with a specific role ID.
+	 *
+	 * @param int $role_id Role ID
+	 * @return array<int>
+	 */
+	public function get_ids_by_role_id(int $role_id): array
+	{
+		return $this->permission_repository->find_ids_by_role_id($role_id);
+	}
 }

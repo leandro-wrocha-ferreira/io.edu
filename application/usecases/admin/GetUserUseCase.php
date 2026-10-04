@@ -40,4 +40,15 @@ class GetUserUseCase
 
 		return $user;
 	}
+
+	/**
+	 * Get role IDs assigned to a user.
+	 *
+	 * @param int $user_id User ID
+	 * @return array<int>
+	 */
+	public function get_role_ids(int $user_id): array
+	{
+		return $this->user_repository->find_role_ids_by_user_id($user_id);
+	}
 }
