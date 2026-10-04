@@ -11,7 +11,7 @@ CodeIgniter 3 project — Plataforma de Educação (LMS). PHP >= 8.2.
 - `system/` — framework core (do not modify)
 - `public/` — web root; serves `assets/css/` and `assets/js/` (Bootstrap files copied from vendor)
 - `docker/` — Docker configs: nginx, php-fpm, startup script
-- Default controller: `Welcome` (maps to `/`)
+- Default controller: `Courses` (maps to `/`)
 
 ## Architecture: DDD Lite
 

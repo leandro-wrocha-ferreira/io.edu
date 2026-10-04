@@ -111,7 +111,7 @@ class Users extends MY_Controller
 			'title'     => 'Gestão de Usuários',
 		];
 
-		$this->load->view('admin/index', $data);
+		$this->load->view('layout/admin', $data);
 	}
 
 	/**
@@ -142,7 +142,7 @@ class Users extends MY_Controller
 			'user'      => null,
 		];
 
-		$this->load->view('admin/index', $data);
+		$this->load->view('layout/admin', $data);
 	}
 
 	/**

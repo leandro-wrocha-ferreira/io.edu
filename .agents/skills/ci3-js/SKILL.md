@@ -1,38 +1,38 @@
 ---
 name: ci3-js
-description: Use when creating, modifying or organizing JavaScript files and logic. Enforces modularity, page-specific scripts, hybrid JS guidelines (jQuery vs Vanilla JS), and CI3 AJAX rules.
+description: Use when creating, modifying or organizing JavaScript files and logic. Enforces modularity, page-specific scripts, hybrid JS guidelines (jQuery vs Vanilla JS), DataTables decoupled toolbar integration, and CI3 AJAX rules.
 ---
 
 # JavaScript Guidelines
 
-This project uses a modular, clean, and hybrid approach for organizing JavaScript files and logic.
+Este projeto adota uma abordagem **modular, limpa e híbrida** para organização e execução de scripts JavaScript.
 
 ---
 
 ## 1. File & Directory Organization
 
-1. **No Inline Scripts in Views**:
-   - It is **strictly prohibited** to place `<script>` blocks with business logic or component initialization directly inside `.php` view files in `application/views/`.
-   - All logic must reside in static `.js` files within the `public/assets/js/` structure.
+1. **Proibição de Scripts Inline nas Views**:
+   * É **estritamente proibido** inserir blocos `<script>` com lógica de negócio, seletores ou inicialização de bibliotecas dentro dos arquivos de view `.php` em `application/views/`.
+   * Todo código JavaScript deve residir em arquivos `.js` estáticos na estrutura `public/assets/js/`.
 
-2. **Folder Structure**:
-    - **Global/Theme:** `public/assets/js/theme.js` (essential scripts loaded in `<head>` before DOM render).
-    - **Global HTTP Client:** `public/assets/js/http.js` (centralized HTTP Fetch client loaded in base layout).
-    - **Layout/Module:** `public/assets/js/admin/layout.js` (global logic for menu, sidebar, and modals).
-    - **Reusable Components:** `public/assets/js/components/` (reusable scripts such as delete confirmation, toasts, etc.).
-    - **Page-Specific:** `public/assets/js/pages/<module>/<controller>/<action>.js` (exclusive view logic loaded dynamically via `$page_js` in the controller).
+2. **Estrutura de Pastas**:
+   * **Global/Theme:** `public/assets/js/theme.js` (gerenciador de tema no `<head>` para evitar FOUC).
+   * **Global HTTP Client:** `public/assets/js/http.js` (cliente Fetch nativo com CSRF e headers padronizados).
+   * **Layout Base:** `public/assets/js/admin/layout.js` (sidebar responsivo, backdrop e toggle).
+   * **Componentes Reutilizáveis:** `public/assets/js/components/` (diálogos, confirmações modais, etc.).
+   * **Scripts por Página:** `public/assets/js/pages/<area>/<controller>/<action>.js` (carregados sob demanda via `$page_js`).
 
-3. **Dynamic Page Loading (`$page_js`)**:
-   - In Controller:
+3. **Carregamento Dinâmico de Scripts de Página (`$page_js`)**:
+   * No Controller:
      ```php
      $data = [
          'page_name' => 'admin/users/index',
-         'title' => 'User Management',
-         'page_js' => ['admin/users/index.js'], // relative to public/assets/js/pages/
+         'title' => 'Gestão de Usuários',
+         'page_js' => ['admin/users/index.js'], // relativo a public/assets/js/pages/
      ];
-     $this->load->view('admin/index', $data);
+     $this->load->view('layout/admin', $data);
      ```
-   - In Base Layout (`admin/index.php`):
+   * No Layout Mestre (`application/views/layout/admin.php`):
      ```php
      <?php if (!empty($page_js)): ?>
          <?php foreach ((array)$page_js as $js): ?>
@@ -43,71 +43,158 @@ This project uses a modular, clean, and hybrid approach for organizing JavaScrip
 
 ---
 
-## 2. Hybrid JS Strategy (jQuery vs Vanilla JS)
+## 2. Estratégia Híbrida (jQuery vs Vanilla JS)
 
-The project adopts a **Hybrid Strategy** to balance the convenience of legacy components with the performance and modern capabilities of native JavaScript (ES6+).
+O projeto adota uma estratégia híbrida equilibrando bibliotecas consolidadas com a performance do JavaScript moderno (ES6+):
 
-### When to Use jQuery:
-- **DataTables:** Initialization, column configuration, sorting, and integration with jQuery plugins.
-- **Concise DOM Manipulation:** Quick operations on existing selectors when jQuery syntax saves substantial boilerplate.
+### Quando Usar jQuery:
+* **DataTables:** Inicialização, configuração de colunas, ordenação, paginação e eventos do plugin (`draw.dt`).
+* **Manipulação de DOM Estritamente Legada:** Apenas quando a sintaxe do jQuery evitar código boilerplate excessivo em plugins existentes.
 
-### When to Use Vanilla JS (ES6+):
-- **Layout & Theme Scripts:** Sidebar toggle, theme switcher, backdrop handlers, and animations.
-- **Custom Asynchronous Requests:** All custom asynchronous operations via `Http` (`public/assets/js/http.js`).
-- **Modern Web APIs:** `IntersectionObserver`, `localStorage`, `sessionStorage`, `CustomEvent`.
+### Quando Usar Vanilla JS (ES6+):
+* **Lógica de Layout e Tema:** Abertura da sidebar, backdrop, alternador de tema e observers.
+* **Requisições Assíncronas:** Todas as operações AJAX via `Http` (`public/assets/js/http.js`).
+* **Eventos e Debounce de Formulários:** `addEventListener`, `FormData`, `setTimeout`/`clearTimeout`.
+* **Web APIs Modernas:** `localStorage`, `IntersectionObserver`, `CustomEvent`.
 
 ---
 
-## 3. Modern Fetch & Custom Header Pattern
+## 3. Padrão DataTables com Toolbar Desacoplada e Debounce
 
-Instead of relying solely on the default CI3 `is_ajax_request()` check or scattered raw `fetch()` calls, all frontend network requests MUST use the centralized native client located at `public/assets/js/http.js`.
+Tabelas de listagem operacional utilizam o componente `.edu-data-toolbar` desacoplado no HTML e controlado via JavaScript. A inicialização do DataTables deve seguir rigorosamente a receita abaixo:
 
-### Mandatory Fetch Standards:
-1. **Centralized Client**: Raw `fetch()` or jQuery `$.ajax` calls are **strictly prohibited** in page scripts. Always use the global `Http` (or `HttpClient`) utility.
-2. **Canonical Standard Headers**: The client automatically attaches:
-   - `X-App-Json: application/json` (canonical header instructing `MY_Controller` to process and respond as JSON)
-   - `X-Requested-With: XMLHttpRequest` (identifies request as an AJAX operation)
-   - `Accept: application/json`
-3. **Automatic CSRF Handling**: Automatically resolves the CSRF token from `<meta name="csrf-token">` or `csrf_cookie_name` cookie and injects it via `X-CSRF-TOKEN` header (and inside `FormData` when applicable).
-4. **Data Formats**:
-   - **JSON Objects**: Automatically serialized with `Content-Type: application/json; charset=utf-8`.
-   - **FormData**: Native `FormData` supported without overriding the multipart boundary.
-5. **Button Loading & Disabled States**: Pass the button element directly or via `{ button: buttonEl }` to automatically disable the trigger and render an animated spinner (`<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Processando...`) during request execution.
-6. **HTTP Error Handling**: Rejects automatically on status >= 400, parsing structured error responses (`result.message` or `result.error`) for easy consumption in `try/catch` blocks.
+```javascript
+/**
+ * Script de Listagem Operacional — io.edu LMS
+ */
+document.addEventListener('DOMContentLoaded', function () {
+    const tableEl = document.getElementById('users-table');
+    
+    // Guard Clause: Verifica existência da tabela e do plugin antes de executar
+    if (!tableEl || typeof jQuery === 'undefined' || !jQuery.fn.DataTable) {
+        return;
+    }
 
-### The `Http` Client Interface (`public/assets/js/http.js`):
+    // 1. Inicialização do DataTables
+    const dt = jQuery(tableEl).DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: window.location.origin + '/admin/usuarios/dados',
+            type: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        },
+        columns: [
+            { data: 'id', width: '70px', className: 'd-none d-md-table-cell ps-3' },
+            { data: 'name', className: 'fw-semibold' },
+            { data: 'email', className: 'text-muted' },
+            { data: 'role', orderable: false, searchable: false },
+            { data: 'status', orderable: false, searchable: false, width: '110px', className: 'text-center' },
+            { data: 'actions', orderable: false, searchable: false, width: '110px', className: 'text-center' }
+        ],
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json',
+            // Estados Vazios Personalizados com classes .edu-table-empty
+            emptyTable: `
+                <div class="edu-table-empty">
+                    <i class="bi bi-people edu-table-empty-icon" aria-hidden="true"></i>
+                    <div class="edu-table-empty-title">Nenhum registro cadastrado</div>
+                    <div class="edu-table-empty-desc">Cadastre o primeiro registro para começar.</div>
+                    <a href="/admin/usuarios/novo" class="edu-btn edu-btn-primary btn-sm">
+                        <i class="bi bi-plus-lg me-1"></i> Criar Novo
+                    </a>
+                </div>
+            `,
+            zeroRecords: `
+                <div class="edu-table-empty">
+                    <i class="bi bi-search edu-table-empty-icon" aria-hidden="true"></i>
+                    <div class="edu-table-empty-title">Nenhum resultado encontrado</div>
+                    <div class="edu-table-empty-desc">Não encontramos registros correspondentes à busca informada.</div>
+                </div>
+            `,
+            processing: '<div class="d-flex align-items-center gap-2"><div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div><span>Carregando dados...</span></div>'
+        },
+        pageLength: 25,
+        order: [[0, 'desc']],
+        // Suprime a barra de busca e seleção padrão do DataTables (delegada à .edu-data-toolbar)
+        dom: 'rt<"d-flex flex-wrap align-items-center justify-content-between p-3 border-top"ip>'
+    });
 
-Available methods on `window.Http`:
-- `Http.get(url, options = {})`
-- `Http.post(url, data, optionsOrButton = {})`
-- `Http.put(url, data, optionsOrButton = {})`
-- `Http.patch(url, data, optionsOrButton = {})`
-- `Http.delete(url, options = {})`
-- `Http.request(url, options = {})`
+    // 2. Busca na Toolbar com Debounce de 300ms
+    const searchInput = document.getElementById('users-search-input');
+    if (searchInput) {
+        let debounceTimer;
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                dt.search(this.value).draw();
+            }, 300);
+        });
+    }
 
-### Usage in Page Scripts (`public/assets/js/pages/...`):
+    // 3. Filtro por Select Integrado
+    const statusFilter = document.getElementById('users-status-filter');
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function () {
+            dt.search(searchInput ? searchInput.value : '').draw();
+        });
+    }
 
-In your specific page logic, use `Http` directly:
+    // 4. Sincronização Dinâmica do Contador de Registros da Toolbar
+    dt.on('draw.dt', function () {
+        const info = dt.page.info();
+        const countEl = document.getElementById('users-count');
+        if (countEl) {
+            if (info.recordsTotal === 0) {
+                countEl.textContent = 'Nenhum registro';
+            } else if (info.recordsDisplay < info.recordsTotal) {
+                countEl.textContent = `Exibindo ${info.recordsDisplay} de ${info.recordsTotal} registros (filtrado)`;
+            } else {
+                countEl.textContent = `Total de ${info.recordsTotal} registros cadastrados`;
+            }
+        }
+    });
+});
+```
+
+---
+
+## 4. Modern Fetch & Cliente HTTP Centralizado (`http.js`)
+
+Todas as requisições assíncronas do frontend DEVEM utilizar o cliente nativo centralizado em `public/assets/js/http.js`. Chamadas brutas com `fetch()` ou `$.ajax` são **estritamente proibidas**.
+
+### Funcionalidades Automáticas do `Http`:
+1. **Headers Canônicos Injetados**:
+   * `X-App-Json: application/json`
+   * `X-Requested-With: XMLHttpRequest`
+   * `Accept: application/json`
+2. **Proteção CSRF**: Lê e anexa automaticamente o token CSRF (`X-CSRF-TOKEN` e em `FormData`).
+3. **Gestão de Estado de Botões**: Desabilita o botão acionador e renderiza spinner acessível durante a chamada.
+4. **Tratamento de Exceções**: Rejeita com mensagem tratada em status HTTP >= 400.
+
+### Exemplo de Uso em Formulário Assíncrono:
 
 ```javascript
 document.addEventListener('DOMContentLoaded', () => {
-    const saveBtn = document.getElementById('btn-save');
-    const userForm = document.getElementById('form-user');
+    const saveBtn = document.getElementById('btn-submit');
+    const formEl = document.getElementById('main-form');
 
-    if (saveBtn && userForm) {
-        userForm.addEventListener('submit', async (event) => {
+    if (saveBtn && formEl) {
+        formEl.addEventListener('submit', async (event) => {
             event.preventDefault();
-            const payload = new FormData(userForm);
+            const payload = new FormData(formEl);
 
             try {
-                // Pass button element as 3rd parameter to manage loading/disabled states
-                const response = await Http.post(userForm.action, payload, saveBtn);
+                // Passa o botão como 3º parâmetro para ativar loading automático
+                const response = await Http.post(formEl.action, payload, saveBtn);
 
                 if (response.success) {
-                    window.location.href = response.redirect || '/admin/users';
+                    window.location.href = response.redirect || '/admin/usuarios';
                 }
             } catch (error) {
-                console.error('Request failed:', error);
+                console.error('Falha na operação:', error);
                 alert(error.message || 'Ocorreu um erro ao processar a solicitação.');
             }
         });
@@ -117,27 +204,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ---
 
-## 4. JavaScript Code Review Checklist
+## 5. JavaScript Code Review Checklist
 
-When creating or modifying JavaScript code, verify the following:
+Ao criar ou revisar arquivos JavaScript, valide os seguintes pontos:
 
-- [ ] **Zero Inline Scripts:** The `.php` view contains no inline `<script>` blocks with business logic or library initializations.
-- [ ] **Centralized HTTP Client:** Asynchronous requests use exclusively the centralized `Http` client (`public/assets/js/http.js`), with zero ad-hoc `fetch()` or jQuery AJAX calls.
-- [ ] **Canonical Headers:** The client automatically issues `X-App-Json: application/json` and `X-Requested-With: XMLHttpRequest` (obsolete headers like `X-App-Response` are prohibited).
-- [ ] **Native FormData:** Form submissions use `new FormData(element)` rather than jQuery `.serialize()`.
-- [ ] **Loading & Disabled States:** Buttons and interactive triggers are disabled with spinner feedback during ongoing network calls.
-- [ ] **Null Checks (Guards):** Scripts verify DOM element existence before manipulating them (`if (!tableEl) return;`).
-- [ ] **Scoped Execution:** Event listeners are bound to `DOMContentLoaded` or scoped to page-specific IDs/classes.
-- [ ] **Clean Error Handling:** Network calls handle exceptions cleanly using `try/catch` blocks.
+- [ ] **Zero Scripts Inline:** A view `.php` não possui tags `<script>` com código executável.
+- [ ] **Guard Clauses:** Todo script verifica a existência dos elementos no DOM antes de executar (`if (!tableEl) return;`).
+- [ ] **DataTables Desacoplado:** A propriedade `dom` oculta a busca/length padrão (`dom: 'rt<...>ip'`) e utiliza `.edu-data-toolbar`.
+- [ ] **Debounce de 300ms:** Pesquisas de texto em listagens aplicam debounce para não sobrecarregar requisições AJAX.
+- [ ] **Estados Vazios Ricos:** Configuração de `emptyTable` e `zeroRecords` utilizando a classe `.edu-table-empty`.
+- [ ] **Uso Exclusivo do `Http`:** Requisições assíncronas passam por `public/assets/js/http.js`.
+- [ ] **Loading nos Botões:** Triggers de submissão recebem estado de carregamento durante operações de rede.
 
 ---
 
-## Anti-Patterns
+## 6. Anti-Patterns
 
-❌ **Inline Scripts in Views**: Placing `<script>` tags with JavaScript logic inside `.php` files in `application/views/`.
-❌ **Ad-hoc `fetch()` or `$.ajax()` Calls**: Invoking raw `fetch()` or jQuery AJAX directly in page scripts instead of using `public/assets/js/http.js`.
-❌ **Obsolete Headers (`X-App-Response`)**: Using deprecated header names instead of the canonical `X-App-Json: application/json`.
-❌ **jQuery Serialize for AJAX**: Using `$(form).serialize()` instead of native `new FormData(form)`.
-❌ **Ignoring Button States**: Triggering asynchronous actions without disabling the trigger element, leading to duplicate submissions.
-❌ **Unguarded DOM Selectors**: Executing queries like `document.getElementById('my-el').addEventListener(...)` without null checks (`if (!el) return;`).
-
+❌ **Scripts Inline em Views**: Inserir código JS dentro de arquivos de view `.php`.
+❌ **Requisições com `fetch()` Bruto ou `$.ajax`**: Fazer chamadas diretas de rede contornando `public/assets/js/http.js`.
+❌ **Busca no DataTables sem Debounce**: Disparar `dt.search().draw()` em cada evento de tecla sem temporizador.
+❌ **DataTables sem Guard Clause**: Inicializar o DataTables sem verificar se o elemento existe no DOM, gerando erros em telas diferentes.
+❌ **Uso da Toolbar Nativa do DataTables**: Deixar controles padrão sem estilização ao invés de usar `.edu-data-toolbar`.
+❌ **Submissões Assíncronas sem Desabilitar Botão**: Permitir múltiplos cliques repetidos do usuário durante a requisição.

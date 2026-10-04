@@ -1,0 +1,1 @@
+Externar a forma de trabalho do Middleware para dentro do framework e não um classe pura
