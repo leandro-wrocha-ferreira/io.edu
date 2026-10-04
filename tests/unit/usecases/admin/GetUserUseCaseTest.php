@@ -57,4 +57,21 @@ class GetUserUseCaseTest extends \PHPUnit\Framework\TestCase
 
 		$use_case->execute(999);
 	}
+
+	/**
+	 * Test retrieving assigned role IDs for a user.
+	 *
+	 * @return void
+	 */
+	public function test_get_role_ids_success()
+	{
+		$user = User::create('Alice', new Email('alice@example.com'), 'password123');
+		$user = $this->mock_user_repository->save($user);
+		$this->mock_user_repository->sync_user_roles($user->get_id(), [1, 2]);
+
+		$use_case = new GetUserUseCase($this->mock_user_repository);
+		$role_ids = $use_case->get_role_ids($user->get_id());
+
+		$this->assertEquals([1, 2], $role_ids);
+	}
 }

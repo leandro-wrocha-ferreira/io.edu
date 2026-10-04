@@ -43,4 +43,19 @@ class ListPermissionsUseCaseTest extends \PHPUnit\Framework\TestCase
 		$this->assertEquals('View Users', $result[0]->get_name());
 		$this->assertEquals('Edit Users', $result[1]->get_name());
 	}
+
+	/**
+	 * Test retrieving permission IDs by role ID.
+	 *
+	 * @return void
+	 */
+	public function test_get_ids_by_role_id_success()
+	{
+		$this->mock_permission_repository->sync_role_permissions(1, [10, 20]);
+
+		$use_case = new ListPermissionsUseCase($this->mock_permission_repository);
+		$ids = $use_case->get_ids_by_role_id(1);
+
+		$this->assertEquals([10, 20], $ids);
+	}
 }
