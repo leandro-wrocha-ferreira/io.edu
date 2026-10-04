@@ -1,0 +1,110 @@
+/**
+ * Curriculum Accordion Component — io.edu LMS
+ *
+ * Implements accessible modules and lesson syllabus lists
+ * with clear semantic status indicators (completed, active, locked).
+ */
+
+.edu-curriculum {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.edu-curriculum-module {
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-md);
+	background-color: var(--edu-bg-surface);
+	overflow: hidden;
+	transition: background-color var(--edu-transition-theme), border-color var(--edu-transition-theme);
+}
+
+.edu-curriculum-header {
+	width: 100%;
+	padding: 1.15rem 1.25rem;
+	background-color: var(--edu-bg-subtle);
+	border: none;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	cursor: pointer;
+	text-align: left;
+	font-family: inherit;
+	transition: background-color var(--edu-transition-fast);
+}
+
+.edu-curriculum-header:hover {
+	background-color: var(--edu-border);
+}
+
+.edu-curriculum-module-title {
+	font-size: 0.95rem;
+	font-weight: 700;
+	color: var(--edu-text-heading);
+	margin: 0;
+}
+
+.edu-curriculum-module-meta {
+	font-size: 0.8125rem;
+	color: var(--edu-text-muted);
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+/* Lesson Items */
+.edu-curriculum-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.edu-curriculum-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.85rem 1.25rem;
+	border-top: 1px solid var(--edu-border);
+	font-size: 0.875rem;
+	color: var(--edu-text-main);
+	transition: background-color var(--edu-transition-fast);
+	text-decoration: none;
+}
+
+.edu-curriculum-item:hover {
+	background-color: var(--edu-bg-subtle);
+	color: var(--edu-primary);
+}
+
+.edu-curriculum-item.active {
+	background-color: var(--edu-primary-ghost);
+	color: var(--edu-primary);
+	font-weight: 600;
+	border-left: 3px solid var(--edu-primary);
+}
+
+.edu-curriculum-item.locked {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.edu-lesson-info {
+	display: flex;
+	align-items: center;
+	gap: 0.65rem;
+}
+
+.edu-lesson-status-icon {
+	font-size: 1rem;
+	flex-shrink: 0;
+}
+
+.edu-lesson-status-completed { color: var(--edu-success); }
+.edu-lesson-status-active    { color: var(--edu-primary); }
+.edu-lesson-status-locked    { color: var(--edu-text-muted); }
+
+.edu-lesson-duration {
+	font-size: 0.75rem;
+	color: var(--edu-text-muted);
+	font-variant-numeric: tabular-nums;
+}

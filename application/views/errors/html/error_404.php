@@ -2,76 +2,81 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 $base_url = config_item('base_url');
 if (empty($base_url)) {
-    $base_url = '/';
+	$base_url = '/';
 } else {
-    $base_url = rtrim($base_url, '/') . '/';
+	$base_url = rtrim($base_url, '/') . '/';
 }
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Página não encontrada</title>
-    
-    <!-- Theme Script (must be in head to prevent FOUC) -->
-    <script src="<?= $base_url ?>public/assets/js/theme.js"></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>404 — Página não encontrada</title>
 
-    <link rel="stylesheet" href="<?= $base_url ?>public/assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="<?= $base_url ?>public/assets/css/theme.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
-    <style>
-        body {
-            background-color: var(--bg-main, #f4f6f9);
-            color: var(--text-main, #334155);
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .error-container {
-            text-align: center;
-            padding: 3rem 2rem;
-            background-color: var(--bg-card, #fff);
-            border: 1px solid var(--border-color, transparent);
-            border-radius: 0.75rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            max-width: 500px;
-            width: 90%;
-            border-top: 5px solid var(--brand-primary, #0d6efd) !important;
-            transition: background-color 0.3s ease, border-color 0.3s ease;
-        }
-        .error-code {
-            font-size: 6rem;
-            font-weight: 700;
-            color: var(--brand-primary, #0d6efd);
-            line-height: 1;
-            margin-bottom: 0.5rem;
-        }
-        .error-heading {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-heading, #1e293b);
-            margin-bottom: 1rem;
-        }
-        .error-text {
-            color: var(--text-muted, #64748b);
-            margin-bottom: 2rem;
-        }
-    </style>
+	<!-- Theme Script (must be in head to prevent FOUC) -->
+	<script src="<?= $base_url ?>public/assets/js/theme.js"></script>
+
+	<link rel="stylesheet" href="<?= $base_url ?>public/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="<?= $base_url ?>public/assets/css/shared/tokens.css">
+	<link rel="stylesheet" href="<?= $base_url ?>public/assets/css/shared/base.css">
+	<link rel="stylesheet" href="<?= $base_url ?>public/assets/css/shared/components.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+	<style>
+		body {
+			background-color: var(--edu-bg-main);
+			color: var(--edu-text-main);
+			min-height: 100vh;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin: 0;
+			padding: 1.5rem;
+			transition: background-color var(--edu-transition-theme), color var(--edu-transition-theme);
+		}
+		.error-container {
+			text-align: center;
+			padding: 3.5rem 2rem;
+			background-color: var(--edu-bg-surface);
+			border: 1px solid var(--edu-border);
+			border-radius: var(--edu-radius-lg);
+			box-shadow: var(--edu-shadow-lg);
+			max-width: 520px;
+			width: 100%;
+			border-top: 5px solid var(--edu-primary) !important;
+			transition: background-color var(--edu-transition-theme), border-color var(--edu-transition-theme);
+		}
+		.error-code {
+			font-size: 5.5rem;
+			font-weight: 800;
+			color: var(--edu-primary);
+			line-height: 1;
+			margin-bottom: 0.75rem;
+			letter-spacing: -0.04em;
+		}
+		.error-heading {
+			font-size: 1.5rem;
+			font-weight: 700;
+			color: var(--edu-text-heading);
+			margin-bottom: 1rem;
+		}
+		.error-text {
+			color: var(--edu-text-muted);
+			margin-bottom: 2rem;
+			line-height: 1.5;
+			font-size: 0.95rem;
+		}
+	</style>
 </head>
 <body>
-    <div class="error-container">
-        <div class="error-code">404</div>
-        <h1 class="error-heading">Página não encontrada</h1>
-        <p class="error-text">Desculpe, mas a página que você está procurando não existe, foi removida ou está temporariamente indisponível.</p>
-        <a href="<?= $base_url ?>" class="btn-theme-primary">
-            <i class="bi bi-house-door"></i> Voltar para o início
-        </a>
-    </div>
+	<main class="error-container animate-fade-up">
+		<div class="error-code">404</div>
+		<h1 class="error-heading">Página não encontrada</h1>
+		<p class="error-text">O endereço solicitado não foi encontrado ou pode ter sido movido permanentemente.</p>
+		<a href="<?= $base_url ?>" class="edu-btn edu-btn-primary">
+			<i class="bi bi-house-door" aria-hidden="true"></i> Voltar ao Início
+		</a>
+	</main>
 </body>
 </html>

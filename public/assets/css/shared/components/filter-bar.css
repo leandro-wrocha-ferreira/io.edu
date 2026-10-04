@@ -1,0 +1,122 @@
+/**
+ * Faceted Filter Bar Component — io.edu LMS
+ *
+ * Implements a responsive search & faceted filter toolbar for course catalogs.
+ * Includes horizontal scrollable pills for mobile and accessible select dropdowns.
+ */
+
+.edu-filter-bar {
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-lg);
+	padding: 1.25rem;
+	box-shadow: var(--edu-shadow-sm);
+	margin-bottom: 2rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	transition: background-color var(--edu-transition-theme), border-color var(--edu-transition-theme);
+}
+
+.edu-filter-row-top {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+/* Search Box */
+.edu-search-wrap {
+	position: relative;
+	flex: 1;
+	min-width: 260px;
+}
+
+.edu-search-icon {
+	position: absolute;
+	left: 1rem;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--edu-text-muted);
+	pointer-events: none;
+	font-size: 1rem;
+}
+
+.edu-search-input {
+	padding-left: 2.75rem !important;
+	border-radius: var(--edu-radius-md);
+}
+
+/* Category Pills Row */
+.edu-filter-pills {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	overflow-x: auto;
+	padding-bottom: 0.25rem;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: thin;
+}
+
+.edu-filter-pills::-webkit-scrollbar {
+	height: 4px;
+}
+.edu-filter-pills::-webkit-scrollbar-thumb {
+	background: var(--edu-border-strong);
+	border-radius: 4px;
+}
+
+.edu-filter-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.45rem 1rem;
+	border-radius: var(--edu-radius-pill);
+	background-color: var(--edu-bg-subtle);
+	color: var(--edu-text-main);
+	border: 1px solid var(--edu-border);
+	font-size: 0.8125rem;
+	font-weight: 600;
+	cursor: pointer;
+	white-space: nowrap;
+	text-decoration: none;
+	transition: all var(--edu-transition-fast);
+}
+
+.edu-filter-pill:hover {
+	background-color: var(--edu-primary-ghost);
+	border-color: var(--edu-primary);
+	color: var(--edu-primary);
+}
+
+.edu-filter-pill.active {
+	background-color: var(--edu-primary);
+	border-color: var(--edu-primary);
+	color: #ffffff;
+}
+
+/* Dropdown Filters */
+.edu-filter-selects {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+
+.edu-filter-select {
+	min-width: 150px;
+	flex: 1;
+}
+
+@media (max-width: 576px) {
+	.edu-filter-row-top {
+		flex-direction: column;
+		align-items: stretch;
+	}
+	.edu-search-wrap {
+		width: 100%;
+	}
+	.edu-filter-select {
+		min-width: 100%;
+	}
+}

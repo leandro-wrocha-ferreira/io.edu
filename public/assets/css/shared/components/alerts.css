@@ -1,0 +1,98 @@
+/**
+ * Shared Alert Components — io.edu LMS
+ *
+ * Implements accessible, semantic alert feedback banners
+ * with theme integration and clear icon indicators.
+ */
+
+.edu-alert,
+.alert-flash {
+	display: flex;
+	align-items: center;
+	gap: 0.85rem;
+	padding: 1rem 1.25rem;
+	border-radius: var(--edu-radius-md);
+	border: 1px solid transparent;
+	border-left-width: 4px;
+	margin-bottom: 1.25rem;
+	background-color: var(--edu-bg-surface);
+	color: var(--edu-text-main);
+	box-shadow: var(--edu-shadow-sm);
+	transition: background-color var(--edu-transition-theme), color var(--edu-transition-theme);
+}
+
+.edu-alert-icon,
+.alert-flash-icon {
+	font-size: 1.25rem;
+	line-height: 1;
+	flex-shrink: 0;
+}
+
+.edu-alert-body,
+.alert-flash-body {
+	flex: 1;
+	font-size: 0.875rem;
+	line-height: 1.4;
+	color: var(--edu-text-main);
+}
+
+.edu-alert .btn-close,
+.alert-flash .btn-close {
+	opacity: 0.5;
+	flex-shrink: 0;
+	padding: 0.5rem;
+	transition: opacity var(--edu-transition-fast);
+}
+
+.edu-alert .btn-close:hover,
+.alert-flash .btn-close:hover {
+	opacity: 1;
+}
+
+/* Success Variant */
+.edu-alert-success,
+.alert-flash-success {
+	background-color: var(--edu-success-ghost);
+	border-color: rgba(16, 185, 129, 0.25);
+	border-left-color: var(--edu-success);
+}
+.edu-alert-success .edu-alert-icon,
+.alert-flash-success .alert-flash-icon {
+	color: var(--edu-success);
+}
+
+/* Danger / Error Variant */
+.edu-alert-danger,
+.alert-flash-danger {
+	background-color: var(--edu-danger-ghost);
+	border-color: rgba(239, 68, 68, 0.25);
+	border-left-color: var(--edu-danger);
+}
+.edu-alert-danger .edu-alert-icon,
+.alert-flash-danger .alert-flash-icon {
+	color: var(--edu-danger);
+}
+
+/* Warning Variant */
+.edu-alert-warning,
+.alert-flash-warning {
+	background-color: var(--edu-warning-ghost);
+	border-color: rgba(245, 158, 11, 0.25);
+	border-left-color: var(--edu-warning);
+}
+.edu-alert-warning .edu-alert-icon,
+.alert-flash-warning .alert-flash-icon {
+	color: var(--edu-warning);
+}
+
+/* Info Variant */
+.edu-alert-info,
+.alert-flash-info {
+	background-color: var(--edu-info-ghost);
+	border-color: rgba(59, 130, 246, 0.25);
+	border-left-color: var(--edu-info);
+}
+.edu-alert-info .edu-alert-icon,
+.alert-flash-info .alert-flash-icon {
+	color: var(--edu-info);
+}

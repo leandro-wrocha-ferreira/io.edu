@@ -1,0 +1,134 @@
+/**
+ * Shared Badge & Tag Components — io.edu LMS
+ *
+ * Implements accessible, high-contrast badges for status,
+ * educational levels, deadlines, and roles.
+ */
+
+.edu-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.3rem 0.75rem;
+	border-radius: var(--edu-radius-pill);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.2px;
+	line-height: 1.2;
+	white-space: nowrap;
+	border: 1px solid transparent;
+	transition: background-color var(--edu-transition-fast), border-color var(--edu-transition-fast);
+}
+
+.edu-badge-primary {
+	background-color: var(--edu-primary-ghost);
+	color: var(--edu-primary);
+	border-color: rgba(79, 70, 229, 0.22);
+}
+
+.edu-badge-accent {
+	background-color: var(--edu-accent-ghost);
+	color: var(--edu-accent);
+	border-color: rgba(6, 182, 212, 0.25);
+}
+
+.edu-badge-success {
+	background-color: var(--edu-success-ghost);
+	color: var(--edu-success);
+	border-color: rgba(16, 185, 129, 0.22);
+}
+
+.edu-badge-warning {
+	background-color: var(--edu-warning-ghost);
+	color: var(--edu-warning);
+	border-color: rgba(245, 158, 11, 0.25);
+}
+
+.edu-badge-danger {
+	background-color: var(--edu-danger-ghost);
+	color: var(--edu-danger);
+	border-color: rgba(239, 68, 68, 0.22);
+}
+
+.edu-badge-neutral {
+	background-color: var(--edu-bg-subtle);
+	color: var(--edu-text-muted);
+	border-color: var(--edu-border);
+}
+
+/* Educational Tags & Deadlines */
+.edu-badge-deadline {
+	background-color: var(--edu-warning-ghost);
+	color: var(--edu-warning);
+	border-color: rgba(245, 158, 11, 0.3);
+	font-weight: 700;
+}
+
+.edu-badge-mandatory {
+	background-color: rgba(239, 68, 68, 0.12);
+	color: var(--edu-danger);
+	border-color: rgba(239, 68, 68, 0.3);
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	font-size: 0.6875rem;
+}
+
+/* ==============================================
+ * Backward-Compatibility Aliases for Admin
+ * ============================================== */
+.badge-role {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	padding: 0.3rem 0.65rem;
+	border-radius: var(--edu-radius-pill);
+	font-size: 0.72rem;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+	white-space: nowrap;
+}
+
+.badge-role-admin {
+	background-color: var(--edu-primary-ghost);
+	color: var(--edu-primary);
+	border: 1px solid rgba(79, 70, 229, 0.2);
+}
+
+.badge-role-student {
+	background-color: var(--edu-success-ghost);
+	color: var(--edu-success);
+	border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.badge-role-default {
+	background-color: var(--edu-bg-subtle);
+	color: var(--edu-text-muted);
+	border: 1px solid var(--edu-border);
+}
+
+.badge-status-active {
+	background-color: var(--edu-success-ghost);
+	color: var(--edu-success);
+	border: 1px solid rgba(16, 185, 129, 0.2);
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	padding: 0.3rem 0.65rem;
+	border-radius: var(--edu-radius-pill);
+	font-size: 0.72rem;
+	font-weight: 600;
+}
+
+.badge-status-inactive {
+	background-color: var(--edu-bg-subtle);
+	color: var(--edu-text-muted);
+	border: 1px solid var(--edu-border);
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	padding: 0.3rem 0.65rem;
+	border-radius: var(--edu-radius-pill);
+	font-size: 0.72rem;
+	font-weight: 600;
+}

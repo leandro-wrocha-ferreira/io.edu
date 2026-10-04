@@ -1,0 +1,87 @@
+/**
+ * Journey / Learning Track Card Component — io.edu LMS
+ *
+ * Implements structured learning paths with milestones,
+ * regulatory deadlines, and visual progress (inspired by Nova ESA).
+ */
+
+.edu-journey-card {
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-lg);
+	box-shadow: var(--edu-shadow-sm);
+	padding: 1.5rem;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	position: relative;
+	transition: transform var(--edu-transition-normal),
+	            box-shadow var(--edu-transition-normal),
+	            border-color var(--edu-transition-normal),
+	            background-color var(--edu-transition-theme);
+}
+
+.edu-journey-card:hover {
+	transform: translateY(-3px);
+	box-shadow: var(--edu-shadow-md);
+	border-color: var(--edu-border-strong);
+}
+
+.edu-journey-top {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin-bottom: 0.85rem;
+}
+
+.edu-journey-title {
+	font-size: 1.15rem;
+	font-weight: 700;
+	color: var(--edu-text-heading);
+	margin-bottom: 0.35rem;
+	line-height: 1.3;
+}
+
+.edu-journey-desc {
+	font-size: 0.875rem;
+	color: var(--edu-text-muted);
+	margin-bottom: 1.25rem;
+	line-height: 1.45;
+}
+
+/* Milestone / Stats Box */
+.edu-journey-milestones {
+	background-color: var(--edu-bg-subtle);
+	border-radius: var(--edu-radius-md);
+	padding: 0.85rem 1rem;
+	margin-bottom: 1.25rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.edu-journey-milestone-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--edu-text-heading);
+}
+
+.edu-journey-progress-text {
+	color: var(--edu-primary);
+	font-variant-numeric: tabular-nums;
+}
+
+/* Footer & Actions */
+.edu-journey-footer {
+	margin-top: auto;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--edu-border);
+}

@@ -1,0 +1,184 @@
+/* ==========================================================================
+   Reports & Analytics Components — io.edu LMS
+   Includes KPI Cards, Visual Progress Bars, and Analytical Table Containers
+   ========================================================================== */
+
+/* Report KPI Card */
+.edu-report-kpi {
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-lg);
+	padding: 1.25rem 1.5rem;
+	box-shadow: var(--edu-shadow-sm);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	transition: transform var(--edu-transition-fast), border-color var(--edu-transition-fast);
+}
+
+.edu-report-kpi:hover {
+	border-color: var(--edu-border-strong);
+	transform: translateY(-2px);
+}
+
+.edu-report-kpi-info {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.edu-report-kpi-label {
+	font-size: 0.8125rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--edu-text-muted);
+}
+
+.edu-report-kpi-value {
+	font-size: 1.75rem;
+	font-weight: 700;
+	color: var(--edu-text-heading);
+	line-height: 1.2;
+}
+
+.edu-report-kpi-trend {
+	font-size: 0.75rem;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	font-weight: 500;
+}
+
+.edu-report-kpi-trend.positive {
+	color: var(--edu-success);
+}
+
+.edu-report-kpi-trend.warning {
+	color: var(--edu-warning);
+}
+
+.edu-report-kpi-trend.danger {
+	color: var(--edu-danger);
+}
+
+.edu-report-kpi-icon {
+	width: 48px;
+	height: 48px;
+	border-radius: var(--edu-radius-md);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.35rem;
+	flex-shrink: 0;
+}
+
+.edu-report-kpi-icon.primary {
+	background: var(--edu-primary-ghost);
+	color: var(--edu-primary);
+}
+
+.edu-report-kpi-icon.success {
+	background: var(--edu-success-ghost);
+	color: var(--edu-success);
+}
+
+.edu-report-kpi-icon.warning {
+	background: var(--edu-warning-ghost);
+	color: var(--edu-warning);
+}
+
+.edu-report-kpi-icon.danger {
+	background: var(--edu-danger-ghost);
+	color: var(--edu-danger);
+}
+
+/* Report Content Card */
+.edu-report-card {
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-lg);
+	box-shadow: var(--edu-shadow-sm);
+	overflow: hidden;
+	margin-bottom: 1.5rem;
+}
+
+.edu-report-card-header {
+	padding: 1.25rem 1.5rem;
+	border-bottom: 1px solid var(--edu-border);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.edu-report-card-title {
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--edu-text-heading);
+	margin: 0;
+}
+
+.edu-report-card-desc {
+	font-size: 0.8125rem;
+	color: var(--edu-text-muted);
+	margin: 0.2rem 0 0;
+}
+
+.edu-report-card-body {
+	padding: 1.5rem;
+}
+
+/* Visual Horizontal Bar Charts (Accessible) */
+.edu-stat-bar-item {
+	margin-bottom: 1.15rem;
+}
+
+.edu-stat-bar-item:last-child {
+	margin-bottom: 0;
+}
+
+.edu-stat-bar-header {
+	display: flex;
+	justify-content: space-between;
+	font-size: 0.875rem;
+	margin-bottom: 0.35rem;
+}
+
+.edu-stat-bar-label {
+	font-weight: 500;
+	color: var(--edu-text-heading);
+}
+
+.edu-stat-bar-value {
+	font-weight: 600;
+	color: var(--edu-text-heading);
+}
+
+.edu-stat-bar-track {
+	height: 8px;
+	border-radius: var(--edu-radius-pill);
+	background-color: var(--edu-bg-subtle);
+	overflow: hidden;
+}
+
+.edu-stat-bar-fill {
+	height: 100%;
+	border-radius: var(--edu-radius-pill);
+	background-color: var(--edu-primary);
+	transition: width var(--edu-transition-normal);
+}
+
+.edu-stat-bar-fill.success {
+	background-color: var(--edu-success);
+}
+
+.edu-stat-bar-fill.warning {
+	background-color: var(--edu-warning);
+}
+
+.edu-stat-bar-fill.danger {
+	background-color: var(--edu-danger);
+}

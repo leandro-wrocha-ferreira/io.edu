@@ -1,0 +1,100 @@
+/**
+ * Virtual Classroom & Video Player Styles — io.edu LMS
+ *
+ * Implements a focused learning layout with 16:9 responsive video wrapper,
+ * collapsible playlist sidebar, and tabbed resources.
+ */
+
+.edu-classroom-wrapper {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+	background-color: var(--edu-bg-main);
+}
+
+.edu-classroom-header {
+	height: 60px;
+	background-color: var(--edu-bg-surface);
+	border-bottom: 1px solid var(--edu-border);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 1.5rem;
+	position: sticky;
+	top: 0;
+	z-index: 100;
+}
+
+.edu-classroom-body {
+	display: flex;
+	flex: 1;
+	overflow: hidden;
+}
+
+/* Main Video & Content Area */
+.edu-classroom-main {
+	flex: 1;
+	overflow-y: auto;
+	padding: 1.5rem 2rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+/* 16:9 Video Canvas */
+.edu-video-player-frame {
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	background-color: #000000;
+	border-radius: var(--edu-radius-md);
+	overflow: hidden;
+	position: relative;
+	box-shadow: var(--edu-shadow-lg);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.edu-video-placeholder {
+	color: rgba(255, 255, 255, 0.7);
+	text-align: center;
+}
+
+.edu-video-placeholder-icon {
+	font-size: 3.5rem;
+	color: var(--edu-primary-light);
+	margin-bottom: 0.5rem;
+}
+
+/* Sidebar Playlist */
+.edu-classroom-sidebar {
+	width: 360px;
+	background-color: var(--edu-bg-surface);
+	border-left: 1px solid var(--edu-border);
+	display: flex;
+	flex-direction: column;
+	overflow-y: auto;
+	transition: width var(--edu-transition-normal);
+}
+
+.edu-classroom-sidebar-header {
+	padding: 1rem 1.25rem;
+	border-bottom: 1px solid var(--edu-border);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+@media (max-width: 992px) {
+	.edu-classroom-body {
+		flex-direction: column;
+	}
+	.edu-classroom-sidebar {
+		width: 100%;
+		border-left: none;
+		border-top: 1px solid var(--edu-border);
+	}
+	.edu-classroom-main {
+		padding: 1rem;
+	}
+}

@@ -1,0 +1,184 @@
+/**
+ * Global Design Tokens — io.edu LMS White-Label
+ *
+ * Provides a unified token layer supporting Light and Dark modes.
+ * These CSS variables power both our custom .edu-* Design System
+ * and theme customizations across Admin, Student, Public, and Auth views.
+ */
+
+:root {
+	/* =============================================
+	 * Brand / Primary Identity (Default Theme: Deep Indigo)
+	 * Fully customizable via White-Label Branding Provider
+	 * ============================================= */
+	--edu-primary:          #4f46e5;
+	--edu-primary-hover:    #4338ca;
+	--edu-primary-active:   #3730a3;
+	--edu-primary-light:    #6366f1;
+	--edu-primary-ghost:    rgba(79, 70, 229, 0.08);
+	--edu-primary-gradient: linear-gradient(135deg, #4f46e5 0%, #312e81 100%);
+
+	/* Semantic Accent / Highlights */
+	--edu-accent:           #06b6d4;
+	--edu-accent-ghost:     rgba(6, 182, 212, 0.1);
+
+	/* Status & Feedback Tokens */
+	--edu-success:          #10b981;
+	--edu-success-ghost:    rgba(16, 185, 129, 0.1);
+	--edu-warning:          #f59e0b;
+	--edu-warning-ghost:    rgba(245, 158, 11, 0.1);
+	--edu-danger:           #ef4444;
+	--edu-danger-ghost:     rgba(239, 68, 68, 0.1);
+	--edu-info:             #3b82f6;
+	--edu-info-ghost:       rgba(59, 130, 246, 0.1);
+
+	/* =============================================
+	 * Light Mode Surfaces & Text (Default)
+	 * ============================================= */
+	--edu-bg-main:          #f8fafc;
+	--edu-bg-surface:       #ffffff;
+	--edu-bg-subtle:        #f1f5f9;
+	--edu-bg-elevated:      #ffffff;
+	--edu-bg-sidebar:       #ffffff;
+
+	/* Sidebar Elements (Comfortable Light Surface) */
+	--edu-sidebar-hover:        rgba(15, 23, 42, 0.04);
+	--edu-sidebar-active-bg:    rgba(79, 70, 229, 0.08);
+	--edu-sidebar-color:        #475569;
+	--edu-sidebar-active-color: var(--edu-primary);
+
+	/* Text Hierarchy */
+	--edu-text-main:        #334155;
+	--edu-text-heading:     #0f172a;
+	--edu-text-muted:       #64748b;
+	--edu-text-inverted:    #ffffff;
+
+	/* Borders */
+	--edu-border:           #e2e8f0;
+	--edu-border-strong:    #cbd5e1;
+
+	/* Shadows & Elevation */
+	--edu-shadow-sm:        0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+	--edu-shadow-md:        0 4px 12px rgba(15, 23, 42, 0.07), 0 2px 4px rgba(15, 23, 42, 0.03);
+	--edu-shadow-lg:        0 12px 28px rgba(15, 23, 42, 0.09), 0 4px 10px rgba(15, 23, 42, 0.04);
+	--edu-shadow-brand:     0 4px 16px rgba(79, 70, 229, 0.28);
+
+	/* Spacing Scale */
+	--edu-space-xs:         0.25rem; /* 4px */
+	--edu-space-sm:         0.5rem;  /* 8px */
+	--edu-space-md:         1rem;    /* 16px */
+	--edu-space-lg:         1.5rem;  /* 24px */
+	--edu-space-xl:         2rem;    /* 32px */
+	--edu-space-2xl:        3rem;    /* 48px */
+
+	/* Radius Scale */
+	--edu-radius-sm:        6px;
+	--edu-radius-md:        10px;
+	--edu-radius-lg:        16px;
+	--edu-radius-pill:      9999px;
+
+	/* Transitions */
+	--edu-transition-fast:   0.15s cubic-bezier(0.4, 0, 0.2, 1);
+	--edu-transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+	--edu-transition-theme:  0.3s ease;
+
+	/* Layout constants */
+	--edu-sidebar-width:    280px;
+
+	/* =============================================
+	 * Backward-Compatibility Aliases with Admin theme.css
+	 * ============================================= */
+	--brand-primary:        var(--edu-primary);
+	--brand-primary-dark:   var(--edu-primary-active);
+	--brand-primary-light:  var(--edu-primary-light);
+	--brand-primary-ghost:  var(--edu-primary-ghost);
+	--brand-gradient:       var(--edu-primary-gradient);
+
+	--brand-success:        var(--edu-success);
+	--brand-success-ghost:  var(--edu-success-ghost);
+	--brand-warning:        var(--edu-warning);
+	--brand-warning-ghost:  var(--edu-warning-ghost);
+	--brand-danger:         var(--edu-danger);
+	--brand-danger-ghost:   var(--edu-danger-ghost);
+	--brand-purple:         var(--edu-primary);
+	--brand-purple-ghost:   var(--edu-primary-ghost);
+
+	--bg-main:              var(--edu-bg-main);
+	--bg-card:              var(--edu-bg-surface);
+	--bg-subtle:            var(--edu-bg-subtle);
+	--bg-sidebar:           var(--edu-bg-sidebar);
+
+	--sidebar-hover:        var(--edu-sidebar-hover);
+	--sidebar-active-bg:    var(--edu-sidebar-active-bg);
+	--sidebar-color:        var(--edu-sidebar-color);
+	--sidebar-active-color: var(--edu-sidebar-active-color);
+
+	--text-main:            var(--edu-text-main);
+	--text-heading:         var(--edu-text-heading);
+	--text-muted:           var(--edu-text-muted);
+
+	--border-color:         var(--edu-border);
+	--border-color-strong:  var(--edu-border-strong);
+
+	--shadow-sm:            var(--edu-shadow-sm);
+	--shadow-md:            var(--edu-shadow-md);
+	--shadow-lg:            var(--edu-shadow-lg);
+	--shadow-brand:         var(--edu-shadow-brand);
+
+	--sidebar-width:        var(--edu-sidebar-width);
+	--transition-fast:      var(--edu-transition-fast);
+	--transition-normal:    var(--edu-transition-normal);
+	--transition-theme:     var(--edu-transition-theme);
+}
+
+/* =============================================
+ * Dark Theme Tokens
+ * Activated via data-theme="dark" or data-bs-theme="dark"
+ * ============================================= */
+[data-theme="dark"],
+[data-bs-theme="dark"] {
+	--edu-bg-main:          #0b132b;
+	--edu-bg-surface:       #162032;
+	--edu-bg-subtle:        #0f172a;
+	--edu-bg-elevated:      #1e293b;
+	--edu-bg-sidebar:       #070f1a;
+
+	--edu-sidebar-hover:        rgba(255, 255, 255, 0.07);
+	--edu-sidebar-active-bg:    rgba(79, 70, 229, 0.22);
+	--edu-sidebar-color:        #64748b;
+	--edu-sidebar-active-color: #ffffff;
+
+	--edu-text-main:        #cbd5e1;
+	--edu-text-heading:     #f8fafc;
+	--edu-text-muted:       #94a3b8;
+
+	--edu-border:           #233348;
+	--edu-border-strong:    #334760;
+
+	--edu-shadow-sm:        0 1px 3px rgba(0, 0, 0, 0.35);
+	--edu-shadow-md:        0 4px 14px rgba(0, 0, 0, 0.45);
+	--edu-shadow-lg:        0 12px 28px rgba(0, 0, 0, 0.55);
+	--edu-shadow-brand:     0 4px 20px rgba(79, 70, 229, 0.4);
+
+	/* Aliases for Admin backward-compatibility */
+	--bg-main:              var(--edu-bg-main);
+	--bg-card:              var(--edu-bg-surface);
+	--bg-subtle:            var(--edu-bg-subtle);
+	--bg-sidebar:           var(--edu-bg-sidebar);
+
+	--sidebar-hover:        var(--edu-sidebar-hover);
+	--sidebar-active-bg:    var(--edu-sidebar-active-bg);
+	--sidebar-color:        var(--edu-sidebar-color);
+	--sidebar-active-color: var(--edu-sidebar-active-color);
+
+	--text-main:            var(--edu-text-main);
+	--text-heading:         var(--edu-text-heading);
+	--text-muted:           var(--edu-text-muted);
+
+	--border-color:         var(--edu-border);
+	--border-color-strong:  var(--edu-border-strong);
+
+	--shadow-sm:            var(--edu-shadow-sm);
+	--shadow-md:            var(--edu-shadow-md);
+	--shadow-lg:            var(--edu-shadow-lg);
+}

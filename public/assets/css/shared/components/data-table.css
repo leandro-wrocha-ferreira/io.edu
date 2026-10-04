@@ -1,0 +1,404 @@
+/**
+ * Operational Data Table & Data Toolbar — io.edu LMS
+ *
+ * Professional, high-density, accessible table layout with neutral headers,
+ * integrated toolbar (search, filters, counts), consistent row actions,
+ * and seamless Light/Dark mode support.
+ */
+
+/* ==========================================================================
+   1. Data Toolbar (Search, Filter, Counters, Actions)
+   ========================================================================== */
+.edu-data-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 1rem 1.25rem;
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-bottom: none;
+	border-top-left-radius: var(--edu-radius-lg);
+	border-top-right-radius: var(--edu-radius-lg);
+}
+
+.edu-toolbar-start,
+.edu-toolbar-end {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.edu-toolbar-start {
+	flex: 1 1 320px;
+}
+
+/* Toolbar Search Box */
+.edu-search-box {
+	position: relative;
+	min-width: 260px;
+	max-width: 380px;
+	flex: 1;
+}
+
+.edu-search-icon {
+	position: absolute;
+	left: 0.875rem;
+	top: 50%;
+	transform: translateY(-50%);
+	color: var(--edu-text-muted);
+	pointer-events: none;
+	font-size: 0.9rem;
+}
+
+.edu-search-input {
+	width: 100%;
+	padding: 0.5rem 0.875rem 0.5rem 2.25rem;
+	font-size: 0.875rem;
+	color: var(--edu-text-main);
+	background-color: var(--edu-bg-subtle);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-md);
+	min-height: 40px;
+	transition: border-color var(--edu-transition-fast),
+	            box-shadow var(--edu-transition-fast),
+	            background-color var(--edu-transition-fast);
+}
+
+.edu-search-input:focus {
+	outline: none;
+	background-color: var(--edu-bg-surface);
+	border-color: var(--edu-primary);
+	box-shadow: 0 0 0 3px var(--edu-primary-ghost);
+}
+
+/* Toolbar Filter Pills / Selects */
+.edu-toolbar-filter {
+	min-height: 40px;
+	padding: 0.5rem 2rem 0.5rem 0.875rem;
+	font-size: 0.875rem;
+	color: var(--edu-text-main);
+	background-color: var(--edu-bg-subtle);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-md);
+	cursor: pointer;
+	transition: border-color var(--edu-transition-fast);
+}
+
+.edu-toolbar-filter:focus {
+	outline: none;
+	border-color: var(--edu-primary);
+	box-shadow: 0 0 0 3px var(--edu-primary-ghost);
+}
+
+/* Records Counter Meta */
+.edu-toolbar-count {
+	font-size: 0.8125rem;
+	color: var(--edu-text-muted);
+	white-space: nowrap;
+}
+
+/* ==========================================================================
+   2. Operational Table Structure
+   ========================================================================== */
+.edu-table-card {
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-lg);
+	overflow: hidden;
+	box-shadow: var(--edu-shadow-sm);
+	margin-bottom: 1.5rem;
+}
+
+.edu-table-responsive {
+	width: 100%;
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+.edu-data-table {
+	width: 100% !important;
+	border-collapse: separate;
+	border-spacing: 0;
+	margin: 0 !important;
+	font-size: 0.875rem;
+	color: var(--edu-text-main);
+}
+
+/* Neutral Professional Table Header */
+.edu-data-table thead th,
+table.dataTable thead th.edu-th,
+.table-head-brand th {
+	background-color: var(--edu-bg-subtle) !important;
+	color: var(--edu-text-muted) !important;
+	font-size: 0.75rem !important;
+	font-weight: 700 !important;
+	text-transform: uppercase !important;
+	letter-spacing: 0.05em !important;
+	padding: 0.875rem 1rem !important;
+	border-top: none !important;
+	border-bottom: 1px solid var(--edu-border) !important;
+	border-left: none !important;
+	border-right: none !important;
+	white-space: nowrap;
+	vertical-align: middle;
+	user-select: none;
+}
+
+/* Table Body Cells */
+.edu-data-table tbody td,
+table.dataTable tbody td {
+	padding: 0.875rem 1rem !important;
+	color: var(--edu-text-main) !important;
+	background-color: transparent !important;
+	border-top: none !important;
+	border-bottom: 1px solid var(--edu-border) !important;
+	border-left: none !important;
+	border-right: none !important;
+	vertical-align: middle;
+	transition: background-color var(--edu-transition-fast);
+}
+
+/* Row Hover */
+.edu-data-table tbody tr:hover td,
+table.dataTable tbody tr:hover td {
+	background-color: rgba(79, 70, 229, 0.03) !important;
+}
+
+[data-theme="dark"] .edu-data-table tbody tr:hover td,
+[data-theme="dark"] table.dataTable tbody tr:hover td {
+	background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* Zebra Striping (Optional/Subtle) */
+.edu-data-table.edu-table-striped tbody tr:nth-of-type(even) td {
+	background-color: rgba(0, 0, 0, 0.015) !important;
+}
+
+[data-theme="dark"] .edu-data-table.edu-table-striped tbody tr:nth-of-type(even) td {
+	background-color: rgba(255, 255, 255, 0.015) !important;
+}
+
+/* ==========================================================================
+   3. Action Group & Action Buttons
+   ========================================================================== */
+.edu-action-group {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+}
+
+.edu-action-btn,
+.btn-action {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	min-width: 36px;
+	min-height: 36px;
+	padding: 0;
+	border-radius: var(--edu-radius-md);
+	border: 1px solid transparent;
+	background-color: transparent;
+	color: var(--edu-text-muted);
+	font-size: 0.95rem;
+	text-decoration: none;
+	cursor: pointer;
+	transition: all var(--edu-transition-fast);
+}
+
+.edu-action-btn:hover,
+.btn-action:hover {
+	background-color: var(--edu-bg-subtle);
+	color: var(--edu-text-heading);
+	border-color: var(--edu-border);
+}
+
+.edu-action-btn:focus-visible,
+.btn-action:focus-visible {
+	outline: none;
+	border-color: var(--edu-primary);
+	box-shadow: 0 0 0 3px var(--edu-primary-ghost);
+}
+
+/* Specific Action Variants */
+.edu-action-btn-edit:hover,
+.btn-action-edit:hover {
+	color: var(--edu-primary) !important;
+	background-color: var(--edu-primary-ghost) !important;
+	border-color: rgba(79, 70, 229, 0.2) !important;
+}
+
+.edu-action-btn-toggle:hover,
+.btn-action-toggle:hover {
+	color: var(--edu-warning) !important;
+	background-color: rgba(245, 158, 11, 0.1) !important;
+	border-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+.edu-action-btn-delete:hover,
+.btn-action-delete:hover {
+	color: var(--edu-danger) !important;
+	background-color: rgba(239, 68, 68, 0.1) !important;
+	border-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+/* ==========================================================================
+   4. Status & Role Badges in Table
+   ========================================================================== */
+.badge-status-active,
+.badge-status-inactive {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.3rem 0.65rem;
+	border-radius: var(--edu-radius-pill);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	white-space: nowrap;
+}
+
+.badge-status-active {
+	background-color: rgba(16, 185, 129, 0.1);
+	color: var(--edu-success);
+	border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.badge-status-inactive {
+	background-color: rgba(148, 163, 184, 0.12);
+	color: var(--edu-text-muted);
+	border: 1px solid var(--edu-border);
+}
+
+.badge-role {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	padding: 0.25rem 0.6rem;
+	border-radius: var(--edu-radius-sm);
+	font-size: 0.75rem;
+	font-weight: 600;
+}
+
+.badge-role-admin {
+	background-color: var(--edu-primary-ghost);
+	color: var(--edu-primary);
+	border: 1px solid rgba(79, 70, 229, 0.2);
+}
+
+.badge-role-student {
+	background-color: rgba(6, 182, 212, 0.1);
+	color: var(--edu-accent);
+	border: 1px solid rgba(6, 182, 212, 0.25);
+}
+
+.badge-role-default {
+	background-color: var(--edu-bg-subtle);
+	color: var(--edu-text-muted);
+	border: 1px solid var(--edu-border);
+}
+
+/* ==========================================================================
+   5. DataTables Integration Overrides
+   ========================================================================== */
+.dataTables_wrapper {
+	color: var(--edu-text-main) !important;
+	font-family: inherit;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+	display: none; /* Replaced by .edu-data-toolbar */
+}
+
+.dataTables_wrapper .dataTables_info {
+	padding: 1rem 1.25rem !important;
+	color: var(--edu-text-muted) !important;
+	font-size: 0.8125rem !important;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+	padding: 1rem 1.25rem !important;
+}
+
+.dataTables_wrapper .pagination {
+	margin: 0;
+	gap: 0.25rem;
+}
+
+.dataTables_wrapper .pagination .page-item .page-link {
+	border-radius: var(--edu-radius-md) !important;
+	background-color: var(--edu-bg-surface) !important;
+	border: 1px solid var(--edu-border) !important;
+	color: var(--edu-text-main) !important;
+	min-width: 36px;
+	height: 36px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	padding: 0 0.5rem;
+	transition: all var(--edu-transition-fast);
+}
+
+.dataTables_wrapper .pagination .page-item .page-link:hover {
+	background-color: var(--edu-bg-subtle) !important;
+	color: var(--edu-primary) !important;
+	border-color: var(--edu-border-strong) !important;
+}
+
+.dataTables_wrapper .pagination .page-item.active .page-link {
+	background-color: var(--edu-primary) !important;
+	border-color: var(--edu-primary) !important;
+	color: #ffffff !important;
+	font-weight: 600;
+}
+
+.dataTables_wrapper .pagination .page-item.disabled .page-link {
+	opacity: 0.45;
+	pointer-events: none;
+}
+
+/* Processing State */
+div.dataTables_processing {
+	background: var(--edu-bg-surface) !important;
+	color: var(--edu-text-heading) !important;
+	border: 1px solid var(--edu-border) !important;
+	border-radius: var(--edu-radius-lg) !important;
+	padding: 1.25rem 2rem !important;
+	box-shadow: var(--edu-shadow-lg) !important;
+	font-weight: 600;
+	font-size: 0.9375rem;
+	z-index: 100;
+}
+
+/* Empty Table State */
+.edu-table-empty {
+	padding: 3rem 1.5rem;
+	text-align: center;
+}
+
+.edu-table-empty-icon {
+	font-size: 2.5rem;
+	color: var(--edu-text-muted);
+	opacity: 0.6;
+	margin-bottom: 0.75rem;
+}
+
+.edu-table-empty-title {
+	font-weight: 600;
+	font-size: 1rem;
+	color: var(--edu-text-heading);
+	margin-bottom: 0.35rem;
+}
+
+.edu-table-empty-desc {
+	font-size: 0.875rem;
+	color: var(--edu-text-muted);
+	margin-bottom: 1.25rem;
+}

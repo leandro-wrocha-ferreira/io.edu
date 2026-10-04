@@ -1,0 +1,24 @@
+/**
+ * Consolidated Design System Components — io.edu LMS
+ *
+ * Provides a single entrypoint for all shared UI and LMS domain components.
+ */
+
+@import url('components/buttons.css');
+@import url('components/cards.css');
+@import url('components/badges.css');
+@import url('components/forms.css');
+@import url('components/alerts.css');
+@import url('components/empty-states.css');
+@import url('components/course-card.css');
+@import url('components/journey-card.css');
+@import url('components/course-progress.css');
+@import url('components/filter-bar.css');
+@import url('components/curriculum.css');
+@import url('components/player.css');
+@import url('components/support-floating.css');
+@import url('components/page-header.css');
+@import url('components/data-table.css');
+@import url('components/form-layout.css');
+@import url('components/course-admin.css');
+@import url('components/reports.css');

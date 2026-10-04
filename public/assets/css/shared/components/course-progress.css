@@ -1,0 +1,55 @@
+/**
+ * Course Progress Component — io.edu LMS
+ *
+ * Implements accessible, dual-feedback progress bars (visual + tabular text)
+ * across cards, classroom, and dashboard views.
+ */
+
+.edu-progress {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	width: 100%;
+}
+
+.edu-progress-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-size: 0.8125rem;
+}
+
+.edu-progress-label {
+	color: var(--edu-text-muted);
+	font-weight: 500;
+}
+
+.edu-progress-val {
+	font-weight: 700;
+	color: var(--edu-text-heading);
+	font-variant-numeric: tabular-nums;
+}
+
+.edu-progress-track {
+	height: 8px;
+	width: 100%;
+	background-color: var(--edu-border);
+	border-radius: var(--edu-radius-pill);
+	overflow: hidden;
+	position: relative;
+}
+
+.edu-progress-bar {
+	height: 100%;
+	background: var(--edu-primary-gradient);
+	border-radius: var(--edu-radius-pill);
+	transition: width 0.4s ease;
+}
+
+.edu-progress-bar-success {
+	background: var(--edu-success);
+}
+
+.edu-progress-sm .edu-progress-track {
+	height: 6px;
+}

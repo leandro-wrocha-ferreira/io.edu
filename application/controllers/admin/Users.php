@@ -41,7 +41,7 @@ class Users extends MY_Controller
 			'page_js' => ['admin/users/index.js'],
 		];
 
-		$this->load->view('admin/index', $data);
+		$this->load->view('layout/admin', $data);
 	}
 
 	/**
@@ -97,12 +97,14 @@ class Users extends MY_Controller
 			$is_admin_target = ($primary_role === RoleSlug::ADMIN);
 
 			if ($is_self) {
-				$actions = '<span class="text-muted small"><i class="bi bi-person-lock"></i> Próprio usuário</span>';
+				$actions = '<span class="text-muted small d-inline-flex align-items-center gap-1"><i class="bi bi-person-lock" aria-hidden="true"></i> Próprio usuário</span>';
 			} elseif ($is_admin_target && !$is_admin) {
-				$actions = '<span class="text-muted small"><i class="bi bi-shield-lock"></i> Protegido</span>';
+				$actions = '<span class="text-muted small d-inline-flex align-items-center gap-1"><i class="bi bi-shield-lock" aria-hidden="true"></i> Protegido</span>';
 			} else {
-				$actions = '<a href="' . $edit_url . '" class="btn-action btn-action-edit" title="Editar"><i class="bi bi-pencil-fill"></i></a> '
-					. '<a href="' . $toggle_url . '" class="btn-action btn-action-toggle" title="' . $toggle_title . '"><i class="bi ' . $toggle_icon . '-fill"></i></a>';
+				$actions = '<div class="edu-action-group">'
+					. '<a href="' . $edit_url . '" class="edu-action-btn edu-action-btn-edit" title="Editar Usuário" aria-label="Editar ' . html_escape($user->get_name()) . '"><i class="bi bi-pencil-fill" aria-hidden="true"></i></a>'
+					. '<a href="' . $toggle_url . '" class="edu-action-btn edu-action-btn-toggle" title="' . $toggle_title . ' Usuário" aria-label="' . $toggle_title . ' ' . html_escape($user->get_name()) . '"><i class="bi ' . $toggle_icon . '-fill" aria-hidden="true"></i></a>'
+					. '</div>';
 			}
 
 			$data[] = [
@@ -174,7 +176,7 @@ class Users extends MY_Controller
 			'user_role_ids' => [],
 		];
 
-		$this->load->view('admin/index', $data);
+		$this->load->view('layout/admin', $data);
 	}
 
 	/**
@@ -230,10 +232,10 @@ class Users extends MY_Controller
 			'title' => 'Editar Usuário',
 			'roles' => $all_roles,
 			'user' => $user,
-			'user_role_ids' => $user_model->find_role_ids_by_user_id($id),
+			'user_role_ids' => $get_use_case->get_role_ids($id),
 		];
 
-		$this->load->view('admin/index', $data);
+		$this->load->view('layout/admin', $data);
 	}
 
 	/**

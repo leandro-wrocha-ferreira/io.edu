@@ -1,53 +1,55 @@
 /* ==============================================
- * Dashboard Component Styles
+ * Dashboard Component Styles — io.edu LMS
  * ============================================== */
 .dashboard-stat-card {
-	background-color: var(--bg-card);
-	border: 1px solid var(--border-color);
-	border-radius: 0.875rem;
-	padding: 1.5rem;
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-lg);
+	padding: 1.25rem 1.5rem;
 	display: flex;
 	align-items: center;
 	gap: 1.25rem;
-	box-shadow: var(--shadow-sm);
-	transition: transform var(--transition-normal), box-shadow var(--transition-normal),
-	            background-color var(--transition-theme), border-color var(--transition-theme);
+	box-shadow: var(--edu-shadow-sm);
+	transition: transform var(--edu-transition-normal),
+	            box-shadow var(--edu-transition-normal),
+	            background-color var(--edu-transition-theme),
+	            border-color var(--edu-transition-theme);
 }
 
 .dashboard-stat-card:hover {
-	transform: translateY(-3px);
-	box-shadow: var(--shadow-md);
+	transform: translateY(-2px);
+	box-shadow: var(--edu-shadow-md);
 }
 
 .stat-icon-wrap {
-	width: 56px;
-	height: 56px;
-	border-radius: 0.75rem;
+	width: 52px;
+	height: 52px;
+	border-radius: var(--edu-radius-md);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 1.5rem;
+	font-size: 1.4rem;
 	flex-shrink: 0;
 }
 
 .stat-icon-primary {
-	background-color: var(--brand-primary-ghost);
-	color: var(--brand-primary);
+	background-color: var(--edu-primary-ghost);
+	color: var(--edu-primary);
 }
 
 .stat-icon-success {
-	background-color: var(--brand-success-ghost);
-	color: var(--brand-success);
+	background-color: rgba(16, 185, 129, 0.1);
+	color: var(--edu-success);
 }
 
 .stat-icon-warning {
-	background-color: var(--brand-warning-ghost);
-	color: var(--brand-warning);
+	background-color: rgba(245, 158, 11, 0.1);
+	color: var(--edu-warning);
 }
 
 .stat-icon-purple {
-	background-color: var(--brand-purple-ghost);
-	color: var(--brand-purple);
+	background-color: rgba(6, 182, 212, 0.1);
+	color: var(--edu-accent);
 }
 
 .stat-body {
@@ -57,23 +59,27 @@
 
 .stat-label {
 	font-size: 0.75rem;
-	font-weight: 600;
+	font-weight: 700;
 	text-transform: uppercase;
-	letter-spacing: 0.6px;
-	color: var(--text-muted);
+	letter-spacing: 0.05em;
+	color: var(--edu-text-muted);
 	margin-bottom: 0.25rem;
 }
 
 .stat-value {
-	font-size: 2rem;
-	font-weight: 700;
-	color: var(--text-heading);
-	line-height: 1;
+	font-size: 1.875rem;
+	font-weight: 800;
+	color: var(--edu-text-heading);
+	line-height: 1.1;
 	font-variant-numeric: tabular-nums;
+	letter-spacing: -0.02em;
 }
 
 .stat-meta {
-	font-size: 0.8rem;
-	color: var(--text-muted);
-	margin-top: 0.25rem;
+	font-size: 0.8125rem;
+	color: var(--edu-text-muted);
+	margin-top: 0.35rem;
+	display: flex;
+	align-items: center;
+	gap: 0.3rem;
 }

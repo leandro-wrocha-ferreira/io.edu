@@ -1,0 +1,112 @@
+/**
+ * Operational Form Layout System — io.edu LMS
+ *
+ * Implements structured, sectioned forms with clear visual hierarchy,
+ * accessible label-input associations, helper text, and action bars.
+ */
+
+.edu-form-card,
+.card-theme-form {
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-lg);
+	box-shadow: var(--edu-shadow-sm);
+	padding: 0;
+	overflow: hidden;
+	margin-bottom: 2rem;
+}
+
+/* Form Sections */
+.edu-form-section,
+.form-section {
+	padding: 1.75rem 2rem;
+	border-bottom: 1px solid var(--edu-border);
+}
+
+.edu-form-section:last-of-type,
+.form-section:last-of-type {
+	border-bottom: none;
+}
+
+.edu-form-section-header,
+.form-section-header {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	margin-bottom: 1.5rem;
+	color: var(--edu-text-heading);
+}
+
+.edu-form-section-header i,
+.form-section-header i {
+	font-size: 1.25rem;
+	color: var(--edu-primary);
+}
+
+.edu-form-section-title,
+.form-section-title {
+	font-size: 1.0625rem;
+	font-weight: 700;
+	color: var(--edu-text-heading);
+	margin: 0;
+}
+
+.edu-form-section-desc {
+	font-size: 0.8125rem;
+	color: var(--edu-text-muted);
+	margin-top: 0.25rem;
+	margin-bottom: 0;
+}
+
+/* Form Fields & Hints */
+.edu-form-field {
+	margin-bottom: 1.25rem;
+}
+
+.edu-form-hint {
+	font-size: 0.8125rem;
+	color: var(--edu-text-muted);
+	margin-top: 0.35rem;
+	display: block;
+}
+
+/* Form Actions Bar */
+.edu-form-actions,
+.form-actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 0.75rem;
+	padding: 1.25rem 2rem;
+	background-color: var(--edu-bg-subtle);
+	border-top: 1px solid var(--edu-border);
+}
+
+/* Sticky Actions Bar (for very long forms if needed) */
+.edu-form-actions-sticky {
+	position: sticky;
+	bottom: 0;
+	z-index: 10;
+	box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+	.edu-form-section,
+	.form-section {
+		padding: 1.25rem;
+	}
+
+	.edu-form-actions,
+	.form-actions {
+		padding: 1rem 1.25rem;
+		flex-direction: column-reverse;
+		align-items: stretch;
+	}
+
+	.edu-form-actions .edu-btn,
+	.edu-form-actions .btn-theme-primary,
+	.edu-form-actions .btn-theme-secondary {
+		width: 100%;
+		justify-content: center;
+	}
+}

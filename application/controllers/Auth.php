@@ -1,6 +1,7 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use app\domain\exceptions\AppException;
 use app\domain\identity\constants\RoleSlug;
 use app\usecases\identity\AuthenticateUserUseCase;
 use app\factories\ModelFactory;
@@ -45,7 +46,11 @@ class Auth extends MY_Controller
 			$use_case = new AuthenticateUserUseCase(ModelFactory::make('user_model'));
 			$user = $use_case->execute($email, $password);
 
-			$role = $user->get_role() ?? RoleSlug::STUDENT;
+			$role = $user->get_role();
+			if (!$role) {
+				throw new AppException('User has no role');
+			}
+
 			$session_data = [
 				'user_id' => $user->get_id(),
 				'user_name' => $user->get_name(),
@@ -60,7 +65,12 @@ class Auth extends MY_Controller
 			return;
 		}
 
-		$this->load->view('login', ['title' => 'Login']);
+		$data = [
+			'page_name' => 'auth/login_form',
+			'title' => 'Entrar — ' . get_institution_name(),
+		];
+
+		$this->load->view('layout/auth', $data);
 	}
 
 	/**

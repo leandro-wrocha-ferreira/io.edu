@@ -1,6 +1,6 @@
 /**
- * Admin Users List Page Script
- * DataTables Server-Side Initialization for Users
+ * Admin Users List Page Script — io.edu LMS
+ * DataTables Server-Side Initialization with integrated Toolbar
  */
 document.addEventListener('DOMContentLoaded', function () {
 	const tableEl = document.getElementById('users-table');
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		return;
 	}
 
-	jQuery(tableEl).DataTable({
+	const dt = jQuery(tableEl).DataTable({
 		processing: true,
 		serverSide: true,
 		ajax: {
@@ -19,19 +19,57 @@ document.addEventListener('DOMContentLoaded', function () {
 			}
 		},
 		columns: [
-			{ data: 'id', width: '60px', className: 'd-none d-md-table-cell ps-3' },
-			{ data: 'name' },
-			{ data: 'email' },
+			{ data: 'id', width: '70px', className: 'd-none d-md-table-cell ps-3' },
+			{ data: 'name', className: 'fw-semibold' },
+			{ data: 'email', className: 'text-muted' },
 			{ data: 'role', orderable: false, searchable: false, className: 'd-none d-lg-table-cell' },
-			{ data: 'created_at', width: '140px', className: 'd-none d-md-table-cell' },
-			{ data: 'status', orderable: false, searchable: false, width: '90px', className: 'text-center' },
-			{ data: 'actions', orderable: false, searchable: false, width: '100px', className: 'text-center' }
+			{ data: 'created_at', width: '150px', className: 'd-none d-md-table-cell text-muted small' },
+			{ data: 'status', orderable: false, searchable: false, width: '110px', className: 'text-center' },
+			{ data: 'actions', orderable: false, searchable: false, width: '110px', className: 'text-center' }
 		],
 		language: {
-			url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
+			url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json',
+			emptyTable: '<div class="edu-table-empty"><i class="bi bi-people edu-table-empty-icon" aria-hidden="true"></i><div class="edu-table-empty-title">Nenhum usuário cadastrado</div><div class="edu-table-empty-desc">Cadastre seu primeiro usuário para começar a gerenciar acessos.</div><a href="/admin/usuarios/novo" class="edu-btn edu-btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i> Criar Usuário</a></div>',
+			zeroRecords: '<div class="edu-table-empty"><i class="bi bi-search edu-table-empty-icon" aria-hidden="true"></i><div class="edu-table-empty-title">Nenhum usuário encontrado</div><div class="edu-table-empty-desc">Não encontramos registros correspondentes à busca informada.</div></div>',
+			processing: '<div class="d-flex align-items-center gap-2"><div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div><span>Carregando dados...</span></div>'
 		},
 		pageLength: 25,
 		order: [[0, 'desc']],
-		dom: '<"row"<"col-sm-6"l><"col-sm-6"f>>rtip'
+		dom: 'rt<"d-flex flex-wrap align-items-center justify-content-between p-3 border-top"ip>'
+	});
+
+	// Toolbar Search Integration with Debounce
+	const searchInput = document.getElementById('users-search-input');
+	if (searchInput) {
+		let debounceTimer;
+		searchInput.addEventListener('input', function () {
+			clearTimeout(debounceTimer);
+			debounceTimer = setTimeout(() => {
+				dt.search(this.value).draw();
+			}, 300);
+		});
+	}
+
+	// Toolbar Status Filter Integration
+	const statusFilter = document.getElementById('users-status-filter');
+	if (statusFilter) {
+		statusFilter.addEventListener('change', function () {
+			dt.search(searchInput ? searchInput.value : '').draw();
+		});
+	}
+
+	// Update Records Count on Table Redraw
+	dt.on('draw.dt', function () {
+		const info = dt.page.info();
+		const countEl = document.getElementById('users-count');
+		if (countEl) {
+			if (info.recordsTotal === 0) {
+				countEl.textContent = 'Nenhum registro';
+			} else if (info.recordsDisplay < info.recordsTotal) {
+				countEl.textContent = `Exibindo ${info.recordsDisplay} de ${info.recordsTotal} usuários (filtrado)`;
+			} else {
+				countEl.textContent = `Total de ${info.recordsTotal} usuários cadastrados`;
+			}
+		}
 	});
 });

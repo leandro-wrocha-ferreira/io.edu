@@ -1,0 +1,49 @@
+/**
+ * Floating Support Button — io.edu LMS
+ *
+ * Implements an accessible, high-contrast floating action button
+ * for student helpdesk and WhatsApp/Chat inquiries.
+ */
+
+.edu-support-btn {
+	position: fixed;
+	bottom: 1.5rem;
+	right: 1.5rem;
+	width: 52px;
+	height: 52px;
+	min-width: 52px;
+	min-height: 52px;
+	border-radius: var(--edu-radius-pill);
+	background: var(--edu-primary-gradient);
+	color: #ffffff !important;
+	border: 2px solid rgba(255, 255, 255, 0.4);
+	box-shadow: var(--edu-shadow-brand);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.35rem;
+	cursor: pointer;
+	z-index: 990;
+	transition: transform var(--edu-transition-fast), box-shadow var(--edu-transition-fast);
+	text-decoration: none;
+}
+
+.edu-support-btn:hover {
+	transform: scale(1.1) translateY(-2px);
+	box-shadow: 0 8px 24px rgba(79, 70, 229, 0.45);
+	color: #ffffff;
+}
+
+.edu-support-btn:active {
+	transform: scale(0.96);
+}
+
+@media (max-width: 576px) {
+	.edu-support-btn {
+		bottom: 1rem;
+		right: 1rem;
+		width: 48px;
+		height: 48px;
+		font-size: 1.2rem;
+	}
+}

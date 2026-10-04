@@ -1,0 +1,113 @@
+/**
+ * Shared Form Control Styles — io.edu LMS
+ *
+ * Implements accessible form inputs, labels, selects, checkboxes,
+ * and semantic error feedback across all themes.
+ */
+
+.edu-form-group {
+	margin-bottom: 1.25rem;
+}
+
+.edu-form-label,
+.form-label {
+	font-weight: 600;
+	font-size: 0.875rem;
+	color: var(--edu-text-heading);
+	margin-bottom: 0.4rem;
+	display: inline-block;
+}
+
+.edu-form-control,
+.edu-form-select,
+.form-control,
+.form-select {
+	background-color: var(--edu-bg-surface);
+	color: var(--edu-text-main);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-md);
+	font-size: 0.9375rem;
+	min-height: 44px;
+	padding: 0.6rem 0.95rem;
+	width: 100%;
+	line-height: 1.5;
+	transition: border-color var(--edu-transition-fast),
+	            box-shadow var(--edu-transition-fast),
+	            background-color var(--edu-transition-theme),
+	            color var(--edu-transition-theme);
+}
+
+.edu-form-control:hover,
+.edu-form-select:hover,
+.form-control:hover,
+.form-select:hover {
+	border-color: var(--edu-border-strong);
+}
+
+.edu-form-control:focus,
+.edu-form-select:focus,
+.form-control:focus,
+.form-select:focus {
+	background-color: var(--edu-bg-surface);
+	color: var(--edu-text-heading);
+	border-color: var(--edu-primary);
+	outline: 0;
+	box-shadow: 0 0 0 3px var(--edu-primary-ghost);
+}
+
+/* Checkbox & Radios */
+.edu-form-check,
+.form-check {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	min-height: 1.5rem;
+	margin-bottom: 0.5rem;
+}
+
+.edu-form-check-input,
+.form-check-input {
+	width: 1.25rem;
+	height: 1.25rem;
+	margin-top: 0;
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border-strong);
+	border-radius: var(--edu-radius-sm);
+	cursor: pointer;
+	flex-shrink: 0;
+	transition: background-color var(--edu-transition-fast), border-color var(--edu-transition-fast);
+}
+
+.edu-form-check-input:checked,
+.form-check-input:checked {
+	background-color: var(--edu-primary);
+	border-color: var(--edu-primary);
+}
+
+.form-check-input[type="radio"] {
+	border-radius: var(--edu-radius-pill);
+}
+
+.form-check-label {
+	font-size: 0.875rem;
+	color: var(--edu-text-main);
+	cursor: pointer;
+	user-select: none;
+}
+
+/* Error States */
+.is-invalid {
+	border-color: var(--edu-danger) !important;
+}
+
+.is-invalid:focus {
+	box-shadow: 0 0 0 3px var(--edu-danger-ghost) !important;
+}
+
+.invalid-feedback {
+	display: block;
+	font-size: 0.8125rem;
+	color: var(--edu-danger);
+	margin-top: 0.35rem;
+	font-weight: 500;
+}

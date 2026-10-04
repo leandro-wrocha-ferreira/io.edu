@@ -1,0 +1,175 @@
+/**
+ * Shared Card Components — io.edu LMS
+ *
+ * Provides elevated surfaces, sectioned form containers,
+ * and interactive card states for Light and Dark modes.
+ */
+
+.edu-card {
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-lg);
+	box-shadow: var(--edu-shadow-sm);
+	transition: background-color var(--edu-transition-theme),
+	            border-color var(--edu-transition-theme),
+	            box-shadow var(--edu-transition-normal),
+	            transform var(--edu-transition-normal);
+	position: relative;
+	overflow: hidden;
+}
+
+.edu-card-interactive {
+	cursor: pointer;
+}
+
+.edu-card-interactive:hover {
+	transform: translateY(-3px);
+	box-shadow: var(--edu-shadow-md);
+	border-color: var(--edu-border-strong);
+}
+
+.edu-card-header {
+	padding: 1.25rem 1.5rem;
+	border-bottom: 1px solid var(--edu-border);
+	background-color: transparent;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.edu-card-title {
+	font-size: 1.125rem;
+	font-weight: 700;
+	color: var(--edu-text-heading);
+	margin: 0;
+}
+
+.edu-card-subtitle {
+	font-size: 0.8125rem;
+	color: var(--edu-text-muted);
+	margin-top: 0.2rem;
+	margin-bottom: 0;
+}
+
+.edu-card-body {
+	padding: 1.5rem;
+}
+
+.edu-card-footer {
+	padding: 1rem 1.5rem;
+	background-color: var(--edu-bg-subtle);
+	border-top: 1px solid var(--edu-border);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+/* ==============================================
+ * Sectioned Form Card (.edu-card-form)
+ * ============================================== */
+.edu-card-form {
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-lg);
+	box-shadow: var(--edu-shadow-sm);
+	overflow: hidden;
+	transition: background-color var(--edu-transition-theme), border-color var(--edu-transition-theme);
+}
+
+.edu-card-form .form-section {
+	padding: 1.5rem 2rem;
+}
+
+.edu-card-form .form-section + .form-section {
+	border-top: 1px solid var(--edu-border);
+}
+
+.edu-card-form .form-section-header {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	margin-bottom: 1.25rem;
+}
+
+.edu-card-form .form-section-header i {
+	color: var(--edu-primary);
+	font-size: 1.1rem;
+}
+
+.edu-card-form .form-section-title {
+	font-size: 0.875rem;
+	font-weight: 700;
+	color: var(--edu-text-heading);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin: 0;
+}
+
+.edu-card-form .form-actions {
+	padding: 1.25rem 2rem;
+	background-color: var(--edu-bg-subtle);
+	border-top: 1px solid var(--edu-border);
+	display: flex;
+	gap: 0.75rem;
+	align-items: center;
+}
+
+/* ==============================================
+ * Backward-Compatibility Aliases for Admin
+ * ============================================== */
+.card-theme {
+	background-color: var(--edu-bg-surface) !important;
+	border: 1px solid var(--edu-border) !important;
+	border-radius: var(--edu-radius-lg) !important;
+	box-shadow: var(--edu-shadow-sm) !important;
+	transition: background-color var(--edu-transition-theme), border-color var(--edu-transition-theme);
+}
+
+.card-theme-form {
+	background-color: var(--edu-bg-surface) !important;
+	border: 1px solid var(--edu-border) !important;
+	border-radius: var(--edu-radius-lg) !important;
+	box-shadow: var(--edu-shadow-sm) !important;
+	overflow: hidden;
+	transition: background-color var(--edu-transition-theme), border-color var(--edu-transition-theme);
+}
+
+.card-theme-form .form-section {
+	padding: 1.5rem 2rem;
+}
+
+.card-theme-form .form-section + .form-section {
+	border-top: 1px solid var(--edu-border);
+}
+
+.card-theme-form .form-section-header {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	margin-bottom: 1.25rem;
+}
+
+.card-theme-form .form-section-header i {
+	color: var(--edu-primary);
+	font-size: 1rem;
+}
+
+.card-theme-form .form-section-title {
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: var(--edu-text-heading);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin: 0;
+}
+
+.card-theme-form .form-actions {
+	padding: 1.25rem 2rem;
+	background-color: var(--edu-bg-subtle);
+	border-top: 1px solid var(--edu-border);
+	display: flex;
+	gap: 0.75rem;
+	align-items: center;
+}

@@ -37,7 +37,7 @@ class Roles extends MY_Controller
 			'page_js' => ['admin/roles/index.js'],
 		];
 
-		$this->load->view('admin/index', $data);
+		$this->load->view('layout/admin', $data);
 	}
 
 	/**
@@ -76,8 +76,10 @@ class Roles extends MY_Controller
 				'slug' => '<code>' . html_escape($row->get_slug()) . '</code>',
 				'description' => $row->get_description() ? html_escape($row->get_description()) : '-',
 				'created_at' => $row->get_created_at()->format('d/m/Y H:i'),
-				'actions' => '<a href="' . $edit_url . '" class="btn-action btn-action-edit" title="Editar"><i class="bi bi-pencil-fill"></i></a> '
-					. '<a href="' . $delete_url . '" class="btn-action btn-action-delete" title="Excluir" onclick="return confirm(\'Tem certeza?\')"><i class="bi bi-trash-fill"></i></a>',
+				'actions' => '<div class="edu-action-group">'
+					. '<a href="' . $edit_url . '" class="edu-action-btn edu-action-btn-edit" title="Editar Perfil" aria-label="Editar ' . html_escape($row->get_name()) . '"><i class="bi bi-pencil-fill" aria-hidden="true"></i></a>'
+					. '<a href="' . $delete_url . '" class="edu-action-btn edu-action-btn-delete" title="Excluir Perfil" aria-label="Excluir ' . html_escape($row->get_name()) . '" onclick="return confirm(\'Tem certeza que deseja excluir este perfil?\')"><i class="bi bi-trash-fill" aria-hidden="true"></i></a>'
+					. '</div>',
 			];
 		}
 
@@ -123,7 +125,7 @@ class Roles extends MY_Controller
 			'role_permission_ids' => [],
 		];
 
-		$this->load->view('admin/index', $data);
+		$this->load->view('layout/admin', $data);
 	}
 
 	/**
@@ -156,17 +158,16 @@ class Roles extends MY_Controller
 			redirect('admin/perfis');
 		}
 
-		$permission_model = ModelFactory::make('permission_model');
-		$permissions_use_case = new ListPermissionsUseCase($permission_model);
+		$permissions_use_case = new ListPermissionsUseCase(ModelFactory::make('permission_model'));
 		$data = [
 			'page_name' => 'admin/roles/form',
 			'title' => 'Editar Perfil',
 			'permissions' => $permissions_use_case->execute(),
 			'role' => $role,
-			'role_permission_ids' => $permission_model->find_ids_by_role_id($id),
+			'role_permission_ids' => $permissions_use_case->get_ids_by_role_id($id),
 		];
 
-		$this->load->view('admin/index', $data);
+		$this->load->view('layout/admin', $data);
 	}
 
 	/**
