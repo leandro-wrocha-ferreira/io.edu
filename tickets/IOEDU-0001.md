@@ -1,4 +1,5 @@
 TITULO: Realizar limpeza e organização
+STATUS: CONCLUÍDO
 
 DESCRIÇÃO:
 1. Deletar controller Welcome.php

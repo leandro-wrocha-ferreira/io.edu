@@ -1,4 +1,5 @@
 TITULO: Atualizar skill ci3-js para refletir novo cliente HTTP Fetch
+STATUS: CONCLUÍDO 
 
 DESCRIÇÃO:
 Atualizar a documentação da skill `.agents/skills/ci3-js/SKILL.md` para incorporar formalmente o cliente HTTP nativo recém-criado em `public/assets/js/http.js`, estabelecendo-o como o padrão oficial do projeto para todas as requisições assíncronas do frontend.

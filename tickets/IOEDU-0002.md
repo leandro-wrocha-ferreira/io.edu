@@ -1,4 +1,5 @@
 TITULO: Padronizar projeto
+STATUS: CONCLUÍDO
 
 DESCRIÇÃO:
 Verificar os arquivos de controllers, models e usecases e padronizar de acordo as skills.

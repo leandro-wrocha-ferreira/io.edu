@@ -1,4 +1,5 @@
 TITULO: Padronização PSR-4 de Mappers/DTOs, Cliente HTTP Fetch e Exceções AppException
+STATUS: CONCLUÍDO
 
 DESCRIÇÃO:
 Implementar melhorias estruturais de arquitetura e infraestrutura no projeto para reforçar o autoload PSR-4, o tratamento padronizado de exceções de domínio e a comunicação assíncrona no frontend.
