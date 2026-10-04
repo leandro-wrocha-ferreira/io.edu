@@ -49,7 +49,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
 */
-$route['default_controller'] = 'auth/login';
+$route['default_controller'] = 'courses';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
@@ -76,5 +76,36 @@ $route['admin/perfis/novo'] = 'admin/roles/create';
 $route['admin/perfis/editar/(:num)'] = 'admin/roles/update/$1';
 $route['admin/perfis/excluir/(:num)'] = 'admin/roles/delete/$1';
 
+// Cursos
+$route['admin/cursos'] = 'admin/courses/index';
+$route['admin/cursos/novo'] = 'admin/courses/create';
+$route['admin/cursos/(:num)'] = 'admin/courses/detail/$1';
+$route['admin/cursos/(:num)/editar'] = 'admin/courses/edit/$1';
+$route['admin/cursos/(:num)/modulos'] = 'admin/courses/content/$1';
+$route['admin/cursos/(:num)/conteudo'] = 'admin/courses/content/$1';
+$route['admin/cursos/(:num)/aulas/editor'] = 'admin/courses/lesson_editor/$1';
+
+// Turmas
+$route['admin/turmas'] = 'admin/classes/index';
+$route['admin/turmas/novo'] = 'admin/classes/create';
+$route['admin/turmas/(:num)'] = 'admin/classes/detail/$1';
+
+// Avaliações
+$route['admin/avaliacoes'] = 'admin/evaluations/index';
+$route['admin/avaliacoes/novo'] = 'admin/evaluations/create';
+$route['admin/avaliacoes/(:num)'] = 'admin/evaluations/detail/$1';
+$route['admin/avaliacoes/(:num)/editar'] = 'admin/evaluations/edit/$1';
+
+// Relatórios
+$route['admin/relatorios'] = 'admin/reports/academic';
+$route['admin/relatorios/academicos'] = 'admin/reports/academic';
+$route['admin/relatorios/financeiros'] = 'admin/reports/financial';
+
 // Student routes
 $route['aluno/painel'] = 'student/dashboard/index';
+$route['aluno/jornadas'] = 'student/dashboard/journeys';
+$route['aluno/aula/(:any)'] = 'student/dashboard/classroom/$1';
+
+// Public Catalog routes
+$route['cursos'] = 'courses/index';
+$route['cursos/detalhes/(:any)'] = 'courses/detail/$1';
