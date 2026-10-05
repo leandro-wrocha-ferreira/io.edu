@@ -20,6 +20,16 @@ final class PermissionSlug
 	public const ROLES_EDIT = 'roles.edit';
 	public const ROLES_DELETE = 'roles.delete';
 
+	public const COURSES_VIEW = 'courses.view';
+	public const COURSES_CREATE = 'courses.create';
+	public const COURSES_EDIT = 'courses.edit';
+	public const COURSES_DELETE = 'courses.delete';
+
+	public const CATEGORIES_VIEW = 'categories.view';
+	public const CATEGORIES_CREATE = 'categories.create';
+	public const CATEGORIES_EDIT = 'categories.edit';
+	public const CATEGORIES_DELETE = 'categories.delete';
+
 	public const ALL = [
 		self::DASHBOARD_VIEW,
 		self::USERS_VIEW,
@@ -31,6 +41,14 @@ final class PermissionSlug
 		self::ROLES_CREATE,
 		self::ROLES_EDIT,
 		self::ROLES_DELETE,
+		self::COURSES_VIEW,
+		self::COURSES_CREATE,
+		self::COURSES_EDIT,
+		self::COURSES_DELETE,
+		self::CATEGORIES_VIEW,
+		self::CATEGORIES_CREATE,
+		self::CATEGORIES_EDIT,
+		self::CATEGORIES_DELETE,
 	];
 
 	/**
