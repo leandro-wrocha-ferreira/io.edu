@@ -93,6 +93,14 @@
 						</a>
 					</li>
 					<li class="nav-item" role="none">
+						<a class="nav-link <?= $seg2 == 'categorias' ? 'active' : '' ?>"
+						   href="<?= base_url('admin/categorias') ?>"
+						   role="menuitem"
+						   <?= $seg2 == 'categorias' ? 'aria-current="page"' : '' ?>>
+							<i class="bi bi-tags" aria-hidden="true"></i> Categorias
+						</a>
+					</li>
+					<li class="nav-item" role="none">
 						<a class="nav-link <?= $seg2 == 'turmas' ? 'active' : '' ?>"
 						   href="<?= base_url('admin/turmas') ?>"
 						   role="menuitem"

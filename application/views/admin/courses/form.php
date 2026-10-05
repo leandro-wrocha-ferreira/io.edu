@@ -1,172 +1,286 @@
+<?php
+/**
+ * @var \app\domain\course\Course|null $course
+ * @var array<\app\domain\course\Category> $categories
+ */
+?>
 <div class="container-fluid px-0">
 	<!-- Page Header -->
-	<header class="edu-page-header animate-fade-up">
-		<div>
-			<nav class="header-breadcrumb d-flex align-items-center gap-2 mb-1" aria-label="Localização">
-				<a href="<?= base_url('admin/painel') ?>" class="text-muted text-decoration-none">Painel</a>
-				<i class="bi bi-chevron-right text-muted" style="font-size: 0.7rem;" aria-hidden="true"></i>
-				<a href="<?= base_url('admin/cursos') ?>" class="text-muted text-decoration-none">Cursos</a>
-				<i class="bi bi-chevron-right text-muted" style="font-size: 0.7rem;" aria-hidden="true"></i>
-				<span class="fw-medium text-body"><?= !empty($course) ? 'Editar Curso' : 'Novo Curso' ?></span>
+	<div class="page-header animate-fade-up">
+		<div class="page-header-info">
+			<nav class="page-header-breadcrumb" aria-label="Breadcrumb">
+				<a href="<?= base_url('admin/painel') ?>">Painel</a>
+				<span class="sep" aria-hidden="true">/</span>
+				<a href="<?= base_url('admin/cursos') ?>">Cursos</a>
+				<span class="sep" aria-hidden="true">/</span>
+				<span class="active" aria-current="page"><?= !empty($course) ? 'Editar' : 'Novo' ?></span>
 			</nav>
-			<h1 class="edu-page-header-title"><?= !empty($course) ? html_escape($course['title']) : 'Novo Curso' ?></h1>
-			<p class="edu-page-header-desc">Defina as diretrizes pedagógicas, carga horária e parâmetros de publicação da disciplina.</p>
+			<h1 class="page-header-title"><?= !empty($course) ? 'Editar Curso' : 'Novo Curso' ?></h1>
+			<p class="page-header-subtitle">Defina as diretrizes pedagógicas, regras de acesso do aluno e parâmetros de certificação.</p>
 		</div>
-		<div class="edu-page-header-actions">
+		<div class="page-header-actions">
 			<a href="<?= base_url('admin/cursos') ?>" class="edu-btn edu-btn-outline">
-				<i class="bi bi-arrow-left" aria-hidden="true"></i>
-				<span>Voltar para Listagem</span>
+				<i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Voltar para Listagem
 			</a>
 		</div>
-	</header>
+	</div>
 
-	<form id="course-form" onsubmit="event.preventDefault(); alert('Protótipo Visual: Nenhuma alteração foi persistida no banco.');" class="animate-fade-up animate-delay-1">
-		<div class="edu-form-card mb-4">
-			<!-- Section 1: Basic Information -->
+	<?php if ($this->session->flashdata('error')): ?>
+		<div class="alert alert-danger alert-dismissible fade show animate-fade-up" role="alert">
+			<i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>
+			<?= html_escape($this->session->flashdata('error')) ?>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+		</div>
+	<?php endif; ?>
+
+	<?php if (validation_errors()): ?>
+		<div class="alert alert-danger alert-dismissible fade show animate-fade-up" role="alert">
+			<i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>
+			<div class="small"><?= validation_errors() ?></div>
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+		</div>
+	<?php endif; ?>
+
+	<div class="edu-form-card animate-fade-up animate-delay-1">
+		<form action="<?= current_url() ?>" method="POST" id="course-form">
+			<!-- Section 1: Identificação -->
 			<div class="edu-form-section">
-				<h2 class="edu-form-section-title">Informações Básicas</h2>
-				<p class="edu-form-section-desc">Identificação principal, titulação e alocação do docente responsável.</p>
+				<div class="edu-form-section-header">
+					<div class="edu-form-section-icon">
+						<i class="bi bi-journal-text" aria-hidden="true"></i>
+					</div>
+					<div>
+						<h2 class="edu-form-section-title">Identificação do Curso</h2>
+						<p class="edu-form-section-desc">Título, categoria, endereço URL amigável e imagem de apresentação.</p>
+					</div>
+				</div>
 
 				<div class="row g-3">
 					<div class="col-md-8 edu-form-field">
-						<label for="course-title" class="edu-form-label">
-							Título do Curso <span class="text-danger" aria-hidden="true">*</span>
-						</label>
+						<label class="edu-label edu-label-required" for="course-title">Título do Curso</label>
 						<input type="text"
+						       class="edu-input"
 						       id="course-title"
 						       name="title"
-						       class="form-control"
-						       value="<?= html_escape($course['title'] ?? 'Desenvolvimento Web Fullstack') ?>"
-						       required
-						       aria-describedby="title-hint">
-						<div id="title-hint" class="edu-form-hint">
-							<i class="bi bi-info-circle me-1"></i>Nome formal exibido no catálogo público e no certificado de conclusão.
-						</div>
+						       value="<?= html_escape(set_value('title', !empty($course) ? $course->get_title() : '')) ?>"
+						       placeholder="Ex: Arquitetura Limpa e DDD com PHP 8"
+						       required>
+						<span class="edu-form-hint">Nome formal exibido na vitrine e nos certificados de conclusão.</span>
 					</div>
 
 					<div class="col-md-4 edu-form-field">
-						<label for="course-category" class="edu-form-label">
-							Categoria Pedagógica <span class="text-danger" aria-hidden="true">*</span>
-						</label>
-						<select id="course-category" name="category" class="form-select" required>
-							<option value="Tecnologia" <?= (!empty($course) && $course['category'] === 'Tecnologia') ? 'selected' : '' ?>>Tecnologia</option>
-							<option value="Gestão & Negócios" <?= (!empty($course) && $course['category'] === 'Gestão & Negócios') ? 'selected' : '' ?>>Gestão & Negócios</option>
-							<option value="Segurança" <?= (!empty($course) && $course['category'] === 'Segurança') ? 'selected' : '' ?>>Segurança</option>
-							<option value="Soft Skills" <?= (!empty($course) && $course['category'] === 'Soft Skills') ? 'selected' : '' ?>>Soft Skills</option>
+						<label class="edu-label edu-label-required" for="course-category">Categoria Pedagógica</label>
+						<select class="edu-select" id="course-category" name="category_id" required>
+							<option value="">Selecione uma categoria...</option>
+							<?php $selected_cat = set_value('category_id', !empty($course) ? $course->get_category_id() : ''); ?>
+							<?php if (!empty($categories)): ?>
+								<?php foreach ($categories as $cat): ?>
+									<option value="<?= $cat->get_id() ?>" <?= (string)$selected_cat === (string)$cat->get_id() ? 'selected' : '' ?>>
+										<?= html_escape($cat->get_name()) ?>
+									</option>
+								<?php endforeach; ?>
+							<?php endif; ?>
 						</select>
 					</div>
 
-					<div class="col-md-8 edu-form-field">
-						<label for="course-instructor" class="edu-form-label">
-							Professor / Docente Responsável <span class="text-danger" aria-hidden="true">*</span>
-						</label>
+					<div class="col-md-6 edu-form-field">
+						<label class="edu-label" for="course-slug">Slug na URL</label>
 						<input type="text"
-						       id="course-instructor"
-						       name="instructor"
-						       class="form-control"
-						       value="<?= html_escape($course['instructor'] ?? 'Prof. Marcelo Santos') ?>"
-						       required>
+						       class="edu-input"
+						       id="course-slug"
+						       name="slug"
+						       value="<?= html_escape(set_value('slug', !empty($course) ? (string)$course->get_slug() : '')) ?>"
+						       placeholder="Ex: arquitetura-limpa-ddd-php-8">
+						<span class="edu-form-hint">Deixe em branco para gerar automaticamente a partir do título.</span>
 					</div>
 
-					<div class="col-md-4 edu-form-field">
-						<label for="course-workload" class="edu-form-label">
-							Carga Horária Total <span class="text-danger" aria-hidden="true">*</span>
-						</label>
-						<div class="input-group">
-							<input type="text"
-							       id="course-workload"
-							       name="workload"
-							       class="form-control"
-							       value="<?= html_escape($course['workload'] ?? '120h') ?>"
-							       required>
-							<span class="input-group-text">horas</span>
-						</div>
+					<div class="col-md-3 edu-form-field">
+						<label class="edu-label edu-label-required" for="course-status">Status de Publicação</label>
+						<select class="edu-select" id="course-status" name="status" required>
+							<?php $selected_status = set_value('status', !empty($course) ? (string)$course->get_status() : 'draft'); ?>
+							<option value="draft" <?= $selected_status === 'draft' ? 'selected' : '' ?>>Rascunho (invisível na vitrine)</option>
+							<option value="active" <?= $selected_status === 'active' ? 'selected' : '' ?>>Ativo (disponível para venda e matrícula)</option>
+							<option value="archived" <?= $selected_status === 'archived' ? 'selected' : '' ?>>Arquivado (vendas encerradas)</option>
+						</select>
+					</div>
+
+					<div class="col-md-3 edu-form-field">
+						<label class="edu-label" for="course-image">URL da Imagem de Capa</label>
+						<input type="text"
+						       class="edu-input"
+						       id="course-image"
+						       name="image"
+						       value="<?= html_escape(set_value('image', !empty($course) ? $course->get_image() : '')) ?>"
+						       placeholder="https://... ou caminho da imagem">
 					</div>
 
 					<div class="col-12 edu-form-field">
-						<label for="course-desc" class="edu-form-label">
-							Ementa / Descrição Pedagógica
-						</label>
-						<textarea id="course-desc"
-						          name="description"
-						          rows="4"
-						          class="form-control"><?= html_escape($course['description'] ?? '') ?></textarea>
-						<div class="edu-form-hint">
-							<i class="bi bi-info-circle me-1"></i>Resumo do conteúdo programático e objetivos de aprendizagem esperados.
-						</div>
+						<label class="edu-label" for="course-short-description">Resumo para Vitrine</label>
+						<textarea class="edu-textarea"
+						          id="course-short-description"
+						          name="short_description"
+						          rows="2"
+						          maxlength="500"
+						          placeholder="Breve chamada explicativa para os cards do catálogo..."><?= html_escape(set_value('short_description', !empty($course) ? $course->get_short_description() : '')) ?></textarea>
+						<span class="edu-form-hint">Máximo de 500 caracteres.</span>
 					</div>
 				</div>
 			</div>
 
-			<!-- Section 2: Visual Presentation -->
+			<!-- Section 2: Regras de Acesso e Certificação -->
 			<div class="edu-form-section">
-				<h2 class="edu-form-section-title">Apresentação & Vitrine</h2>
-				<p class="edu-form-section-desc">Elementos visuais exibidos nas listagens e no portal de matrículas.</p>
-
-				<div class="row g-3">
-					<div class="col-md-6 edu-form-field">
-						<label class="edu-form-label">Imagem de Capa (Proporção 16:9)</label>
-						<div class="p-4 border rounded-3 bg-subtle text-center">
-							<i class="bi bi-image fs-1 text-muted mb-2"></i>
-							<div class="small fw-semibold text-heading">Selecione uma imagem de alta resolução</div>
-							<div class="text-muted small mb-3">Recomendado: 1280×720px (JPEG ou WebP, máx. 2MB)</div>
-							<button type="button" class="edu-btn edu-btn-outline edu-btn-sm" onclick="alert('Protótipo: Seleção de mídia simulada.');">
-								<i class="bi bi-cloud-arrow-up me-1"></i> Escolher Imagem
-							</button>
-						</div>
+				<div class="edu-form-section-header">
+					<div class="edu-form-section-icon">
+						<i class="bi bi-clock-history" aria-hidden="true"></i>
 					</div>
-
-					<div class="col-md-6 edu-form-field">
-						<label for="course-highlights" class="edu-form-label">Destaques do Curso</label>
-						<textarea id="course-highlights"
-						          rows="4"
-						          class="form-control"
-						          placeholder="Principais benefícios para o aluno (um por linha)...">Aulas 100% práticas
-Certificado com validação digital
-Suporte a dúvidas com tutoria especializada</textarea>
+					<div>
+						<h2 class="edu-form-section-title">Regras de Acesso e Certificação</h2>
+						<p class="edu-form-section-desc">Defina a validade da matrícula para o aluno e os parâmetros de emissão do certificado.</p>
 					</div>
 				</div>
-			</div>
-
-			<!-- Section 3: Publication & Certifications -->
-			<div class="edu-form-section border-bottom-0 pb-0">
-				<h2 class="edu-form-section-title">Publicação & Certificação</h2>
-				<p class="edu-form-section-desc">Defina a visibilidade do curso e emissão de certificados automáticos.</p>
 
 				<div class="row g-3">
 					<div class="col-md-6 edu-form-field">
-						<label for="course-status" class="edu-form-label">
-							Status de Publicação <span class="text-danger" aria-hidden="true">*</span>
-						</label>
-						<select id="course-status" name="status" class="form-select">
-							<option value="published" <?= (!empty($course) && $course['status'] === 'published') ? 'selected' : '' ?>>Publicado (Visível no catálogo)</option>
-							<option value="review" <?= (!empty($course) && $course['status'] === 'review') ? 'selected' : '' ?>>Em Revisão (Apenas administradores)</option>
-							<option value="draft" <?= (!empty($course) && $course['status'] === 'draft') ? 'selected' : '' ?>>Rascunho (Não publicado)</option>
+						<label class="edu-label edu-label-required" for="access-period-type">Tipo de Período de Acesso</label>
+						<?php 
+							$current_access_type = set_value(
+								'access_period_type', 
+								!empty($course) ? $course->get_access_period()->get_type() : 'limited_time'
+							); 
+						?>
+						<select class="edu-select" id="access-period-type" name="access_period_type" required>
+							<option value="limited_time" <?= $current_access_type === 'limited_time' ? 'selected' : '' ?>>
+								Prazo Determinado (ex: 1 ano / 365 dias)
+							</option>
+							<option value="lifetime" <?= $current_access_type === 'lifetime' ? 'selected' : '' ?>>
+								Acesso Vitalício (sem data de expiração)
+							</option>
 						</select>
+						<span class="edu-form-hint">Regra de validade padrão aplicada no momento da matrícula do aluno.</span>
 					</div>
 
-					<div class="col-md-6 edu-form-field">
-						<label class="edu-form-label">Emissão de Certificado Digital</label>
-						<div class="form-check form-switch mt-2">
-							<input class="form-check-input" type="checkbox" id="cert-toggle" checked>
-							<label class="form-check-label fw-medium text-body" for="cert-toggle">
-								Emitir certificado automaticamente após 100% de conclusão
+					<div class="col-md-6 edu-form-field" id="access-days-container">
+						<label class="edu-label edu-label-required" for="access-days">Dias de Acesso</label>
+						<?php 
+							$current_access_days = set_value(
+								'access_days', 
+								(!empty($course) && $course->get_access_period()->get_days() !== null) 
+									? $course->get_access_period()->get_days() 
+									: '365'
+							); 
+						?>
+						<div class="input-group">
+							<input type="number"
+							       class="edu-input"
+							       id="access-days"
+							       name="access_days"
+							       min="1"
+							       step="1"
+							       value="<?= html_escape($current_access_days) ?>"
+							       placeholder="365">
+							<span class="input-group-text">dias</span>
+						</div>
+						<span class="edu-form-hint">Exemplos: 365 (1 ano), 180 (6 meses), 730 (2 anos).</span>
+					</div>
+
+					<div class="col-12 edu-form-field">
+						<div class="form-check form-switch pt-2">
+							<?php
+								$cert_checked = !empty($course) ? $course->is_certificate_enabled() : true;
+								if (set_value('submitted')) {
+									$cert_checked = (bool) set_value('certificate_enabled');
+								}
+							?>
+							<input type="hidden" name="submitted" value="1">
+							<input class="form-check-input"
+							       type="checkbox"
+							       role="switch"
+							       id="certificate-enabled"
+							       name="certificate_enabled"
+							       value="1"
+							       <?= $cert_checked ? 'checked' : '' ?>>
+							<label class="form-check-label fw-semibold" for="certificate-enabled">
+								Emitir certificado de conclusão automaticamente ao completar 100% das aulas
 							</label>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<!-- Actions Footer -->
+			<!-- Section 3: Dados Pedagógicos -->
+			<div class="edu-form-section">
+				<div class="edu-form-section-header">
+					<div class="edu-form-section-icon">
+						<i class="bi bi-mortarboard" aria-hidden="true"></i>
+					</div>
+					<div>
+						<h2 class="edu-form-section-title">Dados Pedagógicos</h2>
+						<p class="edu-form-section-desc">Carga horária para o certificado, ementa detalhada e pré-requisitos recomendados.</p>
+					</div>
+				</div>
+
+				<div class="row g-3">
+					<div class="col-md-4 edu-form-field">
+						<label class="edu-label" for="course-workload">Carga Horária Estimada (Certificado)</label>
+						<div class="input-group">
+							<input type="number"
+							       class="edu-input"
+							       id="course-workload"
+							       name="workload_in_hours"
+							       min="0"
+							       step="1"
+							       value="<?= html_escape(set_value('workload_in_hours', !empty($course) ? $course->get_workload_in_hours() : '')) ?>"
+							       placeholder="Ex: 40">
+							<span class="input-group-text">horas</span>
+						</div>
+						<span class="edu-form-hint">Carga horária oficial impressa no certificado do aluno.</span>
+					</div>
+
+					<div class="col-12 edu-form-field">
+						<label class="edu-label" for="course-description">Ementa e Detalhes do Curso</label>
+						<textarea class="edu-textarea"
+						          id="course-description"
+						          name="description"
+						          rows="5"
+						          placeholder="Apresentação detalhada da disciplina, metodologia e estrutura programática..."><?= html_escape(set_value('description', !empty($course) ? $course->get_description() : '')) ?></textarea>
+					</div>
+
+					<div class="col-md-4 edu-form-field">
+						<label class="edu-label" for="course-objectives">O que o aluno vai aprender</label>
+						<textarea class="edu-textarea"
+						          id="course-objectives"
+						          name="objectives"
+						          rows="3"
+						          placeholder="Principais competências e objetivos de aprendizagem..."><?= html_escape(set_value('objectives', !empty($course) ? $course->get_objectives() : '')) ?></textarea>
+					</div>
+
+					<div class="col-md-4 edu-form-field">
+						<label class="edu-label" for="course-target-audience">Público-Alvo</label>
+						<textarea class="edu-textarea"
+						          id="course-target-audience"
+						          name="target_audience"
+						          rows="3"
+						          placeholder="Para quem este curso foi desenhado..."><?= html_escape(set_value('target_audience', !empty($course) ? $course->get_target_audience() : '')) ?></textarea>
+					</div>
+
+					<div class="col-md-4 edu-form-field">
+						<label class="edu-label" for="course-requirements">Pré-requisitos Recomendados</label>
+						<textarea class="edu-textarea"
+						          id="course-requirements"
+						          name="requirements"
+						          rows="3"
+						          placeholder="Conhecimentos prévios ou ferramentas necessárias..."><?= html_escape(set_value('requirements', !empty($course) ? $course->get_requirements() : '')) ?></textarea>
+					</div>
+				</div>
+			</div>
+
+			<!-- Action Buttons -->
 			<div class="edu-form-actions">
-				<a href="<?= base_url('admin/cursos') ?>" class="edu-btn edu-btn-outline">
-					Cancelar
-				</a>
-				<button type="submit" class="edu-btn edu-btn-primary">
-					<i class="bi bi-floppy me-1" aria-hidden="true"></i>
-					<span>Salvar Alterações</span>
+				<a href="<?= base_url('admin/cursos') ?>" class="edu-btn edu-btn-secondary">Cancelar</a>
+				<button type="submit" class="edu-btn edu-btn-primary" id="btn-submit">
+					<i class="bi bi-check-lg me-1" aria-hidden="true"></i> Salvar Curso
 				</button>
 			</div>
-		</div>
-	</form>
+		</form>
+	</div>
 </div>
