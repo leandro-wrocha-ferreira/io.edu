@@ -230,6 +230,7 @@
 	<script src="//cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 	<script src="<?= base_url('public/assets/js/http.js') ?>"></script>
 	<script src="<?= base_url('public/assets/js/admin/layout.js') ?>"></script>
+	<script src="<?= base_url('public/assets/js/components/rich-editor.js') ?>"></script>
 
 	<!-- Page-Specific Scripts -->
 	<?php if (!empty($page_js)): ?>

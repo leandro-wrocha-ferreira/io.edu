@@ -134,6 +134,7 @@ class Categories extends MY_Controller
 			'page_name' => 'admin/categories/form',
 			'title' => 'Nova Categoria',
 			'category' => null,
+			'page_js' => ['admin/categories/form.js'],
 		];
 
 		$this->load->view('layout/admin', $data);
@@ -177,6 +178,7 @@ class Categories extends MY_Controller
 			'page_name' => 'admin/categories/form',
 			'title' => 'Editar Categoria — ' . $category->get_name(),
 			'category' => $category,
+			'page_js' => ['admin/categories/form.js'],
 		];
 
 		$this->load->view('layout/admin', $data);

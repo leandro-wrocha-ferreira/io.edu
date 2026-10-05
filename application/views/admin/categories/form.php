@@ -78,12 +78,15 @@
 					</div>
 
 					<div class="col-md-6 edu-form-field">
-						<label class="edu-form-label edu-label-required" for="category-status">Status de Publicação</label>
+						<label class="edu-form-label edu-label-required" for="category-status">Status</label>
 						<select class="form-select edu-form-select" id="category-status" name="status" required>
 							<?php $curr_status = set_value('status', !empty($category) ? $category->get_status() : 'active'); ?>
-							<option value="active" <?= $curr_status === 'active' ? 'selected' : '' ?>>Ativa (visível para criação de cursos e filtros)</option>
-							<option value="inactive" <?= $curr_status === 'inactive' ? 'selected' : '' ?>>Inativa (oculta do catálogo)</option>
+							<option value="active" <?= $curr_status === 'active' ? 'selected' : '' ?>>Ativa</option>
+							<option value="inactive" <?= $curr_status === 'inactive' ? 'selected' : '' ?>>Inativa</option>
 						</select>
+						<span class="edu-form-hint small" id="category-status-hint">
+							<?= $curr_status === 'inactive' ? 'Oculta do catálogo público e novos cadastros.' : 'Visível para organização e filtros na vitrine.' ?>
+						</span>
 					</div>
 				</div>
 			</div>

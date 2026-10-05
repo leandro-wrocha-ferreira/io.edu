@@ -198,7 +198,6 @@ class Courses extends MY_Controller
 		$this->form_validation->set_rules('short_description', 'Resumo', 'trim|max_length[500]');
 		$this->form_validation->set_rules('description', 'Ementa Completa', 'trim');
 		$this->form_validation->set_rules('image', 'URL da Imagem', 'trim|max_length[255]');
-		$this->form_validation->set_rules('objectives', 'Objetivos', 'trim');
 		$this->form_validation->set_rules('target_audience', 'Público-Alvo', 'trim');
 		$this->form_validation->set_rules('requirements', 'Pré-requisitos', 'trim');
 
@@ -215,6 +214,28 @@ class Courses extends MY_Controller
 					? (int) $this->input->post('workload_in_hours')
 					: null;
 
+				$image = $this->input->post('image') ?: null;
+
+				if (!empty($_FILES['image_file']['name'])) {
+					$upload_dir = FCPATH . 'public/uploads/courses/';
+					if (!is_dir($upload_dir)) {
+						mkdir($upload_dir, 0755, true);
+					}
+
+					$config = [
+						'upload_path' => $upload_dir,
+						'allowed_types' => 'gif|jpg|jpeg|png|webp',
+						'max_size' => 4096,
+						'encrypt_name' => TRUE,
+					];
+
+					$this->load->library('upload', $config);
+					if ($this->upload->do_upload('image_file')) {
+						$upload_data = $this->upload->data();
+						$image = base_url('public/uploads/courses/' . $upload_data['file_name']);
+					}
+				}
+
 				$use_case->execute(
 					(int) $this->input->post('category_id'),
 					$this->input->post('title'),
@@ -225,9 +246,9 @@ class Courses extends MY_Controller
 					$workload,
 					$this->input->post('short_description') ?: null,
 					$this->input->post('description') ?: null,
-					$this->input->post('image') ?: null,
+					$image,
 					0,
-					$this->input->post('objectives') ?: null,
+					null,
 					$this->input->post('target_audience') ?: null,
 					$this->input->post('requirements') ?: null,
 					$this->input->post('certificate_enabled') ? true : false
@@ -287,7 +308,6 @@ class Courses extends MY_Controller
 		$this->form_validation->set_rules('short_description', 'Resumo', 'trim|max_length[500]');
 		$this->form_validation->set_rules('description', 'Ementa Completa', 'trim');
 		$this->form_validation->set_rules('image', 'URL da Imagem', 'trim|max_length[255]');
-		$this->form_validation->set_rules('objectives', 'Objetivos', 'trim');
 		$this->form_validation->set_rules('target_audience', 'Público-Alvo', 'trim');
 		$this->form_validation->set_rules('requirements', 'Pré-requisitos', 'trim');
 
@@ -303,6 +323,28 @@ class Courses extends MY_Controller
 					? (int) $this->input->post('workload_in_hours')
 					: null;
 
+				$image = $this->input->post('image') ?: $course->get_image();
+
+				if (!empty($_FILES['image_file']['name'])) {
+					$upload_dir = FCPATH . 'public/uploads/courses/';
+					if (!is_dir($upload_dir)) {
+						mkdir($upload_dir, 0755, true);
+					}
+
+					$config = [
+						'upload_path' => $upload_dir,
+						'allowed_types' => 'gif|jpg|jpeg|png|webp',
+						'max_size' => 4096,
+						'encrypt_name' => TRUE,
+					];
+
+					$this->load->library('upload', $config);
+					if ($this->upload->do_upload('image_file')) {
+						$upload_data = $this->upload->data();
+						$image = base_url('public/uploads/courses/' . $upload_data['file_name']);
+					}
+				}
+
 				$use_case->execute(
 					$course->get_id(),
 					(int) $this->input->post('category_id'),
@@ -314,8 +356,8 @@ class Courses extends MY_Controller
 					$workload,
 					$this->input->post('short_description') ?: null,
 					$this->input->post('description') ?: null,
-					$this->input->post('image') ?: null,
-					$this->input->post('objectives') ?: null,
+					$image,
+					null,
 					$this->input->post('target_audience') ?: null,
 					$this->input->post('requirements') ?: null,
 					$this->input->post('certificate_enabled') ? true : false

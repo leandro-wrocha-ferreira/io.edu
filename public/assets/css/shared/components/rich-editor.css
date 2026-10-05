@@ -1,0 +1,112 @@
+/**
+ * Rich Text Editor Component Styles — io.edu LMS
+ *
+ * Provides styling for the lightweight WYSIWYG editor container,
+ * formatting toolbar, and contenteditable area compatible with Light and Dark themes.
+ */
+
+.edu-rich-editor-wrapper {
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-md);
+	overflow: hidden;
+	transition: border-color var(--edu-transition-fast), box-shadow var(--edu-transition-fast);
+}
+
+.edu-rich-editor-wrapper:focus-within {
+	border-color: var(--edu-primary);
+	box-shadow: 0 0 0 3px var(--edu-primary-ghost);
+}
+
+.edu-rich-editor-toolbar {
+	background-color: var(--edu-bg-subtle);
+	border-bottom: 1px solid var(--edu-border);
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+	padding: 0.4rem 0.65rem;
+	user-select: none;
+}
+
+.edu-editor-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	border: none;
+	background: transparent;
+	color: var(--edu-text-muted);
+	border-radius: var(--edu-radius-sm);
+	font-size: 0.875rem;
+	cursor: pointer;
+	transition: background-color var(--edu-transition-fast), color var(--edu-transition-fast);
+}
+
+.edu-editor-btn:hover {
+	background-color: var(--edu-bg-surface);
+	color: var(--edu-primary);
+}
+
+.edu-editor-btn:active,
+.edu-editor-btn.active {
+	background-color: var(--edu-primary);
+	color: #ffffff;
+}
+
+.edu-editor-divider {
+	width: 1px;
+	height: 18px;
+	background-color: var(--edu-border);
+	margin: 0 0.35rem;
+}
+
+.edu-rich-editor-content {
+	background-color: var(--edu-bg-surface);
+	color: var(--edu-text-body);
+	padding: 0.75rem 1rem;
+	min-height: 140px;
+	max-height: 480px;
+	overflow-y: auto;
+	outline: none;
+	line-height: 1.6;
+	font-size: 0.9375rem;
+}
+
+.edu-rich-editor-content[data-placeholder]:empty::before {
+	content: attr(data-placeholder);
+	color: var(--edu-text-muted);
+	pointer-events: none;
+}
+
+/* Rich Content Elements Inside Editor */
+.edu-rich-editor-content h4,
+.edu-rich-editor-content h5 {
+	color: var(--edu-text-heading);
+	font-weight: 700;
+	margin-top: 0.5rem;
+	margin-bottom: 0.35rem;
+}
+
+.edu-rich-editor-content p {
+	margin-bottom: 0.5rem;
+}
+
+.edu-rich-editor-content ul,
+.edu-rich-editor-content ol {
+	padding-left: 1.5rem;
+	margin-bottom: 0.5rem;
+}
+
+.edu-rich-editor-content li {
+	margin-bottom: 0.25rem;
+}
+
+.edu-rich-editor-content blockquote {
+	border-left: 3px solid var(--edu-primary);
+	padding-left: 0.75rem;
+	margin: 0.5rem 0;
+	color: var(--edu-text-muted);
+	font-style: italic;
+}

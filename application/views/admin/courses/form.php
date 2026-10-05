@@ -42,7 +42,7 @@
 	<?php endif; ?>
 
 	<div class="edu-form-card animate-fade-up animate-delay-1">
-		<form action="<?= current_url() ?>" method="POST" id="course-form">
+		<form action="<?= current_url() ?>" method="POST" id="course-form" enctype="multipart/form-data">
 			<!-- Section 1: Identificação -->
 			<div class="edu-form-section">
 				<div class="edu-form-section-header">
@@ -94,24 +94,68 @@
 						<span class="edu-form-hint">Deixe em branco para gerar automaticamente a partir do título.</span>
 					</div>
 
-					<div class="col-md-3 edu-form-field">
-						<label class="edu-form-label edu-label-required" for="course-status">Status de Publicação</label>
+					<div class="col-md-6 edu-form-field">
+						<label class="edu-form-label edu-label-required" for="course-status">Status</label>
 						<select class="form-select edu-form-select" id="course-status" name="status" required>
 							<?php $selected_status = set_value('status', !empty($course) ? (string)$course->get_status() : 'draft'); ?>
-							<option value="draft" <?= $selected_status === 'draft' ? 'selected' : '' ?>>Rascunho (invisível na vitrine)</option>
-							<option value="active" <?= $selected_status === 'active' ? 'selected' : '' ?>>Ativo (disponível para venda e matrícula)</option>
-							<option value="archived" <?= $selected_status === 'archived' ? 'selected' : '' ?>>Arquivado (vendas encerradas)</option>
+							<option value="draft" <?= $selected_status === 'draft' ? 'selected' : '' ?>>Rascunho</option>
+							<option value="active" <?= $selected_status === 'active' ? 'selected' : '' ?>>Ativo</option>
+							<option value="archived" <?= $selected_status === 'archived' ? 'selected' : '' ?>>Arquivado</option>
 						</select>
+						<span class="edu-form-hint small" id="course-status-hint">
+							<?php
+								echo match ($selected_status) {
+									'active' => 'Disponível para venda contínua e matrículas imediatas.',
+									'archived' => 'Vendas encerradas, acessível apenas para alunos matriculados.',
+									default => 'Invisível na vitrine, em fase de elaboração pedagógica.',
+								};
+							?>
+						</span>
 					</div>
 
-					<div class="col-md-3 edu-form-field">
-						<label class="edu-form-label" for="course-image">URL da Imagem de Capa</label>
-						<input type="text"
-						       class="form-control edu-form-control"
-						       id="course-image"
-						       name="image"
-						       value="<?= html_escape(set_value('image', !empty($course) ? $course->get_image() : '')) ?>"
-						       placeholder="https://... ou caminho da imagem">
+					<div class="col-12 edu-form-field">
+						<label class="edu-form-label">Imagem de Apresentação (Capa)</label>
+						<div class="edu-card p-3 bg-edu-surface border-edu shadow-none">
+							<div class="d-flex align-items-center gap-3 mb-2">
+								<div class="form-check form-check-inline mb-0">
+									<input class="form-check-input" type="radio" name="image_type" id="img-type-upload" value="upload" checked>
+									<label class="form-check-label fw-medium" for="img-type-upload">Upload de Imagem</label>
+								</div>
+								<div class="form-check form-check-inline mb-0">
+									<input class="form-check-input" type="radio" name="image_type" id="img-type-url" value="url" <?= (!empty($course) && filter_var($course->get_image(), FILTER_VALIDATE_URL)) ? 'checked' : '' ?>>
+									<label class="form-check-label fw-medium" for="img-type-url">URL Externa</label>
+								</div>
+							</div>
+
+							<div id="image-upload-box">
+								<input type="file"
+								       class="form-control edu-form-control"
+								       id="course-image-file"
+								       name="image_file"
+								       accept="image/png,image/jpeg,image/webp,image/jpg">
+								<span class="edu-form-hint">Formatos suportados: PNG, JPG, JPEG ou WebP (tamanho máximo: 4MB).</span>
+							</div>
+
+							<div id="image-url-box" class="d-none">
+								<input type="url"
+								       class="form-control edu-form-control"
+								       id="course-image"
+								       name="image"
+								       value="<?= html_escape(set_value('image', !empty($course) ? $course->get_image() : '')) ?>"
+								       placeholder="https://exemplo.com/imagem-do-curso.jpg">
+								<span class="edu-form-hint">Informe a URL pública direta da imagem.</span>
+							</div>
+
+							<?php if (!empty($course) && $course->get_image()): ?>
+								<div class="mt-2 pt-2 border-top border-edu d-flex align-items-center gap-2 small text-muted">
+									<i class="bi bi-image" aria-hidden="true"></i>
+									<span>Imagem atual:</span>
+									<a href="<?= html_escape($course->get_image()) ?>" target="_blank" rel="noopener" class="text-primary text-truncate d-inline-block" style="max-width: 320px;">
+										<?= html_escape($course->get_image()) ?>
+									</a>
+								</div>
+							<?php endif; ?>
+						</div>
 					</div>
 
 					<div class="col-12 edu-form-field">
@@ -200,7 +244,7 @@
 							       value="1"
 							       <?= $cert_checked ? 'checked' : '' ?>>
 							<label class="form-check-label fw-semibold" for="certificate-enabled">
-								Emitir certificado de conclusão automaticamente ao completar 100% das aulas
+								Emitir certificado de conclusão automaticamente após a conclusão das aulas
 							</label>
 						</div>
 					</div>
@@ -241,35 +285,32 @@
 						<textarea class="form-control edu-form-control"
 						          id="course-description"
 						          name="description"
-						          rows="5"
+						          data-rich-editor="true"
+						          rows="6"
 						          placeholder="Apresentação detalhada da disciplina, metodologia e estrutura programática..."><?= html_escape(set_value('description', !empty($course) ? $course->get_description() : '')) ?></textarea>
+						<span class="edu-form-hint">Utilize a barra de ferramentas para formatar o texto com negrito, títulos, listas e citações.</span>
 					</div>
 
-					<div class="col-md-4 edu-form-field">
-						<label class="edu-form-label" for="course-objectives">O que o aluno vai aprender</label>
-						<textarea class="form-control edu-form-control"
-						          id="course-objectives"
-						          name="objectives"
-						          rows="3"
-						          placeholder="Principais competências e objetivos de aprendizagem..."><?= html_escape(set_value('objectives', !empty($course) ? $course->get_objectives() : '')) ?></textarea>
-					</div>
-
-					<div class="col-md-4 edu-form-field">
+					<div class="col-md-6 edu-form-field">
 						<label class="edu-form-label" for="course-target-audience">Público-Alvo</label>
 						<textarea class="form-control edu-form-control"
 						          id="course-target-audience"
 						          name="target_audience"
+						          data-rich-editor="true"
 						          rows="3"
 						          placeholder="Para quem este curso foi desenhado..."><?= html_escape(set_value('target_audience', !empty($course) ? $course->get_target_audience() : '')) ?></textarea>
+						<span class="edu-form-hint">Formate com marcadores para detalhar os perfis profissionais recomendados.</span>
 					</div>
 
-					<div class="col-md-4 edu-form-field">
+					<div class="col-md-6 edu-form-field">
 						<label class="edu-form-label" for="course-requirements">Pré-requisitos Recomendados</label>
 						<textarea class="form-control edu-form-control"
 						          id="course-requirements"
 						          name="requirements"
+						          data-rich-editor="true"
 						          rows="3"
 						          placeholder="Conhecimentos prévios ou ferramentas necessárias..."><?= html_escape(set_value('requirements', !empty($course) ? $course->get_requirements() : '')) ?></textarea>
+						<span class="edu-form-hint">Formate com marcadores os requisitos técnicos ou conhecimentos prévios.</span>
 					</div>
 				</div>
 			</div>
