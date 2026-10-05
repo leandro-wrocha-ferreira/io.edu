@@ -13,7 +13,7 @@ permission:
     "git-leandro git status*": allow
     "git-leandro git diff*": allow
     "git-leandro git log*": allow
-    "bash bin/check-conventions.sh*": allow
+    "bash .agents/scripts/check-conventions.sh*": allow
     "docker compose exec app vendor/bin/phpunit*": allow
     "docker compose exec app vendor/bin/codecept*": allow
   glob: allow
@@ -44,7 +44,7 @@ When reviewing changes, you MUST execute the following 7 steps in exact sequence
 ### 1. Deterministic Conventions Gate (Zero Hallucination)
 Before reading code visually, ALWAYS execute the deterministic validator script on staged files:
 ```bash
-bash bin/check-conventions.sh --staged
+bash .agents/scripts/check-conventions.sh --staged
 ```
 * **Strict Rule:** If `check-conventions.sh` detects any failure (Vertical Alignment `\s{2,}=>`, Single-Letter Variables, Space Indentation, PSR-12 Braces, or Input XSS Filters), you MUST immediately flag the exact file and lines reported by the script. You are strictly forbidden from reporting "Conforme" on style if this script outputs errors.
 

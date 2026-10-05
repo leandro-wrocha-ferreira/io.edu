@@ -12,6 +12,8 @@ permission:
     "git-leandro log*": allow
     "git-leandro add *": allow
     "git-leandro commit *": allow
+    "git-leandro push*": allow
+    "GIT_AGENT=git-committer git-leandro *": allow
     "git-leandro git status*": allow
     "git-leandro git diff*": allow
     "git-leandro git log*": allow
@@ -73,4 +75,11 @@ Before staging or committing ANY changes, you **MUST** execute and pass the foll
    - <detail 2>
    ```
 5. **Types Allowed**: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `style`, `perf`.
-6. **Tooling Enforcement**: You MUST use `git-leandro` for staging and committing (e.g., `git-leandro add <file>`, `git-leandro commit -m "..."`). Do NOT use standard `git commit` or `git add` directly.
+6. **Tooling Enforcement & Deterministic Gatekeeper (IOEDU-0016)**:
+   - You MUST use `git-leandro` for staging and committing (e.g. `git-leandro add <file>`, `git-leandro commit -m "..."`). Do NOT use standard `git commit` or `git add` directly.
+   - To satisfy the `.agents/hooks.json` safety gatekeeper (`git-guard.py`), you must prefix your mutating commands with `GIT_AGENT=git-committer`:
+     ```bash
+     GIT_AGENT=git-committer git-leandro add <files...>
+     GIT_AGENT=git-committer git-leandro commit -m "<message>"
+     GIT_AGENT=git-committer git-leandro push origin <branch>
+     ```
