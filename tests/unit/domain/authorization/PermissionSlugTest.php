@@ -27,6 +27,14 @@ class PermissionSlugTest extends TestCase
 		$this->assertSame('roles.create', PermissionSlug::ROLES_CREATE);
 		$this->assertSame('roles.edit', PermissionSlug::ROLES_EDIT);
 		$this->assertSame('roles.delete', PermissionSlug::ROLES_DELETE);
+		$this->assertSame('courses.view', PermissionSlug::COURSES_VIEW);
+		$this->assertSame('courses.create', PermissionSlug::COURSES_CREATE);
+		$this->assertSame('courses.edit', PermissionSlug::COURSES_EDIT);
+		$this->assertSame('courses.delete', PermissionSlug::COURSES_DELETE);
+		$this->assertSame('categories.view', PermissionSlug::CATEGORIES_VIEW);
+		$this->assertSame('categories.create', PermissionSlug::CATEGORIES_CREATE);
+		$this->assertSame('categories.edit', PermissionSlug::CATEGORIES_EDIT);
+		$this->assertSame('categories.delete', PermissionSlug::CATEGORIES_DELETE);
 	}
 
 	/**
@@ -47,6 +55,14 @@ class PermissionSlugTest extends TestCase
 			'roles.create',
 			'roles.edit',
 			'roles.delete',
+			'courses.view',
+			'courses.create',
+			'courses.edit',
+			'courses.delete',
+			'categories.view',
+			'categories.create',
+			'categories.edit',
+			'categories.delete',
 		];
 		$this->assertSame($expected, PermissionSlug::ALL);
 	}
