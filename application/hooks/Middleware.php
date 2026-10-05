@@ -39,6 +39,21 @@ class Middleware
 		'admin/perfis/novo' => PermissionSlug::ROLES_CREATE,
 		'admin/perfis/editar' => PermissionSlug::ROLES_EDIT,
 		'admin/perfis/excluir' => PermissionSlug::ROLES_DELETE,
+
+		// Cursos
+		'admin/cursos' => PermissionSlug::COURSES_VIEW,
+		'admin/cursos/dados' => PermissionSlug::COURSES_VIEW,
+		'admin/cursos/novo' => PermissionSlug::COURSES_CREATE,
+		'admin/cursos/editar' => PermissionSlug::COURSES_EDIT,
+		'admin/cursos/arquivar' => PermissionSlug::COURSES_EDIT,
+		'admin/cursos/excluir' => PermissionSlug::COURSES_DELETE,
+
+		// Categorias
+		'admin/categorias' => PermissionSlug::CATEGORIES_VIEW,
+		'admin/categorias/dados' => PermissionSlug::CATEGORIES_VIEW,
+		'admin/categorias/nova' => PermissionSlug::CATEGORIES_CREATE,
+		'admin/categorias/editar' => PermissionSlug::CATEGORIES_EDIT,
+		'admin/categorias/excluir' => PermissionSlug::CATEGORIES_DELETE,
 	];
 
 	/**

@@ -76,11 +76,22 @@ $route['admin/perfis/novo'] = 'admin/roles/create';
 $route['admin/perfis/editar/(:num)'] = 'admin/roles/update/$1';
 $route['admin/perfis/excluir/(:num)'] = 'admin/roles/delete/$1';
 
+// Categorias
+$route['admin/categorias'] = 'admin/categories/index';
+$route['admin/categorias/dados'] = 'admin/categories/ajax_data';
+$route['admin/categorias/nova'] = 'admin/categories/create';
+$route['admin/categorias/editar/(:num)'] = 'admin/categories/update/$1';
+$route['admin/categorias/excluir/(:num)'] = 'admin/categories/delete/$1';
+
 // Cursos
 $route['admin/cursos'] = 'admin/courses/index';
+$route['admin/cursos/dados'] = 'admin/courses/ajax_data';
 $route['admin/cursos/novo'] = 'admin/courses/create';
 $route['admin/cursos/(:num)'] = 'admin/courses/detail/$1';
 $route['admin/cursos/(:num)/editar'] = 'admin/courses/edit/$1';
+$route['admin/cursos/editar/(:num)'] = 'admin/courses/edit/$1';
+$route['admin/cursos/arquivar/(:num)'] = 'admin/courses/archive/$1';
+$route['admin/cursos/excluir/(:num)'] = 'admin/courses/delete/$1';
 $route['admin/cursos/(:num)/modulos'] = 'admin/courses/content/$1';
 $route['admin/cursos/(:num)/conteudo'] = 'admin/courses/content/$1';
 $route['admin/cursos/(:num)/aulas/editor'] = 'admin/courses/lesson_editor/$1';
