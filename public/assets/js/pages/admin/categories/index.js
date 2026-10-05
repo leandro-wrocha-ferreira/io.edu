@@ -48,7 +48,21 @@ document.addEventListener('DOMContentLoaded', function () {
 		},
 		pageLength: 25,
 		order: [[0, 'desc']],
-		dom: 'rt<"d-flex flex-wrap align-items-center justify-content-between p-3 border-top"ip>'
+		dom: 'rt<"d-flex flex-wrap align-items-center justify-content-between p-3 border-top"ip>',
+		drawCallback: function () {
+			const api = this.api();
+			const info = api.page.info();
+			const countEl = document.getElementById('categories-count');
+			if (countEl) {
+				if (info.recordsTotal === 0) {
+					countEl.textContent = 'Nenhuma categoria';
+				} else if (info.recordsDisplay < info.recordsTotal) {
+					countEl.textContent = `Exibindo ${info.recordsDisplay} de ${info.recordsTotal} categorias (filtrado)`;
+				} else {
+					countEl.textContent = `Total de ${info.recordsTotal} categorias cadastradas`;
+				}
+			}
+		}
 	});
 
 	// Toolbar search with 300ms debounce
@@ -62,19 +76,4 @@ document.addEventListener('DOMContentLoaded', function () {
 			}, 300);
 		});
 	}
-
-	// Dynamic counter update
-	dt.on('draw.dt', function () {
-		const info = dt.page.info();
-		const countEl = document.getElementById('categories-count');
-		if (countEl) {
-			if (info.recordsTotal === 0) {
-				countEl.textContent = 'Nenhuma categoria';
-			} else if (info.recordsDisplay < info.recordsTotal) {
-				countEl.textContent = `Exibindo ${info.recordsDisplay} de ${info.recordsTotal} categorias (filtrado)`;
-			} else {
-				countEl.textContent = `Total de ${info.recordsTotal} categorias cadastradas`;
-			}
-		}
-	});
 });

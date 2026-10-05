@@ -28,14 +28,36 @@ document.addEventListener('DOMContentLoaded', function () {
 			{ data: 'actions', orderable: false, searchable: false, width: '110px', className: 'text-center' }
 		],
 		language: {
-			url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json',
 			emptyTable: '<div class="edu-table-empty"><i class="bi bi-people edu-table-empty-icon" aria-hidden="true"></i><div class="edu-table-empty-title">Nenhum usuário cadastrado</div><div class="edu-table-empty-desc">Cadastre seu primeiro usuário para começar a gerenciar acessos.</div><a href="/admin/usuarios/novo" class="edu-btn edu-btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i> Criar Usuário</a></div>',
 			zeroRecords: '<div class="edu-table-empty"><i class="bi bi-search edu-table-empty-icon" aria-hidden="true"></i><div class="edu-table-empty-title">Nenhum usuário encontrado</div><div class="edu-table-empty-desc">Não encontramos registros correspondentes à busca informada.</div></div>',
-			processing: '<div class="d-flex align-items-center gap-2"><div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div><span>Carregando dados...</span></div>'
+			processing: '<div class="d-flex align-items-center gap-2"><div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div><span>Carregando dados...</span></div>',
+			paginate: {
+				first: 'Primeiro',
+				previous: 'Anterior',
+				next: 'Próximo',
+				last: 'Último'
+			},
+			info: 'Exibindo _START_ até _END_ de _TOTAL_ usuários',
+			infoEmpty: 'Nenhum usuário encontrado',
+			infoFiltered: '(filtrado de _MAX_ no total)'
 		},
 		pageLength: 25,
 		order: [[0, 'desc']],
-		dom: 'rt<"d-flex flex-wrap align-items-center justify-content-between p-3 border-top"ip>'
+		dom: 'rt<"d-flex flex-wrap align-items-center justify-content-between p-3 border-top"ip>',
+		drawCallback: function () {
+			const api = this.api();
+			const info = api.page.info();
+			const countEl = document.getElementById('users-count');
+			if (countEl) {
+				if (info.recordsTotal === 0) {
+					countEl.textContent = 'Nenhum registro';
+				} else if (info.recordsDisplay < info.recordsTotal) {
+					countEl.textContent = `Exibindo ${info.recordsDisplay} de ${info.recordsTotal} usuários (filtrado)`;
+				} else {
+					countEl.textContent = `Total de ${info.recordsTotal} usuários cadastrados`;
+				}
+			}
+		}
 	});
 
 	// Toolbar Search Integration with Debounce
@@ -57,19 +79,4 @@ document.addEventListener('DOMContentLoaded', function () {
 			dt.search(searchInput ? searchInput.value : '').draw();
 		});
 	}
-
-	// Update Records Count on Table Redraw
-	dt.on('draw.dt', function () {
-		const info = dt.page.info();
-		const countEl = document.getElementById('users-count');
-		if (countEl) {
-			if (info.recordsTotal === 0) {
-				countEl.textContent = 'Nenhum registro';
-			} else if (info.recordsDisplay < info.recordsTotal) {
-				countEl.textContent = `Exibindo ${info.recordsDisplay} de ${info.recordsTotal} usuários (filtrado)`;
-			} else {
-				countEl.textContent = `Total de ${info.recordsTotal} usuários cadastrados`;
-			}
-		}
-	});
 });

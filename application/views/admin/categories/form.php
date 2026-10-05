@@ -55,9 +55,9 @@
 
 				<div class="row g-3">
 					<div class="col-md-6 edu-form-field">
-						<label class="edu-label edu-label-required" for="category-name">Nome da Categoria</label>
+						<label class="edu-form-label edu-label-required" for="category-name">Nome da Categoria</label>
 						<input type="text"
-						       class="edu-input"
+						       class="form-control edu-form-control"
 						       id="category-name"
 						       name="name"
 						       value="<?= html_escape(set_value('name', !empty($category) ? $category->get_name() : '')) ?>"
@@ -67,9 +67,9 @@
 					</div>
 
 					<div class="col-md-6 edu-form-field">
-						<label class="edu-label" for="category-slug">Slug na URL</label>
+						<label class="edu-form-label" for="category-slug">Slug na URL</label>
 						<input type="text"
-						       class="edu-input"
+						       class="form-control edu-form-control"
 						       id="category-slug"
 						       name="slug"
 						       value="<?= html_escape(set_value('slug', !empty($category) ? $category->get_slug() : '')) ?>"
@@ -78,8 +78,8 @@
 					</div>
 
 					<div class="col-md-6 edu-form-field">
-						<label class="edu-label edu-label-required" for="category-status">Status de Publicação</label>
-						<select class="edu-select" id="category-status" name="status" required>
+						<label class="edu-form-label edu-label-required" for="category-status">Status de Publicação</label>
+						<select class="form-select edu-form-select" id="category-status" name="status" required>
 							<?php $curr_status = set_value('status', !empty($category) ? $category->get_status() : 'active'); ?>
 							<option value="active" <?= $curr_status === 'active' ? 'selected' : '' ?>>Ativa (visível para criação de cursos e filtros)</option>
 							<option value="inactive" <?= $curr_status === 'inactive' ? 'selected' : '' ?>>Inativa (oculta do catálogo)</option>

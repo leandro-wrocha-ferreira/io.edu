@@ -10,6 +10,7 @@
 }
 
 .edu-form-label,
+.edu-label,
 .form-label {
 	font-weight: 600;
 	font-size: 0.875rem;
@@ -18,12 +19,21 @@
 	display: inline-block;
 }
 
+.edu-label-required::after {
+	content: " *";
+	color: var(--edu-danger);
+	font-weight: 700;
+}
+
 .edu-form-control,
 .edu-form-select,
+.edu-input,
+.edu-select,
+.edu-textarea,
 .form-control,
 .form-select {
 	background-color: var(--edu-bg-surface);
-	color: var(--edu-text-main);
+	color: var(--edu-text-body);
 	border: 1px solid var(--edu-border);
 	border-radius: var(--edu-radius-md);
 	font-size: 0.9375rem;
@@ -37,8 +47,18 @@
 	            color var(--edu-transition-theme);
 }
 
+.edu-textarea,
+textarea.edu-input,
+textarea.edu-form-control,
+textarea.form-control {
+	min-height: 100px;
+}
+
 .edu-form-control:hover,
 .edu-form-select:hover,
+.edu-input:hover,
+.edu-select:hover,
+.edu-textarea:hover,
 .form-control:hover,
 .form-select:hover {
 	border-color: var(--edu-border-strong);
@@ -46,6 +66,9 @@
 
 .edu-form-control:focus,
 .edu-form-select:focus,
+.edu-input:focus,
+.edu-select:focus,
+.edu-textarea:focus,
 .form-control:focus,
 .form-select:focus {
 	background-color: var(--edu-bg-surface);
@@ -53,6 +76,14 @@
 	border-color: var(--edu-primary);
 	outline: 0;
 	box-shadow: 0 0 0 3px var(--edu-primary-ghost);
+}
+
+.input-group .input-group-text {
+	background-color: var(--edu-bg-subtle);
+	color: var(--edu-text-muted);
+	border-color: var(--edu-border);
+	font-size: 0.875rem;
+	font-weight: 500;
 }
 
 /* Checkbox & Radios */

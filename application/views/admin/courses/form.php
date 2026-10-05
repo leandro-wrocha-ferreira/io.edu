@@ -57,9 +57,9 @@
 
 				<div class="row g-3">
 					<div class="col-md-8 edu-form-field">
-						<label class="edu-label edu-label-required" for="course-title">Título do Curso</label>
+						<label class="edu-form-label edu-label-required" for="course-title">Título do Curso</label>
 						<input type="text"
-						       class="edu-input"
+						       class="form-control edu-form-control"
 						       id="course-title"
 						       name="title"
 						       value="<?= html_escape(set_value('title', !empty($course) ? $course->get_title() : '')) ?>"
@@ -69,8 +69,8 @@
 					</div>
 
 					<div class="col-md-4 edu-form-field">
-						<label class="edu-label edu-label-required" for="course-category">Categoria Pedagógica</label>
-						<select class="edu-select" id="course-category" name="category_id" required>
+						<label class="edu-form-label edu-label-required" for="course-category">Categoria Pedagógica</label>
+						<select class="form-select edu-form-select" id="course-category" name="category_id" required>
 							<option value="">Selecione uma categoria...</option>
 							<?php $selected_cat = set_value('category_id', !empty($course) ? $course->get_category_id() : ''); ?>
 							<?php if (!empty($categories)): ?>
@@ -84,9 +84,9 @@
 					</div>
 
 					<div class="col-md-6 edu-form-field">
-						<label class="edu-label" for="course-slug">Slug na URL</label>
+						<label class="edu-form-label" for="course-slug">Slug na URL</label>
 						<input type="text"
-						       class="edu-input"
+						       class="form-control edu-form-control"
 						       id="course-slug"
 						       name="slug"
 						       value="<?= html_escape(set_value('slug', !empty($course) ? (string)$course->get_slug() : '')) ?>"
@@ -95,8 +95,8 @@
 					</div>
 
 					<div class="col-md-3 edu-form-field">
-						<label class="edu-label edu-label-required" for="course-status">Status de Publicação</label>
-						<select class="edu-select" id="course-status" name="status" required>
+						<label class="edu-form-label edu-label-required" for="course-status">Status de Publicação</label>
+						<select class="form-select edu-form-select" id="course-status" name="status" required>
 							<?php $selected_status = set_value('status', !empty($course) ? (string)$course->get_status() : 'draft'); ?>
 							<option value="draft" <?= $selected_status === 'draft' ? 'selected' : '' ?>>Rascunho (invisível na vitrine)</option>
 							<option value="active" <?= $selected_status === 'active' ? 'selected' : '' ?>>Ativo (disponível para venda e matrícula)</option>
@@ -105,9 +105,9 @@
 					</div>
 
 					<div class="col-md-3 edu-form-field">
-						<label class="edu-label" for="course-image">URL da Imagem de Capa</label>
+						<label class="edu-form-label" for="course-image">URL da Imagem de Capa</label>
 						<input type="text"
-						       class="edu-input"
+						       class="form-control edu-form-control"
 						       id="course-image"
 						       name="image"
 						       value="<?= html_escape(set_value('image', !empty($course) ? $course->get_image() : '')) ?>"
@@ -115,8 +115,8 @@
 					</div>
 
 					<div class="col-12 edu-form-field">
-						<label class="edu-label" for="course-short-description">Resumo para Vitrine</label>
-						<textarea class="edu-textarea"
+						<label class="edu-form-label" for="course-short-description">Resumo para Vitrine</label>
+						<textarea class="form-control edu-form-control"
 						          id="course-short-description"
 						          name="short_description"
 						          rows="2"
@@ -141,14 +141,14 @@
 
 				<div class="row g-3">
 					<div class="col-md-6 edu-form-field">
-						<label class="edu-label edu-label-required" for="access-period-type">Tipo de Período de Acesso</label>
+						<label class="edu-form-label edu-label-required" for="access-period-type">Tipo de Período de Acesso</label>
 						<?php 
 							$current_access_type = set_value(
 								'access_period_type', 
 								!empty($course) ? $course->get_access_period()->get_type() : 'limited_time'
 							); 
 						?>
-						<select class="edu-select" id="access-period-type" name="access_period_type" required>
+						<select class="form-select edu-form-select" id="access-period-type" name="access_period_type" required>
 							<option value="limited_time" <?= $current_access_type === 'limited_time' ? 'selected' : '' ?>>
 								Prazo Determinado (ex: 1 ano / 365 dias)
 							</option>
@@ -160,7 +160,7 @@
 					</div>
 
 					<div class="col-md-6 edu-form-field" id="access-days-container">
-						<label class="edu-label edu-label-required" for="access-days">Dias de Acesso</label>
+						<label class="edu-form-label edu-label-required" for="access-days">Dias de Acesso</label>
 						<?php 
 							$current_access_days = set_value(
 								'access_days', 
@@ -171,7 +171,7 @@
 						?>
 						<div class="input-group">
 							<input type="number"
-							       class="edu-input"
+							       class="form-control edu-form-control"
 							       id="access-days"
 							       name="access_days"
 							       min="1"
@@ -221,10 +221,10 @@
 
 				<div class="row g-3">
 					<div class="col-md-4 edu-form-field">
-						<label class="edu-label" for="course-workload">Carga Horária Estimada (Certificado)</label>
+						<label class="edu-form-label" for="course-workload">Carga Horária Estimada (Certificado)</label>
 						<div class="input-group">
 							<input type="number"
-							       class="edu-input"
+							       class="form-control edu-form-control"
 							       id="course-workload"
 							       name="workload_in_hours"
 							       min="0"
@@ -237,8 +237,8 @@
 					</div>
 
 					<div class="col-12 edu-form-field">
-						<label class="edu-label" for="course-description">Ementa e Detalhes do Curso</label>
-						<textarea class="edu-textarea"
+						<label class="edu-form-label" for="course-description">Ementa e Detalhes do Curso</label>
+						<textarea class="form-control edu-form-control"
 						          id="course-description"
 						          name="description"
 						          rows="5"
@@ -246,8 +246,8 @@
 					</div>
 
 					<div class="col-md-4 edu-form-field">
-						<label class="edu-label" for="course-objectives">O que o aluno vai aprender</label>
-						<textarea class="edu-textarea"
+						<label class="edu-form-label" for="course-objectives">O que o aluno vai aprender</label>
+						<textarea class="form-control edu-form-control"
 						          id="course-objectives"
 						          name="objectives"
 						          rows="3"
@@ -255,8 +255,8 @@
 					</div>
 
 					<div class="col-md-4 edu-form-field">
-						<label class="edu-label" for="course-target-audience">Público-Alvo</label>
-						<textarea class="edu-textarea"
+						<label class="edu-form-label" for="course-target-audience">Público-Alvo</label>
+						<textarea class="form-control edu-form-control"
 						          id="course-target-audience"
 						          name="target_audience"
 						          rows="3"
@@ -264,8 +264,8 @@
 					</div>
 
 					<div class="col-md-4 edu-form-field">
-						<label class="edu-label" for="course-requirements">Pré-requisitos Recomendados</label>
-						<textarea class="edu-textarea"
+						<label class="edu-form-label" for="course-requirements">Pré-requisitos Recomendados</label>
+						<textarea class="form-control edu-form-control"
 						          id="course-requirements"
 						          name="requirements"
 						          rows="3"
