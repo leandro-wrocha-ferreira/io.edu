@@ -299,14 +299,15 @@ class MY_Model extends CI_Model
 			$diff_before = [];
 			$diff_after = [];
 
-			$is_batch = count($before) > 1;
+			$is_multi_row = array_is_list($before) && isset($before[0]) && is_array($before[0]);
+			$rows_before = $is_multi_row ? $before : [$before];
 
-			foreach ($before as $row) {
+			foreach ($rows_before as $row) {
 				$row_diff_before = [];
 				$row_diff_after = [];
 
 				foreach ($after as $key => $value) {
-					if (array_key_exists($key, $row)) {
+					if (is_array($row) && array_key_exists($key, $row)) {
 						if ($row[$key] != $value) {
 							$row_diff_before[$key] = $row[$key];
 							$row_diff_after[$key] = $value;
@@ -316,7 +317,7 @@ class MY_Model extends CI_Model
 					}
 				}
 
-				if ($is_batch) {
+				if ($is_multi_row) {
 					$diff_before[] = $row_diff_before;
 					$diff_after[] = $row_diff_after;
 				} else {
