@@ -9,9 +9,8 @@ use app\domain\course\value_objects\CourseAccessPeriod;
 use app\domain\course\value_objects\CourseSlug;
 use app\domain\course\value_objects\CourseStatus;
 use app\domain\course\value_objects\Workload;
-use app\domain\exceptions\CategoryNotFoundException;
-use app\domain\exceptions\CourseNotFoundException;
-use app\domain\exceptions\DuplicateSlugException;
+use app\domain\exceptions\ConflictException;
+use app\domain\exceptions\NotFoundException;
 
 /**
  * Use case for updating an existing course.
@@ -46,7 +45,7 @@ class UpdateCourseUseCase
 	 * @param int $category_id Category ID
 	 * @param string $title Course title
 	 * @param string|null $slug Course slug (auto-generated if null)
-	 * @param string $status Status ('draft', 'active', 'archived')
+	 * @param string $status Status ('draft', 'active', 'inactive', 'archived')
 	 * @param string $access_period_type Access period type ('lifetime' or 'limited_time')
 	 * @param int|null $access_days Access days (required if limited_time)
 	 * @param int|null $workload_in_hours Workload in hours
@@ -57,10 +56,10 @@ class UpdateCourseUseCase
 	 * @param string|null $target_audience Target audience
 	 * @param string|null $requirements Prerequisites
 	 * @param bool $certificate_enabled Certificate emission toggle
+	 * @param string|null $image_url External image URL
 	 * @return Course
-	 * @throws CourseNotFoundException When course not found
-	 * @throws CategoryNotFoundException When category not found
-	 * @throws DuplicateSlugException When slug is already taken
+	 * @throws NotFoundException When course or category not found
+	 * @throws ConflictException When slug is already taken
 	 */
 	public function execute(
 		int $id,
@@ -77,24 +76,25 @@ class UpdateCourseUseCase
 		?string $objectives = null,
 		?string $target_audience = null,
 		?string $requirements = null,
-		bool $certificate_enabled = true
+		bool $certificate_enabled = true,
+		?string $image_url = null
 	): Course
 	{
 		$course = $this->course_repository->find_by_id($id);
 		if ($course === null) {
-			throw new CourseNotFoundException("Curso com ID {$id} não foi encontrado.");
+			throw new NotFoundException("Course not found");
 		}
 
 		$category = $this->category_repository->find_by_id($category_id);
 		if ($category === null) {
-			throw new CategoryNotFoundException("Categoria informada (ID {$category_id}) não foi encontrada.");
+			throw new NotFoundException("Category not found");
 		}
 
-		$course_slug = !empty($slug) ? new CourseSlug($slug) : CourseSlug::from_title($title);
+		$course_slug = !empty($slug) ? new CourseSlug($slug) : new CourseSlug($title);
 
 		$existing = $this->course_repository->find_by_slug($course_slug);
 		if ($existing !== null && $existing->get_id() !== $id) {
-			throw new DuplicateSlugException("Já existe outro curso com o slug '{$course_slug}'.");
+			throw new ConflictException("Course slug already exists");
 		}
 
 		$access_period = new CourseAccessPeriod($access_period_type, $access_days);
@@ -112,16 +112,12 @@ class UpdateCourseUseCase
 			$objectives,
 			$target_audience,
 			$requirements,
-			$certificate_enabled
+			$certificate_enabled,
+			$image_url
 		);
 
-		$target_status = new CourseStatus($status);
-		if ($target_status->is_active()) {
-			$course->publish();
-		} elseif ($target_status->is_archived()) {
-			$course->archive();
-		} else {
-			$course->draft();
+		if ($course->get_status()->get_value() !== $status) {
+			$course->change_status($status);
 		}
 
 		return $this->course_repository->save($course);

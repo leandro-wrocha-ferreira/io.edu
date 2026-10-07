@@ -1,6 +1,6 @@
 <?php
 
-namespace app\usecases\course;
+namespace app\usecases\category;
 
 use app\domain\course\Category;
 use app\domain\course\repositories\CategoryRepositoryInterface;

@@ -1,12 +1,12 @@
 <?php
 
-namespace app\usecases\course;
+namespace app\usecases\category;
 
 use app\domain\course\Category;
 use app\domain\course\constants\CategoryStatus;
 use app\domain\course\repositories\CategoryRepositoryInterface;
 use app\domain\course\value_objects\CourseSlug;
-use app\domain\exceptions\DuplicateSlugException;
+use app\domain\exceptions\ConflictException;
 
 /**
  * Use case for creating a course category.
@@ -33,15 +33,15 @@ class CreateCategoryUseCase
 	 * @param string|null $slug Category slug (auto-generated if null)
 	 * @param string $status Status ('active' or 'inactive')
 	 * @return Category
-	 * @throws DuplicateSlugException When slug is already taken
+	 * @throws ConflictException When slug is already taken
 	 */
 	public function execute(string $name, ?string $slug = null, string $status = CategoryStatus::ACTIVE): Category
 	{
-		$final_slug = !empty($slug) ? trim(strtolower($slug)) : CourseSlug::from_title($name)->get_value();
+		$final_slug = !empty($slug) ? CourseSlug::slugify($slug) : CourseSlug::slugify($name);
 
 		$existing = $this->category_repository->find_by_slug($final_slug);
 		if ($existing !== null) {
-			throw new DuplicateSlugException("Já existe uma categoria com o slug '{$final_slug}'.");
+			throw new ConflictException("Category slug already exists");
 		}
 
 		$category = Category::create($name, $final_slug, $status);

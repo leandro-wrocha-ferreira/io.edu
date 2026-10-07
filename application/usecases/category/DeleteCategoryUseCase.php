@@ -1,12 +1,12 @@
 <?php
 
-namespace app\usecases\course;
+namespace app\usecases\category;
 
 use app\domain\course\Category;
 use app\domain\course\repositories\CategoryRepositoryInterface;
 use app\domain\course\repositories\CourseRepositoryInterface;
-use app\domain\exceptions\CategoryNotFoundException;
 use app\domain\exceptions\ConflictException;
+use app\domain\exceptions\NotFoundException;
 
 /**
  * Use case for deleting a course category.
@@ -39,19 +39,19 @@ class DeleteCategoryUseCase
 	 *
 	 * @param int $id Category ID
 	 * @return Category
-	 * @throws CategoryNotFoundException When category not found
+	 * @throws NotFoundException When category not found
 	 * @throws ConflictException When category has linked courses
 	 */
 	public function execute(int $id): Category
 	{
 		$category = $this->category_repository->find_by_id($id);
 		if ($category === null) {
-			throw new CategoryNotFoundException("Categoria com ID {$id} não foi encontrada.");
+			throw new NotFoundException("Category not found");
 		}
 
 		$course_count = $this->course_repository->count_by_category_id($id);
 		if ($course_count > 0) {
-			throw new ConflictException("Não é possível excluir a categoria pois existem {$course_count} curso(s) vinculados a ela.");
+			throw new ConflictException("Cannot delete category with linked courses");
 		}
 
 		return $this->category_repository->delete($category);

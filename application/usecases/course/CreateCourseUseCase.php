@@ -9,8 +9,8 @@ use app\domain\course\value_objects\CourseAccessPeriod;
 use app\domain\course\value_objects\CourseSlug;
 use app\domain\course\value_objects\CourseStatus;
 use app\domain\course\value_objects\Workload;
-use app\domain\exceptions\CategoryNotFoundException;
-use app\domain\exceptions\DuplicateSlugException;
+use app\domain\exceptions\ConflictException;
+use app\domain\exceptions\NotFoundException;
 
 /**
  * Use case for creating a course in the LMS catalog.
@@ -44,7 +44,7 @@ class CreateCourseUseCase
 	 * @param int $category_id Category ID
 	 * @param string $title Course title
 	 * @param string|null $slug Course slug (auto-generated if null)
-	 * @param string $status Status ('draft', 'active', 'archived')
+	 * @param string $status Status ('draft', 'active', 'inactive', 'archived')
 	 * @param string $access_period_type Access period type ('lifetime' or 'limited_time')
 	 * @param int|null $access_days Access days (required if limited_time)
 	 * @param int|null $workload_in_hours Workload in hours
@@ -56,9 +56,10 @@ class CreateCourseUseCase
 	 * @param string|null $target_audience Target audience
 	 * @param string|null $requirements Prerequisites
 	 * @param bool $certificate_enabled Certificate emission toggle
+	 * @param string|null $image_url External image URL
 	 * @return Course
-	 * @throws CategoryNotFoundException When category does not exist
-	 * @throws DuplicateSlugException When slug is already taken
+	 * @throws NotFoundException When category does not exist
+	 * @throws ConflictException When slug is already taken
 	 */
 	public function execute(
 		int $category_id,
@@ -75,19 +76,20 @@ class CreateCourseUseCase
 		?string $objectives = null,
 		?string $target_audience = null,
 		?string $requirements = null,
-		bool $certificate_enabled = true
+		bool $certificate_enabled = true,
+		?string $image_url = null
 	): Course
 	{
 		$category = $this->category_repository->find_by_id($category_id);
 		if ($category === null) {
-			throw new CategoryNotFoundException("Categoria informada (ID {$category_id}) não foi encontrada.");
+			throw new NotFoundException("Category not found");
 		}
 
-		$course_slug = !empty($slug) ? new CourseSlug($slug) : CourseSlug::from_title($title);
+		$course_slug = !empty($slug) ? new CourseSlug($slug) : new CourseSlug($title);
 
 		$existing = $this->course_repository->find_by_slug($course_slug);
 		if ($existing !== null) {
-			throw new DuplicateSlugException("Já existe um curso cadastrado com o slug '{$course_slug}'.");
+			throw new ConflictException("Course slug already exists");
 		}
 
 		$access_period = new CourseAccessPeriod($access_period_type, $access_days);
@@ -108,7 +110,13 @@ class CreateCourseUseCase
 			$objectives,
 			$target_audience,
 			$requirements,
-			$certificate_enabled
+			$certificate_enabled,
+			null,
+			null,
+			null,
+			null,
+			null,
+			$image_url
 		);
 
 		return $this->course_repository->create($course);

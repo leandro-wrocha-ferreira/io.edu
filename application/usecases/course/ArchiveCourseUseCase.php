@@ -4,7 +4,7 @@ namespace app\usecases\course;
 
 use app\domain\course\Course;
 use app\domain\course\repositories\CourseRepositoryInterface;
-use app\domain\exceptions\CourseNotFoundException;
+use app\domain\exceptions\NotFoundException;
 
 /**
  * Use case for archiving a course.
@@ -29,13 +29,13 @@ class ArchiveCourseUseCase
 	 *
 	 * @param int $id Course ID
 	 * @return Course
-	 * @throws CourseNotFoundException When course not found
+	 * @throws NotFoundException When course not found
 	 */
 	public function execute(int $id): Course
 	{
 		$course = $this->course_repository->find_by_id($id);
 		if ($course === null) {
-			throw new CourseNotFoundException("Curso com ID {$id} não foi encontrado.");
+			throw new NotFoundException("Course not found");
 		}
 
 		$course->archive();

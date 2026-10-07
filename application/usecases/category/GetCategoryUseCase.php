@@ -1,10 +1,10 @@
 <?php
 
-namespace app\usecases\course;
+namespace app\usecases\category;
 
 use app\domain\course\Category;
 use app\domain\course\repositories\CategoryRepositoryInterface;
-use app\domain\exceptions\CategoryNotFoundException;
+use app\domain\exceptions\NotFoundException;
 
 /**
  * Use case for getting a category by ID.
@@ -29,13 +29,13 @@ class GetCategoryUseCase
 	 *
 	 * @param int $id Category ID
 	 * @return Category
-	 * @throws CategoryNotFoundException When category not found
+	 * @throws NotFoundException When category not found
 	 */
 	public function execute(int $id): Category
 	{
 		$category = $this->category_repository->find_by_id($id);
 		if ($category === null) {
-			throw new CategoryNotFoundException("Categoria com ID {$id} não foi encontrada.");
+			throw new NotFoundException("Category not found");
 		}
 
 		return $category;
