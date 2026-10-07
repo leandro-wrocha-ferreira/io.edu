@@ -52,7 +52,8 @@ class CourseMapper
 			$row->created_at,
 			$row->updated_at,
 			$row->deleted_at,
-			$row->category_name
+			$row->category_name,
+			$row->image_url
 		);
 	}
 
@@ -91,6 +92,7 @@ class CourseMapper
 			'short_description' => $course->get_short_description(),
 			'description' => $course->get_description(),
 			'image' => $course->get_image(),
+			'image_url' => $course->get_image_url(),
 			'status' => (string) $course->get_status(),
 			'workload_in_hours' => $course->get_workload_in_hours(),
 			'duration_in_seconds' => $course->get_duration_in_seconds(),
@@ -118,6 +120,7 @@ class CourseMapper
 			'short_description' => $course->get_short_description(),
 			'description' => $course->get_description(),
 			'image' => $course->get_image(),
+			'image_url' => $course->get_image_url(),
 			'status' => (string) $course->get_status(),
 			'workload_in_hours' => $course->get_workload_in_hours(),
 			'duration_in_seconds' => $course->get_duration_in_seconds(),

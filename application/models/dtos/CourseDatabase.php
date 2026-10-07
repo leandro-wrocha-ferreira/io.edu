@@ -16,6 +16,7 @@ final class CourseDatabase
 	public ?string $short_description;
 	public ?string $description;
 	public ?string $image;
+	public ?string $image_url;
 	public string $status;
 	public ?int $workload_in_hours;
 	public int $duration_in_seconds;
@@ -44,6 +45,7 @@ final class CourseDatabase
 		$this->short_description = isset($data['short_description']) && $data['short_description'] !== '' ? (string) $data['short_description'] : null;
 		$this->description = isset($data['description']) && $data['description'] !== '' ? (string) $data['description'] : null;
 		$this->image = isset($data['image']) && $data['image'] !== '' ? (string) $data['image'] : null;
+		$this->image_url = isset($data['image_url']) && $data['image_url'] !== '' ? (string) $data['image_url'] : null;
 		$this->status = (string) ($data['status'] ?? 'draft');
 		$this->workload_in_hours = isset($data['workload_in_hours']) && $data['workload_in_hours'] !== '' && $data['workload_in_hours'] !== null ? (int) $data['workload_in_hours'] : null;
 		$this->duration_in_seconds = isset($data['duration_in_seconds']) ? (int) $data['duration_in_seconds'] : 0;

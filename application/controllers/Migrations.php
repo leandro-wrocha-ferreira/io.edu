@@ -8,7 +8,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Provides commands for migrating, rolling back, listing status,
  * and creating new migration files.
  */
-class Migrations extends CI_Controller {
+class Migrations extends CI_Controller
+{
 
 	/**
 	 * Constructor.
