@@ -25,7 +25,8 @@ class CourseMapperTest extends TestCase
 			'slug' => 'curso-clean-code',
 			'short_description' => 'Resumo curto',
 			'description' => 'Ementa do curso',
-			'image' => 'https://img.png',
+			'image' => 'public/uploads/courses/10/image.png',
+			'image_url' => 'https://cdn.example.com/cover.jpg',
 			'status' => 'active',
 			'workload_in_hours' => 60,
 			'duration_in_seconds' => 7200,
@@ -50,7 +51,8 @@ class CourseMapperTest extends TestCase
 		$this->assertSame('curso-clean-code', (string) $course->get_slug());
 		$this->assertSame('Resumo curto', $course->get_short_description());
 		$this->assertSame('Ementa do curso', $course->get_description());
-		$this->assertSame('https://img.png', $course->get_image());
+		$this->assertSame('public/uploads/courses/10/image.png', $course->get_image());
+		$this->assertSame('https://cdn.example.com/cover.jpg', $course->get_image_url());
 		$this->assertTrue($course->is_active());
 		$this->assertSame(60, $course->get_workload_in_hours());
 		$this->assertSame(7200, $course->get_duration_in_seconds());
@@ -103,13 +105,18 @@ class CourseMapperTest extends TestCase
 			new Workload(40),
 			'Resumo',
 			'Descrição',
-			'cover.jpg',
+			'public/uploads/courses/7/image.png',
 			1000,
 			'Objetivo',
 			'Público',
 			'Requisito',
 			true,
-			7
+			7,
+			null,
+			null,
+			null,
+			null,
+			'https://example.com/shared.jpg'
 		);
 
 		$create_data = CourseMapper::to_database_create($course);
@@ -121,11 +128,15 @@ class CourseMapperTest extends TestCase
 		$this->assertNull($create_data['access_days']);
 		$this->assertSame(40, $create_data['workload_in_hours']);
 		$this->assertSame(1, $create_data['certificate_enabled']);
+		$this->assertSame('public/uploads/courses/7/image.png', $create_data['image']);
+		$this->assertSame('https://example.com/shared.jpg', $create_data['image_url']);
 		$this->assertArrayNotHasKey('created_at', $create_data);
 		$this->assertArrayNotHasKey('updated_at', $create_data);
 
 		$update_data = CourseMapper::to_database_update($course);
 		$this->assertSame('DDD em PHP', $update_data['title']);
+		$this->assertSame('public/uploads/courses/7/image.png', $update_data['image']);
+		$this->assertSame('https://example.com/shared.jpg', $update_data['image_url']);
 		$this->assertNull($update_data['deleted_at']);
 	}
 }

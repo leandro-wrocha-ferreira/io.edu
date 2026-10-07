@@ -6,9 +6,9 @@ use app\domain\course\Category;
 use app\domain\course\Course;
 use app\domain\course\value_objects\CourseAccessPeriod;
 use app\domain\course\value_objects\CourseStatus;
-use app\domain\exceptions\CategoryNotFoundException;
-use app\domain\exceptions\CourseNotFoundException;
-use app\domain\exceptions\DuplicateSlugException;
+use app\domain\exceptions\ConflictException;
+use app\domain\exceptions\NotFoundException;
+use app\domain\exceptions\ValidationException;
 use app\usecases\course\UpdateCourseUseCase;
 use PHPUnit\Framework\TestCase;
 use tests\unit\mocks\repositories\MockCategoryRepository;
@@ -53,11 +53,12 @@ class UpdateCourseUseCaseTest extends TestCase
 			40,
 			'Novo resumo',
 			'Nova ementa',
-			'https://example.com/new.png',
+			'public/uploads/courses/1/image.png',
 			'Novos objetivos',
 			'Novo público',
 			'Novos requisitos',
-			false
+			false,
+			'https://example.com/shared-updated.jpg'
 		);
 
 		$this->assertSame('Curso Atualizado', $updated->get_title());
@@ -66,6 +67,8 @@ class UpdateCourseUseCaseTest extends TestCase
 		$this->assertSame(180, $updated->get_access_period()->get_days());
 		$this->assertSame(40, $updated->get_workload_in_hours());
 		$this->assertFalse($updated->is_certificate_enabled());
+		$this->assertSame('public/uploads/courses/1/image.png', $updated->get_image());
+		$this->assertSame('https://example.com/shared-updated.jpg', $updated->get_image_url());
 	}
 
 	public function test_update_course_keeping_same_slug_success(): void
@@ -73,23 +76,63 @@ class UpdateCourseUseCaseTest extends TestCase
 		$course = $this->course_repository->create(Course::create(
 			$this->category->get_id(),
 			'Curso Original',
-			'slug-mesmo'
+			'curso-original'
 		));
 
 		$updated = $this->use_case->execute(
 			$course->get_id(),
 			$this->category->get_id(),
-			'Curso com Novo Título',
-			'slug-mesmo'
+			'Curso Original',
+			'curso-original'
 		);
 
-		$this->assertSame('slug-mesmo', (string) $updated->get_slug());
-		$this->assertSame('Curso com Novo Título', $updated->get_title());
+		$this->assertSame('curso-original', (string) $updated->get_slug());
+		$this->assertSame('Curso Original', $updated->get_title());
+	}
+
+	public function test_update_course_to_inactive_status(): void
+	{
+		$course = $this->course_repository->create(Course::create(
+			$this->category->get_id(),
+			'Curso Ativo',
+			'curso-ativo',
+			CourseStatus::ACTIVE
+		));
+
+		$updated = $this->use_case->execute(
+			$course->get_id(),
+			$this->category->get_id(),
+			'Curso Ativo',
+			'curso-ativo',
+			CourseStatus::INACTIVE
+		);
+
+		$this->assertTrue($updated->is_inactive());
+		$this->assertFalse($updated->is_active());
+	}
+
+	public function test_update_course_transition_back_to_draft_throws_validation_exception(): void
+	{
+		$course = $this->course_repository->create(Course::create(
+			$this->category->get_id(),
+			'Curso Publicado',
+			'curso-publicado',
+			CourseStatus::ACTIVE
+		));
+
+		$this->expectException(ValidationException::class);
+		$this->use_case->execute(
+			$course->get_id(),
+			$this->category->get_id(),
+			'Curso Publicado',
+			'curso-publicado',
+			CourseStatus::DRAFT
+		);
 	}
 
 	public function test_update_non_existing_course_throws_exception(): void
 	{
-		$this->expectException(CourseNotFoundException::class);
+		$this->expectException(NotFoundException::class);
 		$this->use_case->execute(999, $this->category->get_id(), 'Título');
 	}
 
@@ -101,7 +144,7 @@ class UpdateCourseUseCaseTest extends TestCase
 			'curso-original'
 		));
 
-		$this->expectException(CategoryNotFoundException::class);
+		$this->expectException(NotFoundException::class);
 		$this->use_case->execute($course->get_id(), 999, 'Título');
 	}
 
@@ -110,16 +153,16 @@ class UpdateCourseUseCaseTest extends TestCase
 		$this->course_repository->create(Course::create(
 			$this->category->get_id(),
 			'Curso 1',
-			'slug-1'
+			'curso-1'
 		));
 
 		$course2 = $this->course_repository->create(Course::create(
 			$this->category->get_id(),
 			'Curso 2',
-			'slug-2'
+			'curso-2'
 		));
 
-		$this->expectException(DuplicateSlugException::class);
-		$this->use_case->execute($course2->get_id(), $this->category->get_id(), 'Curso 2 Modificado', 'slug-1');
+		$this->expectException(ConflictException::class);
+		$this->use_case->execute($course2->get_id(), $this->category->get_id(), 'Curso 2 Modificado', 'curso-1');
 	}
 }

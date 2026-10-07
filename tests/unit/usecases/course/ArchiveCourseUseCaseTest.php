@@ -3,7 +3,7 @@
 namespace tests\unit\usecases\course;
 
 use app\domain\course\Course;
-use app\domain\exceptions\CourseNotFoundException;
+use app\domain\exceptions\NotFoundException;
 use app\usecases\course\ArchiveCourseUseCase;
 use PHPUnit\Framework\TestCase;
 use tests\unit\mocks\repositories\MockCourseRepository;
@@ -39,7 +39,7 @@ class ArchiveCourseUseCaseTest extends TestCase
 
 	public function test_archive_non_existing_course_throws_exception(): void
 	{
-		$this->expectException(CourseNotFoundException::class);
+		$this->expectException(NotFoundException::class);
 		$this->use_case->execute(999);
 	}
 }

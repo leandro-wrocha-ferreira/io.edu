@@ -24,16 +24,16 @@ class CourseSlugTest extends TestCase
 		new CourseSlug('   ');
 	}
 
-	public function test_invalid_characters_throws_exception(): void
+	public function test_slugify_converts_accents_special_characters_and_spaces(): void
 	{
-		$this->expectException(InvalidArgumentException::class);
-		new CourseSlug('curso_com_underline');
+		$slug = new CourseSlug('Programação Web & Arquitetura Limpa!');
+		$this->assertSame('programacao-web-arquitetura-limpa', (string) $slug);
 	}
 
-	public function test_from_title_converts_accents_and_spaces(): void
+	public function test_from_string_factory_method(): void
 	{
-		$slug = CourseSlug::from_title('Programação Web & Arquitetura Limpa!');
-		$this->assertSame('programacao-web-arquitetura-limpa', (string) $slug);
+		$slug = CourseSlug::from_string('Curso Completo de DDD');
+		$this->assertSame('curso-completo-de-ddd', (string) $slug);
 	}
 
 	public function test_slug_equality(): void

@@ -1,12 +1,12 @@
 <?php
 
-namespace tests\unit\usecases\course;
+namespace tests\unit\usecases\category;
 
 use app\domain\course\Category;
 use app\domain\course\Course;
-use app\domain\exceptions\CategoryNotFoundException;
 use app\domain\exceptions\ConflictException;
-use app\usecases\course\DeleteCategoryUseCase;
+use app\domain\exceptions\NotFoundException;
+use app\usecases\category\DeleteCategoryUseCase;
 use PHPUnit\Framework\TestCase;
 use tests\unit\mocks\repositories\MockCategoryRepository;
 use tests\unit\mocks\repositories\MockCourseRepository;
@@ -22,7 +22,6 @@ class DeleteCategoryUseCaseTest extends TestCase
 
 	protected function setUp(): void
 	{
-		parent::setUp();
 		$this->category_repository = new MockCategoryRepository();
 		$this->course_repository = new MockCourseRepository();
 		$this->use_case = new DeleteCategoryUseCase($this->category_repository, $this->course_repository);
@@ -30,7 +29,7 @@ class DeleteCategoryUseCaseTest extends TestCase
 
 	public function test_delete_category_success(): void
 	{
-		$category = $this->category_repository->create(Category::create('Para Excluir', 'para-excluir'));
+		$category = $this->category_repository->create(Category::create('Idiomas', 'idiomas'));
 
 		$deleted = $this->use_case->execute($category->get_id());
 
@@ -38,20 +37,20 @@ class DeleteCategoryUseCaseTest extends TestCase
 		$this->assertNull($this->category_repository->find_by_id($category->get_id()));
 	}
 
-	public function test_delete_non_existing_category_throws_exception(): void
+	public function test_delete_category_not_found_throws_not_found_exception(): void
 	{
-		$this->expectException(CategoryNotFoundException::class);
+		$this->expectException(NotFoundException::class);
 		$this->use_case->execute(999);
 	}
 
 	public function test_delete_category_with_linked_courses_throws_conflict_exception(): void
 	{
-		$category = $this->category_repository->create(Category::create('Com Cursos', 'com-cursos'));
+		$category = $this->category_repository->create(Category::create('Programação', 'programacao'));
 
 		$this->course_repository->create(Course::create(
 			$category->get_id(),
-			'Curso Vinculado',
-			'curso-vinculado'
+			'Curso com categoria',
+			'curso-com-categoria'
 		));
 
 		$this->expectException(ConflictException::class);

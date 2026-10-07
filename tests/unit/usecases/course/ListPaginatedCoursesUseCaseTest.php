@@ -43,19 +43,19 @@ class ListPaginatedCoursesUseCaseTest extends TestCase
 		$this->course_repository->create(Course::create(1, 'Python AI', 'python-ai', CourseStatus::ACTIVE));
 
 		// Filter by category_id 1
-		$res_cat = $this->use_case->execute(0, 10, '', 'title', 'ASC', 1);
-		$this->assertSame(3, $res_cat['recordsTotal']);
-		$this->assertSame(2, $res_cat['recordsFiltered']);
-		$this->assertCount(2, $res_cat['data']);
+		$result_by_category = $this->use_case->execute(0, 10, '', 'title', 'ASC', 1);
+		$this->assertSame(3, $result_by_category['recordsTotal']);
+		$this->assertSame(2, $result_by_category['recordsFiltered']);
+		$this->assertCount(2, $result_by_category['data']);
 
 		// Filter by status 'draft'
-		$res_status = $this->use_case->execute(0, 10, '', 'title', 'ASC', null, CourseStatus::DRAFT);
-		$this->assertSame(1, $res_status['recordsFiltered']);
-		$this->assertSame('React Frontend', $res_status['data'][0]->get_title());
+		$result_by_status = $this->use_case->execute(0, 10, '', 'title', 'ASC', null, CourseStatus::DRAFT);
+		$this->assertSame(1, $result_by_status['recordsFiltered']);
+		$this->assertSame('React Frontend', $result_by_status['data'][0]->get_title());
 
 		// Search term
-		$res_search = $this->use_case->execute(0, 10, 'Python', 'title', 'ASC');
-		$this->assertSame(1, $res_search['recordsFiltered']);
-		$this->assertSame('Python AI', $res_search['data'][0]->get_title());
+		$result_by_search = $this->use_case->execute(0, 10, 'Python', 'title', 'ASC');
+		$this->assertSame(1, $result_by_search['recordsFiltered']);
+		$this->assertSame('Python AI', $result_by_search['data'][0]->get_title());
 	}
 }

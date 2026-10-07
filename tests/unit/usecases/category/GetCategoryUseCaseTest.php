@@ -1,10 +1,10 @@
 <?php
 
-namespace tests\unit\usecases\course;
+namespace tests\unit\usecases\category;
 
 use app\domain\course\Category;
-use app\domain\exceptions\CategoryNotFoundException;
-use app\usecases\course\GetCategoryUseCase;
+use app\domain\exceptions\NotFoundException;
+use app\usecases\category\GetCategoryUseCase;
 use PHPUnit\Framework\TestCase;
 use tests\unit\mocks\repositories\MockCategoryRepository;
 
@@ -18,24 +18,23 @@ class GetCategoryUseCaseTest extends TestCase
 
 	protected function setUp(): void
 	{
-		parent::setUp();
 		$this->category_repository = new MockCategoryRepository();
 		$this->use_case = new GetCategoryUseCase($this->category_repository);
 	}
 
 	public function test_get_category_success(): void
 	{
-		$created = $this->category_repository->create(Category::create('Idiomas', 'idiomas'));
+		$created = $this->category_repository->create(Category::create('Marketing', 'marketing'));
 
-		$category = $this->use_case->execute($created->get_id());
+		$result = $this->use_case->execute($created->get_id());
 
-		$this->assertSame($created->get_id(), $category->get_id());
-		$this->assertSame('Idiomas', $category->get_name());
+		$this->assertSame($created->get_id(), $result->get_id());
+		$this->assertSame('Marketing', $result->get_name());
 	}
 
-	public function test_get_non_existing_category_throws_exception(): void
+	public function test_get_category_not_found_throws_not_found_exception(): void
 	{
-		$this->expectException(CategoryNotFoundException::class);
+		$this->expectException(NotFoundException::class);
 		$this->use_case->execute(999);
 	}
 }

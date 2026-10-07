@@ -25,16 +25,19 @@ class CategoryTest extends TestCase
 		$this->assertNotNull($category->get_created_at());
 	}
 
+	public function test_create_category_auto_generates_slug_when_null_or_empty(): void
+	{
+		$category = Category::create('Desenvolvimento Web');
+		$this->assertSame('desenvolvimento-web', $category->get_slug());
+
+		$category_empty_slug = Category::create('Design & UX', '');
+		$this->assertSame('design-ux', $category_empty_slug->get_slug());
+	}
+
 	public function test_empty_name_throws_exception(): void
 	{
 		$this->expectException(InvalidArgumentException::class);
 		Category::create('   ', 'tecnologia');
-	}
-
-	public function test_empty_slug_throws_exception(): void
-	{
-		$this->expectException(InvalidArgumentException::class);
-		Category::create('Tecnologia', '   ');
 	}
 
 	public function test_invalid_status_throws_exception(): void

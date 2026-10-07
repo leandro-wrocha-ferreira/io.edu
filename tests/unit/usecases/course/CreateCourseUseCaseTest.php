@@ -5,8 +5,8 @@ namespace tests\unit\usecases\course;
 use app\domain\course\Category;
 use app\domain\course\value_objects\CourseAccessPeriod;
 use app\domain\course\value_objects\CourseStatus;
-use app\domain\exceptions\CategoryNotFoundException;
-use app\domain\exceptions\DuplicateSlugException;
+use app\domain\exceptions\ConflictException;
+use app\domain\exceptions\NotFoundException;
 use app\usecases\course\CreateCourseUseCase;
 use PHPUnit\Framework\TestCase;
 use tests\unit\mocks\repositories\MockCategoryRepository;
@@ -44,12 +44,13 @@ class CreateCourseUseCaseTest extends TestCase
 			80,
 			'Resumo do curso',
 			'Descrição detalhada',
-			'https://example.com/img.jpg',
+			'public/uploads/courses/1/image.png',
 			1800,
 			'Objetivos',
 			'Público',
 			'Requisitos',
-			true
+			true,
+			'https://example.com/shared.jpg'
 		);
 
 		$this->assertNotNull($course->get_id());
@@ -60,6 +61,8 @@ class CreateCourseUseCaseTest extends TestCase
 		$this->assertTrue($course->get_access_period()->is_limited_time());
 		$this->assertSame(365, $course->get_access_period()->get_days());
 		$this->assertSame(80, $course->get_workload_in_hours());
+		$this->assertSame('public/uploads/courses/1/image.png', $course->get_image());
+		$this->assertSame('https://example.com/shared.jpg', $course->get_image_url());
 		$this->assertTrue($course->is_certificate_enabled());
 	}
 
@@ -80,17 +83,31 @@ class CreateCourseUseCaseTest extends TestCase
 		$this->assertSame('curso-vitalicio', (string) $course->get_slug());
 	}
 
+	public function test_create_course_with_inactive_status(): void
+	{
+		$course = $this->use_case->execute(
+			$this->category->get_id(),
+			'Curso Inativo',
+			'curso-inativo',
+			CourseStatus::INACTIVE
+		);
+
+		$this->assertTrue($course->is_inactive());
+		$this->assertFalse($course->is_active());
+		$this->assertFalse($course->is_draft());
+	}
+
 	public function test_create_course_with_non_existing_category_throws_exception(): void
 	{
-		$this->expectException(CategoryNotFoundException::class);
+		$this->expectException(NotFoundException::class);
 		$this->use_case->execute(999, 'Título Sem Categoria');
 	}
 
-	public function test_create_course_with_duplicate_slug_throws_exception(): void
+	public function test_create_course_with_duplicate_slug_throws_conflict_exception(): void
 	{
 		$this->use_case->execute($this->category->get_id(), 'Curso Original', 'slug-duplicado');
 
-		$this->expectException(DuplicateSlugException::class);
+		$this->expectException(ConflictException::class);
 		$this->use_case->execute($this->category->get_id(), 'Outro Curso', 'slug-duplicado');
 	}
 }
