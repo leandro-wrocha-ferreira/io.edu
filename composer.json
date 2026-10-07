@@ -10,9 +10,24 @@
 		"slack": "https://codeigniterchat.slack.com",
 		"source": "https://github.com/bcit-ci/CodeIgniter"
 	},
+	"repositories": [
+		{
+			"type": "package",
+			"package": {
+				"name": "quilljs/quill",
+				"version": "2.0.3",
+				"dist": {
+					"url": "https://registry.npmjs.org/quill/-/quill-2.0.3.tgz",
+					"type": "tar"
+				}
+			}
+		}
+	],
 	"require": {
 		"php": ">=8.2",
-		"twbs/bootstrap": "5.3.8"
+		"twbs/bootstrap": "5.3.8",
+		"ezyang/htmlpurifier": "^4.19",
+		"quilljs/quill": "2.0.3"
 	},
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"
@@ -23,7 +38,8 @@
 			"app\\usecases\\": "application/usecases/",
 			"app\\factories\\": "application/factories/",
 			"app\\models\\dtos\\": "application/models/dtos/",
-			"app\\models\\mappers\\": "application/models/mappers/"
+			"app\\models\\mappers\\": "application/models/mappers/",
+			"app\\infrastructure\\": "application/infrastructure/"
 		}
 	},
 	"autoload-dev": {
@@ -32,19 +48,24 @@
 		]
 	},
 	"scripts": {
+		"test:usecases": "php bin/verify-usecase-tests.php",
 		"test:coverage": [
 			"@putenv XDEBUG_MODE=coverage",
-			"phpunit --color=always --coverage-text --configuration tests/travis/sqlite.phpunit.xml"
+			"phpunit --color=always --coverage-text --configuration phpunit.xml"
 		],
 		"post-install-cmd": [
 			"sed -i s/name{0}/name[0]/ vendor/mikey179/vfsstream/src/main/php/org/bovigo/vfs/vfsStream.php",
 			"cp vendor/twbs/bootstrap/dist/css/bootstrap.min.css public/assets/css/",
-			"cp vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js public/assets/js/"
+			"cp vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js public/assets/js/",
+			"cp vendor/quilljs/quill/dist/quill.snow.css public/assets/css/",
+			"cp vendor/quilljs/quill/dist/quill.js public/assets/js/"
 		],
 		"post-update-cmd": [
 			"sed -i s/name{0}/name[0]/ vendor/mikey179/vfsstream/src/main/php/org/bovigo/vfs/vfsStream.php",
 			"cp vendor/twbs/bootstrap/dist/css/bootstrap.min.css public/assets/css/",
-			"cp vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js public/assets/js/"
+			"cp vendor/twbs/bootstrap/dist/js/bootstrap.bundle.min.js public/assets/js/",
+			"cp vendor/quilljs/quill/dist/quill.snow.css public/assets/css/",
+			"cp vendor/quilljs/quill/dist/quill.js public/assets/js/"
 		]
 	},
 	"require-dev": {

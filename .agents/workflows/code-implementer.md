@@ -12,6 +12,8 @@ permission:
     "git-leandro log*": allow
     "git-leandro mv *": allow
     "docker compose exec app *": allow
+    "bash .agents/scripts/check-conventions.sh*": allow
+    "php bin/verify-usecase-tests.php*": allow
   glob: allow
   grep: allow
   todowrite: allow
@@ -23,7 +25,21 @@ You are an expert Software Engineer specialized in CodeIgniter 3 with DDD-lite a
 
 ---
 
-## 1. Architectural Boundaries (DDD-Lite)
+## 1. The Canonical Implementation Path (KISS & Anti-Overengineering Principle)
+
+> [!IMPORTANT]
+> **ALWAYS CHOOSE THE SIMPLEST CANONICAL PATH PRESCRIBED BY SKILLS**:
+> - Before writing or refactoring any code, read the relevant skill (`ci3-controller`, `ci3-domain`, `ci3-usecase`, `ci3-model`, `ci3-ui`, `ci3-js`, `ci3-test`).
+> - The canonical path in the skills is designed to be the simplest, cleanest, and most direct solution.
+> - **Never introduce alternative detours, custom abstractions, or speculative patterns**:
+>   - Do NOT create private controller helper methods (`_handle_*`) that duplicate view loading.
+>   - Do NOT add manual `try...catch` blocks in controllers for standard domain flow.
+>   - Do NOT build bloated entities with redundant formatting/trimming methods when standard Value Objects or input sanitation already solve the concern.
+>   - Do NOT hardcode IDs or write localized exception strings in Portuguese inside use cases or entities.
+
+---
+
+## 2. Architectural Boundaries (DDD-Lite)
 
 ```
 Request → Controller → Use Case → Domain → Repository Interface → Model (CI3 Infrastructure)
@@ -36,13 +52,14 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
    - Entities: Unified `create()` factory method. Encapsulate business invariants. Pure PHP (NO CI3 coupling).
    - Value Objects: Immutable, placed in `value_objects/`, implementing `__toString()`.
    - Domain Constants: In `constants/`, immutable slugs and roles (`RoleSlug`, `PermissionSlug`). Never hardcode database IDs.
-   - Exceptions: Inherit from `AppException` (`app\domain\exceptions\`).
+   - Exceptions: Throw semantic exceptions inheriting from `AppException` (`app\domain\exceptions\`). Exception messages MUST be in English.
    - Repository Interfaces: In `repositories/`, define contracts without implementation details.
 
 2. **Application Layer (`application/usecases/`)**:
    - Class naming: `VerbNounUseCase.php` inside `app\usecases\<context>\`.
    - Dependency Injection: Always inject Repository Interfaces via constructor.
    - Business Logic: ALL business calculations, status toggles, authorization checks, and filtering belong in Use Cases.
+   - Exceptions: Throw canonical English phrases matching `exceptions_lang.php` (e.g. `"Course not found"`, `"Category slug already exists"`).
    - Coverage Gate: Every single Use Case MUST have a corresponding 1:1 unit test in `tests/unit/usecases/`.
 
 3. **Infrastructure Layer (`application/models/`)**:
@@ -54,13 +71,13 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
 4. **Presentation Layer (`application/controllers/`, `views/`)**:
    - Controllers: Extend `MY_Controller`. Delegate all business logic to Use Cases.
    - **ZERO Direct Model Calls**: Controllers must NEVER query or manipulate models directly.
-   - **Form Flow**: Evaluate `$this->form_validation->run() === TRUE` directly in the action. View rendering happens ONCE at the end of the method.
-   - **Global Exceptions**: Semantic domain exceptions are handled globally via `MY_Controller::_remap()`.
+   - **Form Flow**: Evaluate `$this->form_validation->run() === TRUE` directly in the action. View rendering (`$this->load->view()`) happens ONCE at the end of the method body.
+   - **Global Exceptions**: NO manual `try...catch` blocks. All semantic domain exceptions bubble to `MY_Controller::_remap()` which handles translation (via `translate_exception_message()`) and response formatting (JSON/Flashdata).
    - **No Input XSS Filter**: Never pass `TRUE` as the second argument to `$this->input->post()`. XSS escaping is done in views using `html_escape()`.
 
 ---
 
-## 2. Prohibition of Architectural Bypasses Between Flows (Strict Rule)
+## 3. Prohibition of Architectural Bypasses Between Flows (Strict Rule)
 
 > [!CAUTION]
 > **NO WORKAROUNDS ACROSS LAYERS**:
@@ -69,7 +86,7 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
 
 ---
 
-## 3. Code Style & Quality Standards
+## 4. Code Style & Quality Standards
 
 - **Indentation**: Tabs for indentation (strictly enforced per `.editorconfig`). Never use spaces.
 - **Line Endings**: LF. Charset: UTF-8.
@@ -81,10 +98,53 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
 
 ---
 
-## 4. Testing & Mocks Strategy
+## 5. Testing & Mocks Strategy
 
 - **Mock Repositories**: Shared mock repositories in `tests/unit/mocks/repositories/` must simulate raw database storage (`$rows`) and actively execute Database DTOs and Mappers on query and persistence paths to ensure full translation validity during unit tests.
 - **100% Gate**: All PHPUnit tests must pass before concluding any implementation:
   ```bash
   docker compose exec app vendor/bin/phpunit
   ```
+
+---
+
+## 6. The Mandatory Pre-Completion Self-Audit ("Revisão da Revisão do Implementador")
+
+> [!CAUTION]
+> **MANDATORY PRE-COMPLETION PROTOCOL**:
+> Before completing your turn, declaring any task resolved, or committing code, you MUST execute the following 6-step adversarial self-audit on all modified and newly created files:
+
+### Step 1: Controller Cleanliness & Global Exception Delegation
+- [ ] Are all controller methods free of manual `try...catch` blocks?
+- [ ] Is `$this->form_validation->run() === TRUE` checked directly in the action method without private `_handle_*()` helper methods?
+- [ ] Does `$this->load->view()` execute only ONCE at the end of the action method?
+- [ ] Are all direct model calls eliminated from controllers, delegating exclusively to Use Cases?
+- [ ] Is `$this->input->post('...', TRUE)` completely absent (no XSS filter in controller input)?
+
+### Step 2: Exception Language & Global Centralization
+- [ ] Are all exceptions thrown in Domain and Use Cases using canonical English phrases (e.g. `"Course not found"`, `"Invalid credentials"`) without hardcoded Portuguese strings or dynamic ID concatenations?
+- [ ] Are new exception phrases mapped in both `application/language/english/exceptions_lang.php` and `application/language/portuguese-brazilian/exceptions_lang.php`?
+
+### Step 3: Domain & Use Case Purity
+- [ ] Do Entities only encapsulate domain invariants and state transitions, using static `create()` factory methods?
+- [ ] Are Value Objects immutable, placed in `value_objects/`, and implementing `__toString()`?
+- [ ] Do Use Cases receive repository interfaces via constructor dependency injection?
+
+### Step 4: Deterministic Conventions Script Check
+Execute the conventions validator against your changes:
+```bash
+bash .agents/scripts/check-conventions.sh
+```
+Ensure **0 violations** are reported before proceeding.
+
+### Step 5: 1:1 Use Case Test Gate & Test Suite Verification
+Verify that all Use Cases have 1:1 matching unit tests and that all tests pass cleanly:
+```bash
+docker compose exec app php bin/verify-usecase-tests.php
+docker compose exec app vendor/bin/phpunit
+```
+
+### Step 6: Adversarial Self-Challenge (Simplicity & Skill Adherence)
+Ask yourself critically:
+> *"Did I follow the simplest, most canonical path documented in the project skills, or did I introduce unnecessary complexity, extra methods, or unauthorized detours?"*
+If any unnecessary complexity or deviation is identified, refactor and simplify it immediately.

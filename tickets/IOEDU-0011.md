@@ -53,7 +53,7 @@ Implementar a base do catálogo educacional do LMS, compreendendo a gestão de C
   - `short_description`: VARCHAR(500), NULL (resumo para cards de vitrine)
   - `description`: TEXT, NULL (ementa completa e detalhes do curso)
   - `image`: VARCHAR(255), NULL (caminho/URL da imagem de capa)
-  - `status`: ENUM('draft', 'active', 'archived'), DEFAULT 'draft'
+  - `status`: ENUM('draft', 'active', 'inactive', 'archived'), DEFAULT 'draft'
   - `workload_in_hours`: INT unsigned, NULL (carga horária estimada exibida no certificado)
   - `duration_in_seconds`: INT unsigned, DEFAULT 0 (tempo total somado de mídia/vídeos)
   - `objectives`: TEXT, NULL (o que o aluno vai aprender)
@@ -69,12 +69,12 @@ Implementar a base do catálogo educacional do LMS, compreendendo a gestão de C
 ### 3. Padrões de Implementação (DDD-Lite):
 - **Domain Layer (`app\domain\course\`)**:
   - Entidades: `Category`, `Course`.
-  - Value Objects: `CourseSlug`, `CourseStatus`, `CourseAccessPeriod` (valida lifetime vs dias de acesso), `Workload`.
+  - Value Objects: `CourseSlug`, `CourseStatus` (com máquina de transição e status inactive), `CourseAccessPeriod` (valida lifetime vs dias de acesso), `Workload`.
   - Interfaces de Repositório: `CategoryRepositoryInterface`, `CourseRepositoryInterface`.
-  - Semantic Exceptions: `CourseNotFoundException`, `DuplicateSlugException`, `CategoryNotFoundException`.
-- **Application Layer (`app\usecases\course\`)**:
-  - `CreateCourseUseCase`, `UpdateCourseUseCase`, `ArchiveCourseUseCase`, `ListCoursesUseCase`, `GetCourseDetailUseCase`.
-  - `CreateCategoryUseCase`, `UpdateCategoryUseCase`, `ListCategoriesUseCase`.
+  - Semantic Exceptions: `NotFoundException`, `ConflictException`, `ValidationException` (todas herdando de `AppException`).
+- **Application Layer (`app\usecases\course\` e `app\usecases\category\`)**:
+  - `app\usecases\course\`: `CreateCourseUseCase`, `UpdateCourseUseCase`, `ArchiveCourseUseCase`, `DeleteCourseUseCase`, `GetCourseDetailUseCase`, `ListCoursesUseCase`, `ListPaginatedCoursesUseCase`.
+  - `app\usecases\category\`: `CreateCategoryUseCase`, `UpdateCategoryUseCase`, `DeleteCategoryUseCase`, `GetCategoryUseCase`, `ListCategoriesUseCase`, `ListPaginatedCategoriesUseCase`.
 - **Infrastructure Layer (`application/models/`)**:
   - `Category_model` e `Course_model` estendendo `MY_Model`, utilizando Mappers e Database DTOs.
 - **Presentation Layer (`application/controllers/admin/`)**:

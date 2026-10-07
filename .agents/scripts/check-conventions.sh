@@ -57,7 +57,10 @@ for file in $FILES; do
 	fi
 
 	# Skip third-party/generated files if any
-	if [[ "$file" == *"vendor/"* ]] || [[ "$file" == *"system/"* ]]; then
+	if [[ "$file" == *"vendor/"* ]] || [[ "$file" == *"system/"* ]] || \
+	   [[ "$file" == *"config/user_agents.php"* ]] || [[ "$file" == *"config/mimes.php"* ]] || \
+	   [[ "$file" == *"config/smileys.php"* ]] || [[ "$file" == *"config/doctypes.php"* ]] || \
+	   [[ "$file" == *"config/foreign_chars.php"* ]] || [[ "$file" == *"config/memcached.php"* ]]; then
 		continue
 	fi
 
@@ -112,6 +115,18 @@ for file in $FILES; do
 			echo -e "   ${YELLOW}Linha:${NC} $line"
 		done
 		FILE_VIOLATIONS=$((FILE_VIOLATIONS + 1))
+	fi
+
+	# 6. Check Manual Try-Catch in Controllers (forbidden: exceptions must bubble to MY_Controller::_remap)
+	if [[ "$file" == *"application/controllers/"* ]]; then
+		TRY_CATCH_MATCHES=$(grep -Hn -P '^\s*catch\s*\(' "$file" || true)
+		if [ -n "$TRY_CATCH_MATCHES" ]; then
+			echo -e "\n${RED}[FALHA] Bloco try-catch manual detectado em Controller (exceções devem ser tratadas globalmente por MY_Controller::_remap) em:${NC} $file"
+			echo "$TRY_CATCH_MATCHES" | while read -r line; do
+				echo -e "   ${YELLOW}Linha:${NC} $line"
+			done
+			FILE_VIOLATIONS=$((FILE_VIOLATIONS + 1))
+		fi
 	fi
 
 	if [ "$FILE_VIOLATIONS" -gt 0 ]; then
