@@ -18,7 +18,7 @@ class ForbiddenException extends AppException
 	 * @param array<string, mixed> $errors Additional error details
 	 * @param Throwable|null $previous Previous exception
 	 */
-	public function __construct(string $message = "Acesso negado", array $errors = [], ?Throwable $previous = null)
+	public function __construct(string $message = "Access forbidden", array $errors = [], ?Throwable $previous = null)
 	{
 		parent::__construct($message, 403, $errors, $previous);
 	}

@@ -18,7 +18,7 @@ class ValidationException extends AppException
 	 * @param array<string, mixed> $errors Field-specific validation errors
 	 * @param Throwable|null $previous Previous exception
 	 */
-	public function __construct(string $message = "Dados inválidos", array $errors = [], ?Throwable $previous = null)
+	public function __construct(string $message = "Validation failed", array $errors = [], ?Throwable $previous = null)
 	{
 		parent::__construct($message, 422, $errors, $previous);
 	}

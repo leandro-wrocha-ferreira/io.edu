@@ -18,7 +18,7 @@ class UnauthorizedException extends AppException
 	 * @param array<string, mixed> $errors Additional error details
 	 * @param Throwable|null $previous Previous exception
 	 */
-	public function __construct(string $message = "Não autorizado", array $errors = [], ?Throwable $previous = null)
+	public function __construct(string $message = "Unauthorized", array $errors = [], ?Throwable $previous = null)
 	{
 		parent::__construct($message, 401, $errors, $previous);
 	}

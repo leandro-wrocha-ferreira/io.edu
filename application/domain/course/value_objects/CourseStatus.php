@@ -5,19 +5,21 @@ namespace app\domain\course\value_objects;
 use InvalidArgumentException;
 
 /**
- * Value Object representing course status.
+ * Value Object representing course publication status.
  *
- * Immutable by design.
+ * Encapsulates status validation and lifecycle transition invariants.
  */
 final class CourseStatus
 {
 	public const DRAFT = 'draft';
 	public const ACTIVE = 'active';
+	public const INACTIVE = 'inactive';
 	public const ARCHIVED = 'archived';
 
 	public const ALL = [
 		self::DRAFT,
 		self::ACTIVE,
+		self::INACTIVE,
 		self::ARCHIVED,
 	];
 
@@ -64,6 +66,16 @@ final class CourseStatus
 	}
 
 	/**
+	 * Create inactive status.
+	 *
+	 * @return self
+	 */
+	public static function inactive(): self
+	{
+		return new self(self::INACTIVE);
+	}
+
+	/**
 	 * Create archived status.
 	 *
 	 * @return self
@@ -94,6 +106,16 @@ final class CourseStatus
 	}
 
 	/**
+	 * Check if status is inactive.
+	 *
+	 * @return bool
+	 */
+	public function is_inactive(): bool
+	{
+		return $this->value === self::INACTIVE;
+	}
+
+	/**
 	 * Check if status is archived.
 	 *
 	 * @return bool
@@ -101,6 +123,23 @@ final class CourseStatus
 	public function is_archived(): bool
 	{
 		return $this->value === self::ARCHIVED;
+	}
+
+	/**
+	 * Determine if transition from current status to target status is valid.
+	 *
+	 * A course can transition from draft to any status, but cannot transition back to draft once it left draft.
+	 *
+	 * @param CourseStatus $target Target status
+	 * @return bool
+	 */
+	public function can_transition_to(CourseStatus $target): bool
+	{
+		if ($this->value !== self::DRAFT && $target->is_draft()) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

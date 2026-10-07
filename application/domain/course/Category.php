@@ -3,6 +3,7 @@
 namespace app\domain\course;
 
 use app\domain\course\constants\CategoryStatus;
+use app\domain\course\value_objects\CourseSlug;
 use DateTime;
 use InvalidArgumentException;
 
@@ -64,18 +65,18 @@ final class Category
 	 * Create a category domain entity.
 	 *
 	 * @param string $name Category name
-	 * @param string $slug Unique slug
+	 * @param string|null $slug Unique slug (auto-generated from name if null/empty)
 	 * @param string $status Status ('active' or 'inactive')
 	 * @param int|null $id Category ID
 	 * @param DateTime|null $created_at Creation timestamp
 	 * @param DateTime|null $updated_at Update timestamp
 	 * @param DateTime|null $deleted_at Deletion timestamp
 	 * @return self
-	 * @throws InvalidArgumentException When name or slug is empty, or status is invalid
+	 * @throws InvalidArgumentException When name is empty or status is invalid
 	 */
 	public static function create(
 		string $name,
-		string $slug,
+		?string $slug = null,
 		string $status = CategoryStatus::ACTIVE,
 		?int $id = null,
 		?DateTime $created_at = null,
@@ -88,9 +89,9 @@ final class Category
 			throw new InvalidArgumentException("Category name cannot be empty");
 		}
 
-		$trimmed_slug = trim(strtolower($slug));
-		if ($trimmed_slug === '') {
-			throw new InvalidArgumentException("Category slug cannot be empty");
+		$clean_slug = !empty($slug) ? CourseSlug::slugify($slug) : CourseSlug::slugify($trimmed_name);
+		if ($clean_slug === '') {
+			$clean_slug = 'categoria';
 		}
 
 		if (!CategoryStatus::is_valid($status)) {
@@ -100,7 +101,7 @@ final class Category
 		$category = new self();
 		$category->id = $id;
 		$category->name = $trimmed_name;
-		$category->slug = $trimmed_slug;
+		$category->slug = $clean_slug;
 		$category->status = $status;
 		$category->created_at = $created_at ?? new DateTime();
 		$category->updated_at = $updated_at ?? ($id === null ? new DateTime() : null);
@@ -164,11 +165,11 @@ final class Category
 	 */
 	public function set_slug(string $slug): void
 	{
-		$trimmed = trim(strtolower($slug));
-		if ($trimmed === '') {
+		$clean = CourseSlug::slugify($slug);
+		if ($clean === '') {
 			throw new InvalidArgumentException("Category slug cannot be empty");
 		}
-		$this->slug = $trimmed;
+		$this->slug = $clean;
 	}
 
 	/**

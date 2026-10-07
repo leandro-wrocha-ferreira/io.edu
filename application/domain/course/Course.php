@@ -6,11 +6,12 @@ use app\domain\course\value_objects\CourseAccessPeriod;
 use app\domain\course\value_objects\CourseSlug;
 use app\domain\course\value_objects\CourseStatus;
 use app\domain\course\value_objects\Workload;
+use app\domain\exceptions\ValidationException;
 use DateTime;
 use InvalidArgumentException;
 
 /**
- * Domain entity representing a LMS Course product.
+ * Domain entity representing an educational LMS Course.
  */
 final class Course
 {
@@ -50,6 +51,27 @@ final class Course
 	private CourseSlug $slug;
 
 	/**
+	 * Publication status ('draft', 'active', 'inactive', 'archived').
+	 *
+	 * @var CourseStatus
+	 */
+	private CourseStatus $status;
+
+	/**
+	 * Access period configuration (lifetime vs limited time).
+	 *
+	 * @var CourseAccessPeriod
+	 */
+	private CourseAccessPeriod $access_period;
+
+	/**
+	 * Estimated workload in hours.
+	 *
+	 * @var Workload|null
+	 */
+	private ?Workload $workload = null;
+
+	/**
 	 * Short summary description for showcase cards.
 	 *
 	 * @var string|null
@@ -64,25 +86,18 @@ final class Course
 	private ?string $description = null;
 
 	/**
-	 * Cover image path or URL.
+	 * Cover image path (relative internal path e.g. public/uploads/courses/{id}/image.{ext}).
 	 *
 	 * @var string|null
 	 */
 	private ?string $image = null;
 
 	/**
-	 * Publication status ('draft', 'active', 'archived').
+	 * Shared external cover image URL.
 	 *
-	 * @var CourseStatus
+	 * @var string|null
 	 */
-	private CourseStatus $status;
-
-	/**
-	 * Estimated workload in hours.
-	 *
-	 * @var Workload|null
-	 */
-	private ?Workload $workload = null;
+	private ?string $image_url = null;
 
 	/**
 	 * Total recorded media duration in seconds.
@@ -111,13 +126,6 @@ final class Course
 	 * @var string|null
 	 */
 	private ?string $requirements = null;
-
-	/**
-	 * Access period configuration (lifetime vs limited time).
-	 *
-	 * @var CourseAccessPeriod
-	 */
-	private CourseAccessPeriod $access_period;
 
 	/**
 	 * Whether a certificate is issued upon course completion.
@@ -153,7 +161,7 @@ final class Course
 	 * @param int $category_id Category foreign key ID
 	 * @param string $title Course title
 	 * @param CourseSlug|string $slug Course slug Value Object or string
-	 * @param CourseStatus|string $status Status ('draft', 'active', 'archived')
+	 * @param CourseStatus|string $status Status ('draft', 'active', 'inactive', 'archived')
 	 * @param CourseAccessPeriod|null $access_period Access period VO
 	 * @param Workload|int|null $workload Workload VO or hours
 	 * @param string|null $short_description Short summary
@@ -169,6 +177,7 @@ final class Course
 	 * @param DateTime|null $updated_at Update timestamp
 	 * @param DateTime|null $deleted_at Deletion timestamp
 	 * @param string|null $category_name Optional category name
+	 * @param string|null $image_url External image URL
 	 * @return self
 	 * @throws InvalidArgumentException When validation fails
 	 */
@@ -191,15 +200,16 @@ final class Course
 		?DateTime $created_at = null,
 		?DateTime $updated_at = null,
 		?DateTime $deleted_at = null,
-		?string $category_name = null
+		?string $category_name = null,
+		?string $image_url = null
 	): self
 	{
 		if ($category_id <= 0) {
 			throw new InvalidArgumentException("Category ID must be greater than 0");
 		}
 
-		$trimmed_title = trim($title);
-		if ($trimmed_title === '') {
+		$clean_title = trim($title);
+		if ($clean_title === '') {
 			throw new InvalidArgumentException("Course title cannot be empty");
 		}
 
@@ -218,18 +228,19 @@ final class Course
 		$course->id = $id;
 		$course->category_id = $category_id;
 		$course->category_name = $category_name;
-		$course->title = $trimmed_title;
+		$course->title = $clean_title;
 		$course->slug = $course_slug;
 		$course->status = $course_status;
 		$course->access_period = $course_access_period;
 		$course->workload = $course_workload;
-		$course->short_description = $short_description !== null ? trim($short_description) : null;
-		$course->description = $description !== null ? trim($description) : null;
-		$course->image = $image !== null ? trim($image) : null;
+		$course->short_description = $short_description;
+		$course->description = $description;
+		$course->image = $image;
+		$course->image_url = $image_url;
 		$course->duration_in_seconds = max(0, $duration_in_seconds);
-		$course->objectives = $objectives !== null ? trim($objectives) : null;
-		$course->target_audience = $target_audience !== null ? trim($target_audience) : null;
-		$course->requirements = $requirements !== null ? trim($requirements) : null;
+		$course->objectives = $objectives;
+		$course->target_audience = $target_audience;
+		$course->requirements = $requirements;
 		$course->certificate_enabled = $certificate_enabled;
 		$course->created_at = $created_at ?? new DateTime();
 		$course->updated_at = $updated_at ?? ($id === null ? new DateTime() : null);
@@ -239,58 +250,80 @@ final class Course
 	}
 
 	/**
-	 * Update general course details.
+	 * Update general course metadata and syllabus.
 	 *
-	 * @param int $category_id
-	 * @param string $title
-	 * @param CourseSlug $slug
-	 * @param CourseAccessPeriod $access_period
-	 * @param Workload|null $workload
-	 * @param string|null $short_description
-	 * @param string|null $description
-	 * @param string|null $image
-	 * @param string|null $objectives
-	 * @param string|null $target_audience
-	 * @param string|null $requirements
-	 * @param bool $certificate_enabled
+	 * @param int $category_id Category foreign key ID
+	 * @param string $title Course title
+	 * @param CourseSlug|string $slug Course slug
+	 * @param CourseAccessPeriod $access_period Access period VO
+	 * @param Workload|int|null $workload Workload VO or hours
+	 * @param string|null $short_description Short description
+	 * @param string|null $description Full description
+	 * @param string|null $image Cover image file path
+	 * @param string|null $objectives Learning objectives
+	 * @param string|null $target_audience Target audience
+	 * @param string|null $requirements Prerequisites
+	 * @param bool $certificate_enabled Certificate emission toggle
+	 * @param string|null $image_url External image URL
 	 * @return void
+	 * @throws InvalidArgumentException
 	 */
 	public function update_details(
 		int $category_id,
 		string $title,
-		CourseSlug $slug,
+		CourseSlug|string $slug,
 		CourseAccessPeriod $access_period,
-		?Workload $workload = null,
+		Workload|int|null $workload = null,
 		?string $short_description = null,
 		?string $description = null,
 		?string $image = null,
 		?string $objectives = null,
 		?string $target_audience = null,
 		?string $requirements = null,
-		bool $certificate_enabled = true
+		bool $certificate_enabled = true,
+		?string $image_url = null
 	): void
 	{
 		if ($category_id <= 0) {
 			throw new InvalidArgumentException("Category ID must be greater than 0");
 		}
 
-		$trimmed_title = trim($title);
-		if ($trimmed_title === '') {
+		$clean_title = trim($title);
+		if ($clean_title === '') {
 			throw new InvalidArgumentException("Course title cannot be empty");
 		}
 
 		$this->category_id = $category_id;
-		$this->title = $trimmed_title;
-		$this->slug = $slug;
+		$this->title = $clean_title;
+		$this->slug = $slug instanceof CourseSlug ? $slug : new CourseSlug($slug);
 		$this->access_period = $access_period;
-		$this->workload = $workload;
-		$this->short_description = $short_description !== null ? trim($short_description) : null;
-		$this->description = $description !== null ? trim($description) : null;
-		$this->image = $image !== null ? trim($image) : null;
-		$this->objectives = $objectives !== null ? trim($objectives) : null;
-		$this->target_audience = $target_audience !== null ? trim($target_audience) : null;
-		$this->requirements = $requirements !== null ? trim($requirements) : null;
+		$this->workload = $workload instanceof Workload ? $workload : ($workload !== null ? new Workload((int) $workload) : null);
+		$this->short_description = $short_description;
+		$this->description = $description;
+		$this->image = $image;
+		$this->image_url = $image_url;
+		$this->objectives = $objectives;
+		$this->target_audience = $target_audience;
+		$this->requirements = $requirements;
 		$this->certificate_enabled = $certificate_enabled;
+	}
+
+	/**
+	 * Change course publication status with transition rule enforcement.
+	 *
+	 * @param CourseStatus|string $status Target status
+	 * @return void
+	 * @throws ValidationException When transition back to draft is attempted
+	 */
+	public function change_status(CourseStatus|string $status): void
+	{
+		$target_status = $status instanceof CourseStatus ? $status : new CourseStatus($status);
+
+		if (!$this->status->can_transition_to($target_status)) {
+			throw new ValidationException("Course that has left draft status cannot return to draft status");
+		}
+
+		$this->status = $target_status;
 	}
 
 	/**
@@ -300,7 +333,17 @@ final class Course
 	 */
 	public function publish(): void
 	{
-		$this->status = CourseStatus::active();
+		$this->change_status(CourseStatus::active());
+	}
+
+	/**
+	 * Deactivate the course.
+	 *
+	 * @return void
+	 */
+	public function deactivate(): void
+	{
+		$this->change_status(CourseStatus::inactive());
 	}
 
 	/**
@@ -310,17 +353,7 @@ final class Course
 	 */
 	public function archive(): void
 	{
-		$this->status = CourseStatus::archived();
-	}
-
-	/**
-	 * Set status back to draft.
-	 *
-	 * @return void
-	 */
-	public function draft(): void
-	{
-		$this->status = CourseStatus::draft();
+		$this->change_status(CourseStatus::archived());
 	}
 
 	/**
@@ -351,6 +384,16 @@ final class Course
 	public function is_draft(): bool
 	{
 		return $this->status->is_draft();
+	}
+
+	/**
+	 * Check if course is inactive.
+	 *
+	 * @return bool
+	 */
+	public function is_inactive(): bool
+	{
+		return $this->status->is_inactive();
 	}
 
 	/**
@@ -454,13 +497,41 @@ final class Course
 	}
 
 	/**
-	 * Get image.
+	 * Get image relative path.
 	 *
 	 * @return string|null
 	 */
 	public function get_image(): ?string
 	{
 		return $this->image;
+	}
+
+	/**
+	 * Get shared external image URL.
+	 *
+	 * @return string|null
+	 */
+	public function get_image_url(): ?string
+	{
+		return $this->image_url;
+	}
+
+	/**
+	 * Get resolved display image URL for views (direct upload URL or external URL).
+	 *
+	 * @return string|null
+	 */
+	public function get_display_image(): ?string
+	{
+		if (!empty($this->image)) {
+			return function_exists('base_url') ? base_url($this->image) : '/' . ltrim($this->image, '/');
+		}
+
+		if (!empty($this->image_url)) {
+			return $this->image_url;
+		}
+
+		return null;
 	}
 
 	/**

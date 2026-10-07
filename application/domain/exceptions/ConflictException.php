@@ -19,7 +19,7 @@ class ConflictException extends AppException
 	 * @param array<string, mixed> $errors Additional error details
 	 * @param Throwable|null $previous Previous exception
 	 */
-	public function __construct(string $message = "Operação em conflito com o estado atual", array $errors = [], ?Throwable $previous = null)
+	public function __construct(string $message = "Operation conflicts with current state", array $errors = [], ?Throwable $previous = null)
 	{
 		parent::__construct($message, 409, $errors, $previous);
 	}
