@@ -18,6 +18,7 @@
 	<link rel="stylesheet" href="<?= base_url('public/assets/css/bootstrap.min.css') ?>">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 	<link rel="stylesheet" href="//cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+	<link rel="stylesheet" href="<?= base_url('public/assets/css/quill.snow.css?v=' . (file_exists(FCPATH . 'public/assets/css/quill.snow.css') ? filemtime(FCPATH . 'public/assets/css/quill.snow.css') : '1')) ?>">
 
 	<!-- Unified Design System Tokens & Base -->
 	<link rel="stylesheet" href="<?= base_url('public/assets/css/shared/tokens.css?v=' . filemtime(FCPATH . 'public/assets/css/shared/tokens.css')) ?>">
@@ -228,14 +229,16 @@
 	<script src="<?= base_url('public/assets/js/bootstrap.bundle.min.js') ?>"></script>
 	<script src="//cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 	<script src="//cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-	<script src="<?= base_url('public/assets/js/http.js') ?>"></script>
-	<script src="<?= base_url('public/assets/js/admin/layout.js') ?>"></script>
-	<script src="<?= base_url('public/assets/js/components/rich-editor.js') ?>"></script>
+	<script src="<?= base_url('public/assets/js/http.js?v=' . (file_exists(FCPATH . 'public/assets/js/http.js') ? filemtime(FCPATH . 'public/assets/js/http.js') : '1')) ?>"></script>
+	<script src="<?= base_url('public/assets/js/admin/layout.js?v=' . (file_exists(FCPATH . 'public/assets/js/admin/layout.js') ? filemtime(FCPATH . 'public/assets/js/admin/layout.js') : '1')) ?>"></script>
+	<script src="<?= base_url('public/assets/js/quill.js?v=' . (file_exists(FCPATH . 'public/assets/js/quill.js') ? filemtime(FCPATH . 'public/assets/js/quill.js') : '1')) ?>"></script>
+	<script src="<?= base_url('public/assets/js/components/rich-editor.js?v=' . (file_exists(FCPATH . 'public/assets/js/components/rich-editor.js') ? filemtime(FCPATH . 'public/assets/js/components/rich-editor.js') : '1')) ?>"></script>
+	<script src="<?= base_url('public/assets/js/components/tag-input.js?v=' . (file_exists(FCPATH . 'public/assets/js/components/tag-input.js') ? filemtime(FCPATH . 'public/assets/js/components/tag-input.js') : '1')) ?>"></script>
 
 	<!-- Page-Specific Scripts -->
 	<?php if (!empty($page_js)): ?>
 		<?php foreach ((array)$page_js as $js): ?>
-			<script src="<?= base_url('public/assets/js/pages/' . $js) ?>"></script>
+			<script src="<?= base_url('public/assets/js/pages/' . $js . '?v=' . (file_exists(FCPATH . 'public/assets/js/pages/' . $js) ? filemtime(FCPATH . 'public/assets/js/pages/' . $js) : '1')) ?>"></script>
 		<?php endforeach; ?>
 	<?php endif; ?>
 </body>

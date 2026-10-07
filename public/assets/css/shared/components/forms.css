@@ -142,3 +142,70 @@ textarea.form-control {
 	margin-top: 0.35rem;
 	font-weight: 500;
 }
+
+/* Custom File Picker Component (Always in Portuguese & Themed) */
+.edu-file-picker {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.35rem 0.5rem;
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-md);
+	min-height: 44px;
+	transition: border-color var(--edu-transition-fast), box-shadow var(--edu-transition-fast);
+}
+
+.edu-file-picker:focus-within {
+	border-color: var(--edu-primary);
+	box-shadow: 0 0 0 3px var(--edu-primary-ghost);
+}
+
+.edu-file-picker-input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.edu-file-picker-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.4rem 0.85rem;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--edu-text-body);
+	background-color: var(--edu-bg-subtle);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-sm);
+	cursor: pointer;
+	white-space: nowrap;
+	user-select: none;
+	transition: background-color var(--edu-transition-fast), color var(--edu-transition-fast);
+}
+
+.edu-file-picker-btn:hover {
+	background-color: var(--edu-border);
+	color: var(--edu-text-heading);
+}
+
+.edu-file-picker-label {
+	font-size: 0.875rem;
+	color: var(--edu-text-muted);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	flex: 1;
+}
+
+.edu-file-picker-label.has-file {
+	color: var(--edu-primary);
+	font-weight: 600;
+}

@@ -98,7 +98,7 @@
 						</div>
 						<div class="edu-card-body">
 							<div class="text-body leading-relaxed mb-4">
-								<?= nl2br(html_escape($course->get_description() ?? 'Nenhuma ementa detalhada informada.')) ?>
+								<?= $course->get_description() ?: '<span class="text-muted">Nenhuma ementa detalhada informada.</span>' ?>
 							</div>
 
 							<div class="row g-3 pt-2 border-top">
@@ -112,7 +112,7 @@
 								</div>
 								<div class="col-sm-6">
 									<span class="text-muted small d-block">Pré-requisitos</span>
-									<span class="text-body"><?= nl2br(html_escape($course->get_requirements() ?? 'Nenhum pré-requisito.')) ?></span>
+									<span class="text-body"><?= $course->get_requirements() ?: '<span class="text-muted">Nenhum pré-requisito.</span>' ?></span>
 								</div>
 								<div class="col-sm-6">
 									<span class="text-muted small d-block">Cadastrado em</span>

@@ -4,13 +4,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 use app\domain\course\value_objects\CourseAccessPeriod;
 use app\domain\course\value_objects\CourseStatus;
-use app\domain\exceptions\DuplicateSlugException;
 use app\factories\ModelFactory;
+use app\usecases\category\ListCategoriesUseCase;
 use app\usecases\course\ArchiveCourseUseCase;
 use app\usecases\course\CreateCourseUseCase;
 use app\usecases\course\DeleteCourseUseCase;
 use app\usecases\course\GetCourseDetailUseCase;
-use app\usecases\course\ListCategoriesUseCase;
 use app\usecases\course\ListPaginatedCoursesUseCase;
 use app\usecases\course\UpdateCourseUseCase;
 
@@ -98,6 +97,7 @@ class Courses extends MY_Controller
 			$course_status = $course->get_status();
 			$status_badge = match (true) {
 				$course_status->is_active() => '<span class="edu-badge edu-badge-success edu-badge-dot">Ativo</span>',
+				$course_status->is_inactive() => '<span class="edu-badge edu-badge-neutral edu-badge-dot">Inativo</span>',
 				$course_status->is_archived() => '<span class="edu-badge edu-badge-warning edu-badge-dot">Arquivado</span>',
 				default => '<span class="edu-badge edu-badge-neutral edu-badge-dot">Rascunho</span>',
 			};
@@ -184,7 +184,7 @@ class Courses extends MY_Controller
 		$this->form_validation->set_rules('title', 'Título do Curso', 'required|trim|min_length[3]|max_length[255]');
 		$this->form_validation->set_rules('category_id', 'Categoria', 'required|is_natural_no_zero');
 		$this->form_validation->set_rules('slug', 'Slug', 'trim|max_length[255]');
-		$this->form_validation->set_rules('status', 'Status', 'required|trim|in_list[draft,active,archived]');
+		$this->form_validation->set_rules('status', 'Status', 'required|trim|in_list[draft,active,inactive,archived]');
 		$this->form_validation->set_rules('access_period_type', 'Tipo de Período de Acesso', 'required|trim|in_list[lifetime,limited_time]');
 
 		if ($this->input->post('access_period_type') === 'limited_time') {
@@ -197,69 +197,68 @@ class Courses extends MY_Controller
 		$this->form_validation->set_rules('workload_in_hours', 'Carga Horária', 'trim|numeric');
 		$this->form_validation->set_rules('short_description', 'Resumo', 'trim|max_length[500]');
 		$this->form_validation->set_rules('description', 'Ementa Completa', 'trim');
-		$this->form_validation->set_rules('image', 'URL da Imagem', 'trim|max_length[255]');
+		$this->form_validation->set_rules('image_url', 'URL da Imagem', 'trim|max_length[255]');
 		$this->form_validation->set_rules('target_audience', 'Público-Alvo', 'trim');
 		$this->form_validation->set_rules('requirements', 'Pré-requisitos', 'trim');
 
-		if ($this->form_validation->run() === TRUE) {
-			try {
-				$course_model = ModelFactory::make('course_model');
-				$use_case = new CreateCourseUseCase($course_model, $category_model);
+		$image_has_error = false;
+		if (!empty($_FILES['image_file']['name'])) {
+			$file_ext = strtolower(pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION));
+			$allowed_exts = ['gif', 'jpg', 'jpeg', 'png', 'webp'];
+			$max_size_bytes = 4096 * 1024;
 
-				$access_days = $this->input->post('access_period_type') === 'limited_time'
-					? (int) $this->input->post('access_days')
-					: null;
-
-				$workload = $this->input->post('workload_in_hours') !== ''
-					? (int) $this->input->post('workload_in_hours')
-					: null;
-
-				$image = $this->input->post('image') ?: null;
-
-				if (!empty($_FILES['image_file']['name'])) {
-					$upload_dir = FCPATH . 'public/uploads/courses/';
-					if (!is_dir($upload_dir)) {
-						mkdir($upload_dir, 0755, true);
-					}
-
-					$config = [
-						'upload_path' => $upload_dir,
-						'allowed_types' => 'gif|jpg|jpeg|png|webp',
-						'max_size' => 4096,
-						'encrypt_name' => TRUE,
-					];
-
-					$this->load->library('upload', $config);
-					if ($this->upload->do_upload('image_file')) {
-						$upload_data = $this->upload->data();
-						$image = base_url('public/uploads/courses/' . $upload_data['file_name']);
-					}
-				}
-
-				$use_case->execute(
-					(int) $this->input->post('category_id'),
-					$this->input->post('title'),
-					$this->input->post('slug') ?: null,
-					$this->input->post('status'),
-					$this->input->post('access_period_type'),
-					$access_days,
-					$workload,
-					$this->input->post('short_description') ?: null,
-					$this->input->post('description') ?: null,
-					$image,
-					0,
-					null,
-					$this->input->post('target_audience') ?: null,
-					$this->input->post('requirements') ?: null,
-					$this->input->post('certificate_enabled') ? true : false
-				);
-
-				$this->session->set_flashdata('success', 'Curso cadastrado com sucesso!');
-				redirect('admin/cursos');
-				return;
-			} catch (DuplicateSlugException $exception) {
-				$this->session->set_flashdata('error', $exception->getMessage());
+			if (!in_array($file_ext, $allowed_exts, true) || (($_FILES['image_file']['size'] ?? 0) > $max_size_bytes)) {
+				$this->session->set_flashdata('error', 'O arquivo enviado deve ser uma imagem válida (GIF, JPG, JPEG, PNG, WEBP) de até 4MB.');
+				$image_has_error = true;
 			}
+		}
+
+		if ($this->form_validation->run() === TRUE && !$image_has_error) {
+			$course_model = ModelFactory::make('course_model');
+			$use_case = new CreateCourseUseCase($course_model, $category_model);
+
+			$access_days = $this->input->post('access_period_type') === 'limited_time'
+				? (int) $this->input->post('access_days')
+				: null;
+
+			$workload = $this->input->post('workload_in_hours') !== ''
+				? (int) $this->input->post('workload_in_hours')
+				: null;
+
+			$image_type = $this->input->post('image_type');
+			$image = null;
+			$image_url = ($image_type === 'url') ? ($this->input->post('image_url') ?: null) : null;
+
+			if ($image_type !== 'url' && !empty($_FILES['image_file']['name'])) {
+				$uploaded_image = $this->_upload_course_image();
+				if ($uploaded_image !== null) {
+					$image = $uploaded_image;
+					$image_url = null;
+				}
+			}
+
+			$use_case->execute(
+				(int) $this->input->post('category_id'),
+				$this->input->post('title'),
+				$this->input->post('slug') ?: null,
+				$this->input->post('status'),
+				$this->input->post('access_period_type'),
+				$access_days,
+				$workload,
+				$this->input->post('short_description') ?: null,
+				$this->input->post('description') ?: null,
+				$image,
+				0,
+				null,
+				$this->input->post('target_audience') ?: null,
+				$this->input->post('requirements') ?: null,
+				$this->input->post('certificate_enabled') ? true : false,
+				$image_url
+			);
+
+			$this->session->set_flashdata('success', 'Curso cadastrado com sucesso!');
+			redirect('admin/cursos');
+			return;
 		}
 
 		$data = [
@@ -294,7 +293,7 @@ class Courses extends MY_Controller
 		$this->form_validation->set_rules('title', 'Título do Curso', 'required|trim|min_length[3]|max_length[255]');
 		$this->form_validation->set_rules('category_id', 'Categoria', 'required|is_natural_no_zero');
 		$this->form_validation->set_rules('slug', 'Slug', 'trim|max_length[255]');
-		$this->form_validation->set_rules('status', 'Status', 'required|trim|in_list[draft,active,archived]');
+		$this->form_validation->set_rules('status', 'Status', 'required|trim|in_list[draft,active,inactive,archived]');
 		$this->form_validation->set_rules('access_period_type', 'Tipo de Período de Acesso', 'required|trim|in_list[lifetime,limited_time]');
 
 		if ($this->input->post('access_period_type') === 'limited_time') {
@@ -307,68 +306,72 @@ class Courses extends MY_Controller
 		$this->form_validation->set_rules('workload_in_hours', 'Carga Horária', 'trim|numeric');
 		$this->form_validation->set_rules('short_description', 'Resumo', 'trim|max_length[500]');
 		$this->form_validation->set_rules('description', 'Ementa Completa', 'trim');
-		$this->form_validation->set_rules('image', 'URL da Imagem', 'trim|max_length[255]');
+		$this->form_validation->set_rules('image_url', 'URL da Imagem', 'trim|max_length[255]');
 		$this->form_validation->set_rules('target_audience', 'Público-Alvo', 'trim');
 		$this->form_validation->set_rules('requirements', 'Pré-requisitos', 'trim');
 
-		if ($this->form_validation->run() === TRUE) {
-			try {
-				$use_case = new UpdateCourseUseCase($course_model, $category_model);
+		$image_has_error = false;
+		if (!empty($_FILES['image_file']['name'])) {
+			$file_ext = strtolower(pathinfo($_FILES['image_file']['name'], PATHINFO_EXTENSION));
+			$allowed_exts = ['gif', 'jpg', 'jpeg', 'png', 'webp'];
+			$max_size_bytes = 4096 * 1024;
 
-				$access_days = $this->input->post('access_period_type') === 'limited_time'
-					? (int) $this->input->post('access_days')
-					: null;
+			if (!in_array($file_ext, $allowed_exts, true) || (($_FILES['image_file']['size'] ?? 0) > $max_size_bytes)) {
+				$this->session->set_flashdata('error', 'O arquivo enviado deve ser uma imagem válida (GIF, JPG, JPEG, PNG, WEBP) de até 4MB.');
+				$image_has_error = true;
+			}
+		}
 
-				$workload = $this->input->post('workload_in_hours') !== ''
-					? (int) $this->input->post('workload_in_hours')
-					: null;
+		if ($this->form_validation->run() === TRUE && !$image_has_error) {
+			$use_case = new UpdateCourseUseCase($course_model, $category_model);
 
-				$image = $this->input->post('image') ?: $course->get_image();
+			$access_days = $this->input->post('access_period_type') === 'limited_time'
+				? (int) $this->input->post('access_days')
+				: null;
 
+			$workload = $this->input->post('workload_in_hours') !== ''
+				? (int) $this->input->post('workload_in_hours')
+				: null;
+
+			$image_type = $this->input->post('image_type');
+			$image = $course->get_image();
+			$image_url = $course->get_image_url();
+
+			if ($image_type === 'url') {
+				$image_url = $this->input->post('image_url') ?: null;
+				$image = null;
+			} else {
 				if (!empty($_FILES['image_file']['name'])) {
-					$upload_dir = FCPATH . 'public/uploads/courses/';
-					if (!is_dir($upload_dir)) {
-						mkdir($upload_dir, 0755, true);
-					}
-
-					$config = [
-						'upload_path' => $upload_dir,
-						'allowed_types' => 'gif|jpg|jpeg|png|webp',
-						'max_size' => 4096,
-						'encrypt_name' => TRUE,
-					];
-
-					$this->load->library('upload', $config);
-					if ($this->upload->do_upload('image_file')) {
-						$upload_data = $this->upload->data();
-						$image = base_url('public/uploads/courses/' . $upload_data['file_name']);
+					$uploaded_image = $this->_upload_course_image($course->get_id());
+					if ($uploaded_image !== null) {
+						$image = $uploaded_image;
+						$image_url = null;
 					}
 				}
-
-				$use_case->execute(
-					$course->get_id(),
-					(int) $this->input->post('category_id'),
-					$this->input->post('title'),
-					$this->input->post('slug') ?: null,
-					$this->input->post('status'),
-					$this->input->post('access_period_type'),
-					$access_days,
-					$workload,
-					$this->input->post('short_description') ?: null,
-					$this->input->post('description') ?: null,
-					$image,
-					null,
-					$this->input->post('target_audience') ?: null,
-					$this->input->post('requirements') ?: null,
-					$this->input->post('certificate_enabled') ? true : false
-				);
-
-				$this->session->set_flashdata('success', 'Curso atualizado com sucesso!');
-				redirect('admin/cursos');
-				return;
-			} catch (DuplicateSlugException $exception) {
-				$this->session->set_flashdata('error', $exception->getMessage());
 			}
+
+			$use_case->execute(
+				$course->get_id(),
+				(int) $this->input->post('category_id'),
+				$this->input->post('title'),
+				$this->input->post('slug') ?: null,
+				$this->input->post('status'),
+				$this->input->post('access_period_type'),
+				$access_days,
+				$workload,
+				$this->input->post('short_description') ?: null,
+				$this->input->post('description') ?: null,
+				$image,
+				$this->input->post('objectives') ?: null,
+				$this->input->post('target_audience') ?: null,
+				$this->input->post('requirements') ?: null,
+				$this->input->post('certificate_enabled') ? true : false,
+				$image_url
+			);
+
+			$this->session->set_flashdata('success', 'Curso atualizado com sucesso!');
+			redirect('admin/cursos');
+			return;
 		}
 
 		$data = [
@@ -430,40 +433,65 @@ class Courses extends MY_Controller
 		$course = $use_case->execute($course_id);
 
 		$data = [
-			'title' => 'Conteúdo Curricular — ' . $course->get_title(),
+			'title' => 'Estrutura Curricular — ' . $course->get_title(),
 			'page_name' => 'admin/courses/content',
 			'course' => [
 				'id' => $course->get_id(),
 				'title' => $course->get_title(),
 			],
-			'curriculum' => [],
 		];
 
 		$this->load->view('layout/admin', $data);
 	}
 
 	/**
-	 * Display visual lesson editor for course content.
+	 * Upload course representation image to dedicated folder.
 	 *
-	 * @param int $course_id Course identifier
-	 * @return void
+	 * @param int|null $course_id Optional course identifier
+	 * @return string|null Relative path of uploaded image or null on failure/none
 	 */
-	public function lesson_editor($course_id = 1)
+	private function _upload_course_image(?int $course_id = null): ?string
 	{
-		$course_id = (int) $course_id;
-		$course_model = ModelFactory::make('course_model');
-		$use_case = new GetCourseDetailUseCase($course_model);
-		$course = $use_case->execute($course_id);
+		if (empty($_FILES['image_file']['name'])) {
+			return null;
+		}
 
-		$data = [
-			'title' => 'Editor de Aula — ' . $course->get_title(),
-			'page_name' => 'admin/courses/lesson_editor',
-			'course' => [
-				'id' => $course->get_id(),
-				'title' => $course->get_title(),
-			],
+		$relative_dir = $course_id !== null 
+			? 'public/uploads/courses/' . $course_id . '/'
+			: 'public/uploads/courses/covers/';
+
+		$upload_dir = FCPATH . $relative_dir;
+		if (!is_dir($upload_dir)) {
+			mkdir($upload_dir, 0755, true);
+		}
+
+		if ($course_id !== null) {
+			$existing_files = glob($upload_dir . 'image.*');
+			if (!empty($existing_files)) {
+				foreach ($existing_files as $file_path) {
+					if (is_file($file_path)) {
+						@unlink($file_path);
+					}
+				}
+			}
+		}
+
+		$config = [
+			'upload_path' => $upload_dir,
+			'allowed_types' => 'gif|jpg|jpeg|png|webp',
+			'max_size' => 4096,
+			'file_name' => $course_id !== null ? 'image' : 'cover_' . time() . '_' . bin2hex(random_bytes(4)),
+			'overwrite' => $course_id !== null,
 		];
 
-		$this->load->view('layout/admin', $data);
+		$this->load->library('upload', $config);
+		$this->upload->initialize($config);
+
+		if ($this->upload->do_upload('image_file')) {
+			$upload_data = $this->upload->data();
+			return $relative_dir . $upload_data['file_name'];
+		}
+
+		return null;
 	}
 }

@@ -39,6 +39,31 @@ p {
 	margin-bottom: 1rem;
 }
 
+blockquote {
+	margin: 0.5rem 0;
+}
+
+blockquote.edu-editor-quote,
+blockquote:not([style*="margin"]) {
+	border-left: 3px solid var(--edu-primary);
+	padding-left: 0.75rem;
+	color: var(--edu-text-muted);
+	font-style: italic;
+}
+
+blockquote[style*="margin"] {
+	border-left: none;
+	padding-left: 0;
+	color: inherit;
+	font-style: normal;
+}
+
+.ql-indent-1 { padding-left: 2rem; }
+.ql-indent-2 { padding-left: 4rem; }
+.ql-indent-3 { padding-left: 6rem; }
+.ql-indent-4 { padding-left: 8rem; }
+.ql-indent-5 { padding-left: 10rem; }
+
 a {
 	color: var(--edu-primary);
 	text-decoration: none;
@@ -119,16 +144,16 @@ button,
 @keyframes fadeInUp {
 	from {
 		opacity: 0;
-		transform: translateY(14px);
+		transform: translateY(12px);
 	}
 	to {
 		opacity: 1;
-		transform: translateY(0);
+		transform: none;
 	}
 }
 
 .animate-fade-up {
-	animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+	animation: fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-delay-1 { animation-delay: 0.05s; }

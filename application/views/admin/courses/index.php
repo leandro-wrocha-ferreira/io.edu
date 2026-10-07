@@ -61,6 +61,7 @@
 					<option value="">Todos os status</option>
 					<option value="draft">Rascunhos</option>
 					<option value="active">Ativos</option>
+					<option value="inactive">Inativos</option>
 					<option value="archived">Arquivados</option>
 				</select>
 

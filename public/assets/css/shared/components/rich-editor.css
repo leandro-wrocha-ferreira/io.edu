@@ -1,8 +1,8 @@
 /**
- * Rich Text Editor Component Styles — io.edu LMS
+ * Rich Text Editor (Quill.js Integration) Component Styles — io.edu LMS
  *
- * Provides styling for the lightweight WYSIWYG editor container,
- * formatting toolbar, and contenteditable area compatible with Light and Dark themes.
+ * Provides complete styling and theme integration for Quill 2 (Snow theme),
+ * supporting Light and Dark modes via Design System CSS tokens.
  */
 
 .edu-rich-editor-wrapper {
@@ -18,95 +18,159 @@
 	box-shadow: 0 0 0 3px var(--edu-primary-ghost);
 }
 
-.edu-rich-editor-toolbar {
+/* Quill Toolbar Override */
+.edu-rich-editor-wrapper .ql-toolbar.ql-snow {
 	background-color: var(--edu-bg-subtle);
+	border: none;
 	border-bottom: 1px solid var(--edu-border);
-	display: flex;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 0.25rem;
-	padding: 0.4rem 0.65rem;
+	padding: 0.45rem 0.65rem;
+	font-family: inherit;
 	user-select: none;
 }
 
-.edu-editor-btn {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 30px;
-	height: 30px;
-	border: none;
-	background: transparent;
-	color: var(--edu-text-muted);
+.edu-rich-editor-wrapper .ql-toolbar.ql-snow .ql-formats {
+	margin-right: 0.65rem;
+}
+
+/* Toolbar Buttons */
+.edu-rich-editor-wrapper .ql-snow.ql-toolbar button {
+	width: 28px;
+	height: 28px;
+	padding: 3px 4px;
 	border-radius: var(--edu-radius-sm);
-	font-size: 0.875rem;
-	cursor: pointer;
+	color: var(--edu-text-muted);
 	transition: background-color var(--edu-transition-fast), color var(--edu-transition-fast);
 }
 
-.edu-editor-btn:hover {
+.edu-rich-editor-wrapper .ql-snow.ql-toolbar button:hover {
 	background-color: var(--edu-bg-surface);
-	color: var(--edu-primary);
 }
 
-.edu-editor-btn:active,
-.edu-editor-btn.active {
-	background-color: var(--edu-primary);
-	color: #ffffff;
+.edu-rich-editor-wrapper .ql-snow.ql-toolbar button.ql-active {
+	background-color: var(--edu-primary-ghost);
 }
 
-.edu-editor-divider {
-	width: 1px;
-	height: 18px;
-	background-color: var(--edu-border);
-	margin: 0 0.35rem;
+/* Icon SVGs */
+.edu-rich-editor-wrapper .ql-snow .ql-stroke {
+	stroke: var(--edu-text-muted);
+	transition: stroke var(--edu-transition-fast);
 }
 
-.edu-rich-editor-content {
-	background-color: var(--edu-bg-surface);
+.edu-rich-editor-wrapper .ql-snow .ql-fill {
+	fill: var(--edu-text-muted);
+	transition: fill var(--edu-transition-fast);
+}
+
+.edu-rich-editor-wrapper .ql-snow button:hover .ql-stroke,
+.edu-rich-editor-wrapper .ql-snow button.ql-active .ql-stroke,
+.edu-rich-editor-wrapper .ql-snow .ql-picker-label:hover .ql-stroke,
+.edu-rich-editor-wrapper .ql-snow .ql-picker-label.ql-active .ql-stroke {
+	stroke: var(--edu-primary) !important;
+}
+
+.edu-rich-editor-wrapper .ql-snow button:hover .ql-fill,
+.edu-rich-editor-wrapper .ql-snow button.ql-active .ql-fill,
+.edu-rich-editor-wrapper .ql-snow .ql-picker-label:hover .ql-fill,
+.edu-rich-editor-wrapper .ql-snow .ql-picker-label.ql-active .ql-fill {
+	fill: var(--edu-primary) !important;
+}
+
+/* Dropdown Pickers (Format / Headers) */
+.edu-rich-editor-wrapper .ql-snow .ql-picker {
 	color: var(--edu-text-body);
-	padding: 0.75rem 1rem;
+	font-weight: 500;
+	font-size: 0.8125rem;
+	height: 28px;
+}
+
+.edu-rich-editor-wrapper .ql-snow .ql-picker-label {
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-sm);
+	padding: 0.15rem 0.5rem;
+	transition: border-color var(--edu-transition-fast);
+}
+
+.edu-rich-editor-wrapper .ql-snow .ql-picker-label:hover,
+.edu-rich-editor-wrapper .ql-snow .ql-picker.ql-expanded .ql-picker-label {
+	border-color: var(--edu-primary);
+}
+
+.edu-rich-editor-wrapper .ql-snow .ql-picker-options {
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-sm);
+	box-shadow: var(--edu-shadow-lg);
+	padding: 0.35rem 0;
+	z-index: 1050;
+}
+
+.edu-rich-editor-wrapper .ql-snow .ql-picker-item {
+	color: var(--edu-text-body);
+	padding: 0.35rem 0.75rem;
+	transition: background-color var(--edu-transition-fast), color var(--edu-transition-fast);
+}
+
+.edu-rich-editor-wrapper .ql-snow .ql-picker-item:hover,
+.edu-rich-editor-wrapper .ql-snow .ql-picker-item.ql-selected {
+	background-color: var(--edu-bg-subtle);
+	color: var(--edu-primary) !important;
+}
+
+/* Container & Editable Area */
+.edu-rich-editor-wrapper .ql-container.ql-snow {
+	background-color: var(--edu-bg-surface);
+	border: none;
+	font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-size: 0.9375rem;
+	color: var(--edu-text-body);
+}
+
+.edu-rich-editor-wrapper .ql-editor {
 	min-height: 140px;
 	max-height: 480px;
-	overflow-y: auto;
-	outline: none;
 	line-height: 1.6;
-	font-size: 0.9375rem;
+	padding: 0.75rem 1rem;
+	outline: none;
 }
 
-.edu-rich-editor-content[data-placeholder]:empty::before {
-	content: attr(data-placeholder);
+/* Placeholder */
+.edu-rich-editor-wrapper .ql-editor.ql-blank::before {
 	color: var(--edu-text-muted);
+	font-style: normal;
+	left: 1rem;
+	right: 1rem;
 	pointer-events: none;
 }
 
-/* Rich Content Elements Inside Editor */
-.edu-rich-editor-content h4,
-.edu-rich-editor-content h5 {
+/* Content Elements Inside Editor */
+.edu-rich-editor-wrapper .ql-editor h3,
+.edu-rich-editor-wrapper .ql-editor h4,
+.edu-rich-editor-wrapper .ql-editor h5 {
 	color: var(--edu-text-heading);
 	font-weight: 700;
-	margin-top: 0.5rem;
-	margin-bottom: 0.35rem;
+	margin-top: 0.6rem;
+	margin-bottom: 0.4rem;
 }
 
-.edu-rich-editor-content p {
+.edu-rich-editor-wrapper .ql-editor p {
 	margin-bottom: 0.5rem;
 }
 
-.edu-rich-editor-content ul,
-.edu-rich-editor-content ol {
-	padding-left: 1.5rem;
-	margin-bottom: 0.5rem;
-}
-
-.edu-rich-editor-content li {
-	margin-bottom: 0.25rem;
-}
-
-.edu-rich-editor-content blockquote {
+.edu-rich-editor-wrapper .ql-editor blockquote {
 	border-left: 3px solid var(--edu-primary);
 	padding-left: 0.75rem;
 	margin: 0.5rem 0;
 	color: var(--edu-text-muted);
 	font-style: italic;
+}
+
+.edu-rich-editor-wrapper .ql-editor ul,
+.edu-rich-editor-wrapper .ql-editor ol {
+	padding-left: 1.5rem;
+	margin-bottom: 0.5rem;
+}
+
+.edu-rich-editor-wrapper .ql-editor li {
+	margin-bottom: 0.25rem;
 }

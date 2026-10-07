@@ -1,13 +1,12 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-use app\domain\exceptions\DuplicateSlugException;
 use app\factories\ModelFactory;
-use app\usecases\course\CreateCategoryUseCase;
-use app\usecases\course\DeleteCategoryUseCase;
-use app\usecases\course\GetCategoryUseCase;
-use app\usecases\course\ListPaginatedCategoriesUseCase;
-use app\usecases\course\UpdateCategoryUseCase;
+use app\usecases\category\CreateCategoryUseCase;
+use app\usecases\category\DeleteCategoryUseCase;
+use app\usecases\category\GetCategoryUseCase;
+use app\usecases\category\ListPaginatedCategoriesUseCase;
+use app\usecases\category\UpdateCategoryUseCase;
 
 /**
  * Categories Controller (Admin)
@@ -113,21 +112,17 @@ class Categories extends MY_Controller
 		$this->form_validation->set_rules('status', 'Status', 'required|trim|in_list[active,inactive]');
 
 		if ($this->form_validation->run() === TRUE) {
-			try {
-				$category_model = ModelFactory::make('category_model');
-				$use_case = new CreateCategoryUseCase($category_model);
-				$use_case->execute(
-					$this->input->post('name'),
-					$this->input->post('slug') ?: null,
-					$this->input->post('status')
-				);
+			$category_model = ModelFactory::make('category_model');
+			$use_case = new CreateCategoryUseCase($category_model);
+			$use_case->execute(
+				$this->input->post('name'),
+				$this->input->post('slug') ?: null,
+				$this->input->post('status')
+			);
 
-				$this->session->set_flashdata('success', 'Categoria cadastrada com sucesso!');
-				redirect('admin/categorias');
-				return;
-			} catch (DuplicateSlugException $exception) {
-				$this->session->set_flashdata('error', $exception->getMessage());
-			}
+			$this->session->set_flashdata('success', 'Categoria cadastrada com sucesso!');
+			redirect('admin/categorias');
+			return;
 		}
 
 		$data = [
@@ -157,21 +152,17 @@ class Categories extends MY_Controller
 		$this->form_validation->set_rules('status', 'Status', 'required|trim|in_list[active,inactive]');
 
 		if ($this->form_validation->run() === TRUE) {
-			try {
-				$update_use_case = new UpdateCategoryUseCase($category_model);
-				$update_use_case->execute(
-					$category->get_id(),
-					$this->input->post('name'),
-					$this->input->post('slug') ?: null,
-					$this->input->post('status')
-				);
+			$update_use_case = new UpdateCategoryUseCase($category_model);
+			$update_use_case->execute(
+				$category->get_id(),
+				$this->input->post('name'),
+				$this->input->post('slug') ?: null,
+				$this->input->post('status')
+			);
 
-				$this->session->set_flashdata('success', 'Categoria atualizada com sucesso!');
-				redirect('admin/categorias');
-				return;
-			} catch (DuplicateSlugException $exception) {
-				$this->session->set_flashdata('error', $exception->getMessage());
-			}
+			$this->session->set_flashdata('success', 'Categoria atualizada com sucesso!');
+			redirect('admin/categorias');
+			return;
 		}
 
 		$data = [
