@@ -17,10 +17,10 @@ Curso (courses)
 ```
 
 Exemplo prático de blocos em uma aula:
-- Bloco 1: Vídeo explicativo (YouTube, Vimeo ou Bunny)
-- Bloco 2: Texto em Markdown/HTML com resumo teórico e links
-- Bloco 3: Arquivo anexo para download (PDF de apoio ou código-fonte)
-- Bloco 4: Questão/Quiz de fixação
+- **Bloco Vídeo**: Provedor (YouTube, Vimeo, Bunny), URL/Embed e duração em segundos.
+- **Bloco Texto**: Conteúdo em Markdown ou HTML estruturado com resumo teórico e links.
+- **Bloco Anexo**: Arquivo para download (PDF de apoio, slides ou código-fonte).
+- **Bloco Quiz**: Questões de fixação ou autoavaliação rápida.
 
 ---
 
@@ -39,7 +39,7 @@ Exemplo prático de blocos em uma aula:
 - `id`: INT unsigned AI, PK
 - `module_id`: INT unsigned, NOT NULL (FK para `course_modules.id` ON DELETE CASCADE)
 - `title`: VARCHAR(255), NOT NULL
-- `slug`: VARCHAR(255), NOT NULL
+- `slug`: VARCHAR(255), NOT NULL (URL amigável da aula dentro do curso)
 - `description`: TEXT, NULL
 - `duration_in_seconds`: INT unsigned, DEFAULT 0 (tempo somado dos vídeos ou informado manualmente)
 - `sort_order`: INT unsigned, DEFAULT 0 (ordenação sequencial dentro do módulo)
@@ -50,40 +50,111 @@ Exemplo prático de blocos em uma aula:
 - `id`: INT unsigned AI, PK
 - `lesson_id`: INT unsigned, NOT NULL (FK para `course_lessons.id` ON DELETE CASCADE)
 - `type`: ENUM('video', 'text', 'attachment', 'quiz'), NOT NULL
-- `payload`: JSON, NOT NULL (estrutura flexível com dados específicos do bloco: URL do vídeo, texto markdown, arquivo anexo, etc.)
-- `sort_order`: INT unsigned, DEFAULT 0
+- `payload`: JSON, NOT NULL (estrutura tipada conforme o `type`)
+- `sort_order`: INT unsigned, DEFAULT 0 (ordenação sequencial dentro da aula)
 - `created_at`, `updated_at`, `deleted_at`: DATETIME
 
 ---
 
 ### 2. Regras de Negócio e Comportamentos:
-- **Ordenação Explícita**: A ordem dos módulos dentro de um curso e das aulas dentro de um módulo deve ser gerenciável (arrastar/soltar ou botões de subir/descer).
-- **Publicação Parcial**: Módulos ou aulas com status `draft` não aparecem para o aluno na área de membros, permitindo ao instrutor preparar novos conteúdos sem exibi-los antes da hora.
-- **Cálculo de Duração**: A duração estimada da aula pode ser calculada a partir da duração dos blocos de vídeo ou preenchida manualmente pelo instrutor.
+- **Ordenação Explícita e Isolada por Escopo**:
+  - A reordenação de módulos afeta apenas os módulos pertencentes ao mesmo `course_id`.
+  - A reordenação de aulas afeta apenas as aulas do mesmo `module_id`.
+  - A reordenação de blocos afeta apenas os blocos da mesma `lesson_id`.
+- **Publicação Parcial & Controle de Acesso**:
+  - Módulos ou aulas com status `draft` permanecem visíveis apenas na área administrativa/instrutor e são filtrados na área do aluno.
+- **Cálculo de Duração**:
+  - A duração da aula pode ser recalculada automaticamente pela soma dos blocos de vídeo (`video`) ou ajustada manualmente pelo instrutor.
+- **Payload Estruturado por Tipo de Bloco**:
+  - `video`: `{"provider": "youtube|vimeo|bunny|custom", "url": "...", "duration_in_seconds": 360}`
+  - `text`: `{"content": "..."}`
+  - `attachment`: `{"filename": "...", "filepath": "...", "filesize": 1024, "extension": "pdf"}`
+  - `quiz`: `{"questions": [...]}`
 
 ---
 
 ### 3. Padrões de Implementação (DDD-Lite):
-- **Domain Layer (`app\domain\course\content\`)**:
-  - Entidades: `CourseModule`, `CourseLesson`, `LessonBlock`.
-  - Value Objects: `BlockType` (video, text, attachment, quiz), `SortOrder`.
-  - Interfaces de Repositório: `ModuleRepositoryInterface`, `LessonRepositoryInterface`, `BlockRepositoryInterface`.
-- **Application Layer (`app\usecases\course\content\`)**:
-  - `CreateModuleUseCase`, `UpdateModuleUseCase`, `ReorderModulesUseCase`, `DeleteModuleUseCase`.
-  - `CreateLessonUseCase`, `UpdateLessonUseCase`, `ReorderLessonsUseCase`, `DeleteLessonUseCase`.
-  - `ManageLessonBlocksUseCase`.
-- **Infrastructure Layer (`application/models/`)**:
-  - `Course_module_model`, `Course_lesson_model`, `Lesson_block_model`.
-- **Presentation Layer (`application/controllers/admin/`)**:
-  - Gestor de Currículo/Ementa integrado à edição do Curso no Admin (`Course_curriculum.php`).
-  - Rotas assíncronas para reordenação via drag-and-drop (`http.js`).
+
+#### 3.1 Domain Layer (`app\domain\course\`):
+- **Entidades**:
+  - `CourseModule` (em `application/domain/course/CourseModule.php`)
+  - `CourseLesson` (em `application/domain/course/CourseLesson.php`)
+  - `LessonBlock` (em `application/domain/course/LessonBlock.php`)
+- **Value Objects** (`app\domain\course\value_objects\`):
+  - `LessonSlug.php`: Validação e normalização de slug de aula.
+  - `ModuleStatus.php` / `LessonStatus.php`: Validação dos estados `draft` e `published`.
+  - `LessonDuration.php`: Encapsulamento de duração em segundos e conversão para formatos amigáveis.
+- **Constantes** (`app\domain\course\constants\`):
+  - `BlockType.php`: Tipos de bloco permitidos (`VIDEO = 'video'`, `TEXT = 'text'`, `ATTACHMENT = 'attachment'`, `QUIZ = 'quiz'`).
+- **Interfaces de Repositório** (`app\domain\course\repositories\`):
+  - `CourseModuleRepositoryInterface.php`
+  - `CourseLessonRepositoryInterface.php`
+  - `LessonBlockRepositoryInterface.php`
+- **Semantic Exceptions** (`app\domain\exceptions\`):
+  - `NotFoundException`, `ValidationException`, `ConflictException`.
+
+#### 3.2 Application Layer (`app\usecases\course\`):
+- **Use Cases de Módulos**:
+  - `CreateCourseModuleUseCase`
+  - `UpdateCourseModuleUseCase`
+  - `ReorderCourseModulesUseCase`
+  - `DeleteCourseModuleUseCase`
+  - `GetCourseModuleUseCase`
+- **Use Cases de Aulas**:
+  - `CreateCourseLessonUseCase`
+  - `UpdateCourseLessonUseCase`
+  - `ReorderCourseLessonsUseCase`
+  - `DeleteCourseLessonUseCase`
+  - `GetCourseLessonUseCase`
+- **Use Cases de Blocos**:
+  - `CreateLessonBlockUseCase`
+  - `UpdateLessonBlockUseCase`
+  - `DeleteLessonBlockUseCase`
+  - `ReorderLessonBlocksUseCase`
+
+#### 3.3 Infrastructure Layer (`application/models/`):
+- **Models** (estendendo `MY_Model` e implementando as interfaces de repositório):
+  - `Course_module_model.php`
+  - `Course_lesson_model.php`
+  - `Lesson_block_model.php`
+- **Database DTOs** (`application/models/dtos/`):
+  - `CourseModuleDatabase.php`
+  - `CourseLessonDatabase.php`
+  - `LessonBlockDatabase.php`
+- **Mappers** (`application/models/mappers/`):
+  - `CourseModuleMapper.php`
+  - `CourseLessonMapper.php`
+  - `LessonBlockMapper.php`
+
+#### 3.4 Presentation Layer (`application/controllers/admin/`):
+- `Curriculum.php` (ou `Course_curriculum.php`) estendendo `MY_Controller`.
+- Fluxo unificado de formulários e respostas AJAX com `json_response()`.
+- Rotas amigáveis em português (`application/config/routes.php`):
+  - `admin/cursos/(:num)/curriculo` -> `admin/curriculum/index/$1`
+  - `admin/cursos/modulos/salvar` -> `admin/curriculum/save_module`
+  - `admin/cursos/modulos/reordenar` -> `admin/curriculum/reorder_modules`
+  - `admin/cursos/aulas/salvar` -> `admin/curriculum/save_lesson`
+  - `admin/cursos/aulas/reordenar` -> `admin/curriculum/reorder_lessons`
+  - `admin/cursos/blocos/salvar` -> `admin/curriculum/save_block`
+  - `admin/cursos/blocos/reordenar` -> `admin/curriculum/reorder_blocks`
+
+#### 3.5 Frontend & Interatividade (`ci3-ui` e `ci3-js`):
+- Views integradas ao layout master `layout/admin` com componentes `.edu-*` e animações `.animate-fade-up`.
+- Scripts modulares em `public/assets/js/curriculum.js` utilizando o cliente `Http` nativo (`public/assets/js/http.js`) para operações assíncronas e drag-and-drop.
+
+---
+
+### 4. Estratégia de Testes Automatizados (`ci3-test`):
+- Testes unitários 1:1 para cada Use Case em `tests/unit/usecases/course/`.
+- Repositórios em memória compartilhados em `tests/mocks/repositories/` (`InMemoryCourseModuleRepository`, `InMemoryCourseLessonRepository`, `InMemoryLessonBlockRepository`).
+- Cobertura de testes automatizados >= 80%.
 
 ---
 
 ### CRITÉRIOS DE ACEITE:
-- [ ] Migration cria tabelas `course_modules`, `course_lessons` e `lesson_blocks` com integridade referencial e índices.
-- [ ] É possível criar, editar, reordenar e excluir módulos de um curso pelo painel administrativo.
-- [ ] É possível criar, editar, reordenar e excluir aulas dentro de um módulo.
-- [ ] É possível adicionar blocos de diferentes tipos (vídeo, texto, anexo) dentro de uma aula.
-- [ ] A ordenação hierárquica é persistida e respeitada em todas as listagens.
-- [ ] Testes unitários para regras de reordenação e validação da árvore de conteúdo (cobertura >= 80%).
+- [ ] Migration cria tabelas `course_modules`, `course_lessons` e `lesson_blocks` com integridade referencial, índices e triggers de timestamp.
+- [ ] CRUD e reordenação de módulos funcionando de forma isolada por curso.
+- [ ] CRUD e reordenação de aulas funcionando de forma isolada por módulo.
+- [ ] Adição, edição, remoção e reordenação atômica de blocos de conteúdo (vídeo, texto, anexo, quiz) por aula.
+- [ ] Endpoints assíncronos respondendo com tratamento semântico de erros e HTTP status codes via `MY_Controller`.
+- [ ] Suite de testes unitários cobrindo todas as regras de negócio dos use cases e entidades (cobertura >= 80%).
