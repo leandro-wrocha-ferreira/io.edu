@@ -8,7 +8,6 @@ use app\domain\course\value_objects\CourseStatus;
 use app\domain\course\value_objects\Workload;
 use app\domain\exceptions\ValidationException;
 use DateTime;
-use InvalidArgumentException;
 
 /**
  * Domain entity representing an educational LMS Course.
@@ -107,6 +106,13 @@ final class Course
 	private int $duration_in_seconds = 0;
 
 	/**
+	 * Minimum video playback percentage required for automated completion (1-100).
+	 *
+	 * @var int
+	 */
+	private int $video_min_completion_percentage = 80;
+
+	/**
 	 * Learning objectives.
 	 *
 	 * @var string|null
@@ -178,8 +184,9 @@ final class Course
 	 * @param DateTime|null $deleted_at Deletion timestamp
 	 * @param string|null $category_name Optional category name
 	 * @param string|null $image_url External image URL
+	 * @param int $video_min_completion_percentage Minimum video percentage required for completion
 	 * @return self
-	 * @throws InvalidArgumentException When validation fails
+	 * @throws ValidationException When validation fails
 	 */
 	public static function create(
 		int $category_id,
@@ -201,16 +208,21 @@ final class Course
 		?DateTime $updated_at = null,
 		?DateTime $deleted_at = null,
 		?string $category_name = null,
-		?string $image_url = null
+		?string $image_url = null,
+		int $video_min_completion_percentage = 80
 	): self
 	{
 		if ($category_id <= 0) {
-			throw new InvalidArgumentException("Category ID must be greater than 0");
+			throw new ValidationException("Category ID must be greater than 0");
 		}
 
 		$clean_title = trim($title);
 		if ($clean_title === '') {
-			throw new InvalidArgumentException("Course title cannot be empty");
+			throw new ValidationException("Course title cannot be empty");
+		}
+
+		if ($video_min_completion_percentage < 1 || $video_min_completion_percentage > 100) {
+			throw new ValidationException("Video minimum completion percentage must be between 1 and 100");
 		}
 
 		$course_slug = $slug instanceof CourseSlug ? $slug : new CourseSlug($slug);
@@ -238,6 +250,7 @@ final class Course
 		$course->image = $image;
 		$course->image_url = $image_url;
 		$course->duration_in_seconds = max(0, $duration_in_seconds);
+		$course->video_min_completion_percentage = $video_min_completion_percentage;
 		$course->objectives = $objectives;
 		$course->target_audience = $target_audience;
 		$course->requirements = $requirements;
@@ -265,8 +278,9 @@ final class Course
 	 * @param string|null $requirements Prerequisites
 	 * @param bool $certificate_enabled Certificate emission toggle
 	 * @param string|null $image_url External image URL
+	 * @param int $video_min_completion_percentage Minimum video percentage required for completion
 	 * @return void
-	 * @throws InvalidArgumentException
+	 * @throws ValidationException
 	 */
 	public function update_details(
 		int $category_id,
@@ -281,16 +295,21 @@ final class Course
 		?string $target_audience = null,
 		?string $requirements = null,
 		bool $certificate_enabled = true,
-		?string $image_url = null
+		?string $image_url = null,
+		int $video_min_completion_percentage = 80
 	): void
 	{
 		if ($category_id <= 0) {
-			throw new InvalidArgumentException("Category ID must be greater than 0");
+			throw new ValidationException("Category ID must be greater than 0");
 		}
 
 		$clean_title = trim($title);
 		if ($clean_title === '') {
-			throw new InvalidArgumentException("Course title cannot be empty");
+			throw new ValidationException("Course title cannot be empty");
+		}
+
+		if ($video_min_completion_percentage < 1 || $video_min_completion_percentage > 100) {
+			throw new ValidationException("Video minimum completion percentage must be between 1 and 100");
 		}
 
 		$this->category_id = $category_id;
@@ -302,10 +321,27 @@ final class Course
 		$this->description = $description;
 		$this->image = $image;
 		$this->image_url = $image_url;
+		$this->video_min_completion_percentage = $video_min_completion_percentage;
 		$this->objectives = $objectives;
 		$this->target_audience = $target_audience;
 		$this->requirements = $requirements;
 		$this->certificate_enabled = $certificate_enabled;
+	}
+
+	/**
+	 * Update minimum video percentage required for completion.
+	 *
+	 * @param int $percentage
+	 * @return void
+	 * @throws ValidationException
+	 */
+	public function set_video_min_completion_percentage(int $percentage): void
+	{
+		if ($percentage < 1 || $percentage > 100) {
+			throw new ValidationException("Video minimum completion percentage must be between 1 and 100");
+		}
+
+		$this->video_min_completion_percentage = $percentage;
 	}
 
 	/**
@@ -562,6 +598,16 @@ final class Course
 	public function get_duration_in_seconds(): int
 	{
 		return $this->duration_in_seconds;
+	}
+
+	/**
+	 * Get minimum video playback percentage required for completion.
+	 *
+	 * @return int
+	 */
+	public function get_video_min_completion_percentage(): int
+	{
+		return $this->video_min_completion_percentage;
 	}
 
 	/**
