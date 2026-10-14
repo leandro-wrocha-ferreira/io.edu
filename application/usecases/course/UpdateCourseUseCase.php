@@ -57,6 +57,7 @@ class UpdateCourseUseCase
 	 * @param string|null $requirements Prerequisites
 	 * @param bool $certificate_enabled Certificate emission toggle
 	 * @param string|null $image_url External image URL
+	 * @param int $video_min_completion_percentage Minimum video percentage required for completion
 	 * @return Course
 	 * @throws NotFoundException When course or category not found
 	 * @throws ConflictException When slug is already taken
@@ -77,7 +78,8 @@ class UpdateCourseUseCase
 		?string $target_audience = null,
 		?string $requirements = null,
 		bool $certificate_enabled = true,
-		?string $image_url = null
+		?string $image_url = null,
+		int $video_min_completion_percentage = 80
 	): Course
 	{
 		$course = $this->course_repository->find_by_id($id);
@@ -113,7 +115,8 @@ class UpdateCourseUseCase
 			$target_audience,
 			$requirements,
 			$certificate_enabled,
-			$image_url
+			$image_url,
+			$video_min_completion_percentage
 		);
 
 		if ($course->get_status()->get_value() !== $status) {

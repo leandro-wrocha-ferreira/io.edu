@@ -57,6 +57,7 @@ class CreateCourseUseCase
 	 * @param string|null $requirements Prerequisites
 	 * @param bool $certificate_enabled Certificate emission toggle
 	 * @param string|null $image_url External image URL
+	 * @param int $video_min_completion_percentage Minimum video percentage required for completion
 	 * @return Course
 	 * @throws NotFoundException When category does not exist
 	 * @throws ConflictException When slug is already taken
@@ -77,7 +78,8 @@ class CreateCourseUseCase
 		?string $target_audience = null,
 		?string $requirements = null,
 		bool $certificate_enabled = true,
-		?string $image_url = null
+		?string $image_url = null,
+		int $video_min_completion_percentage = 80
 	): Course
 	{
 		$category = $this->category_repository->find_by_id($category_id);
@@ -116,7 +118,8 @@ class CreateCourseUseCase
 			null,
 			null,
 			null,
-			$image_url
+			$image_url,
+			$video_min_completion_percentage
 		);
 
 		return $this->course_repository->create($course);
