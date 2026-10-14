@@ -53,7 +53,8 @@ class CourseMapper
 			$row->updated_at,
 			$row->deleted_at,
 			$row->category_name,
-			$row->image_url
+			$row->image_url,
+			$row->video_min_completion_percentage
 		);
 	}
 
@@ -96,6 +97,7 @@ class CourseMapper
 			'status' => (string) $course->get_status(),
 			'workload_in_hours' => $course->get_workload_in_hours(),
 			'duration_in_seconds' => $course->get_duration_in_seconds(),
+			'video_min_completion_percentage' => $course->get_video_min_completion_percentage(),
 			'objectives' => $course->get_objectives(),
 			'target_audience' => $course->get_target_audience(),
 			'requirements' => $course->get_requirements(),
@@ -124,6 +126,7 @@ class CourseMapper
 			'status' => (string) $course->get_status(),
 			'workload_in_hours' => $course->get_workload_in_hours(),
 			'duration_in_seconds' => $course->get_duration_in_seconds(),
+			'video_min_completion_percentage' => $course->get_video_min_completion_percentage(),
 			'objectives' => $course->get_objectives(),
 			'target_audience' => $course->get_target_audience(),
 			'requirements' => $course->get_requirements(),

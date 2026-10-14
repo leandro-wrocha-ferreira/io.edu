@@ -20,6 +20,7 @@ final class CourseDatabase
 	public string $status;
 	public ?int $workload_in_hours;
 	public int $duration_in_seconds;
+	public int $video_min_completion_percentage;
 	public ?string $objectives;
 	public ?string $target_audience;
 	public ?string $requirements;
@@ -49,6 +50,7 @@ final class CourseDatabase
 		$this->status = (string) ($data['status'] ?? 'draft');
 		$this->workload_in_hours = isset($data['workload_in_hours']) && $data['workload_in_hours'] !== '' && $data['workload_in_hours'] !== null ? (int) $data['workload_in_hours'] : null;
 		$this->duration_in_seconds = isset($data['duration_in_seconds']) ? (int) $data['duration_in_seconds'] : 0;
+		$this->video_min_completion_percentage = isset($data['video_min_completion_percentage']) ? (int) $data['video_min_completion_percentage'] : 80;
 		$this->objectives = isset($data['objectives']) && $data['objectives'] !== '' ? (string) $data['objectives'] : null;
 		$this->target_audience = isset($data['target_audience']) && $data['target_audience'] !== '' ? (string) $data['target_audience'] : null;
 		$this->requirements = isset($data['requirements']) && $data['requirements'] !== '' ? (string) $data['requirements'] : null;
