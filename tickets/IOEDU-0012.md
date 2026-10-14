@@ -39,20 +39,24 @@ Exemplo prático de blocos em uma aula:
 - `id`: INT unsigned AI, PK
 - `module_id`: INT unsigned, NOT NULL (FK para `course_modules.id` ON DELETE CASCADE)
 - `title`: VARCHAR(255), NOT NULL
-- `slug`: VARCHAR(255), NOT NULL (URL amigável da aula dentro do curso)
 - `description`: TEXT, NULL
-- `duration_in_seconds`: INT unsigned, DEFAULT 0 (tempo somado dos vídeos ou informado manualmente)
 - `sort_order`: INT unsigned, DEFAULT 0 (ordenação sequencial dentro do módulo)
 - `status`: ENUM('draft', 'published'), DEFAULT 'draft'
 - `created_at`, `updated_at`, `deleted_at`: DATETIME
+- *Nota Arquitetural*: `slug` e `duration_in_seconds` foram descontinuados/removidos via migration (`20261009000003`); o roteamento de aulas utiliza o ID numérico e a duração é calculada sob demanda pelos blocos de vídeo.
 
 #### 1.3 Blocos de Conteúdo da Aula (`lesson_blocks`):
 - `id`: INT unsigned AI, PK
 - `lesson_id`: INT unsigned, NOT NULL (FK para `course_lessons.id` ON DELETE CASCADE)
 - `type`: ENUM('video', 'text', 'attachment', 'quiz'), NOT NULL
-- `payload`: JSON, NOT NULL (estrutura tipada conforme o `type`)
 - `sort_order`: INT unsigned, DEFAULT 0 (ordenação sequencial dentro da aula)
+- `is_required`: TINYINT(1), DEFAULT 1
 - `created_at`, `updated_at`, `deleted_at`: DATETIME
+- *Normalização Polimórfica (Class Table Inheritance)*:
+  - `video_blocks`: `provider`, `url`, `duration_in_seconds`.
+  - `text_blocks`: `content`, `min_reading_time_in_minutes`.
+  - `attachment_blocks`: `filename`, `filepath`, `file_size`, `file_type`, `min_reading_time_in_minutes`.
+  - *Bloco Quiz (`quiz`)*: Postergado para a demanda de Avaliações / Testes de Fixação (IOEDU-0014). Na interface administrativa, a ação exibe alerta amigável de "Recurso em Desenvolvimento".
 
 ---
 
@@ -61,15 +65,15 @@ Exemplo prático de blocos em uma aula:
   - A reordenação de módulos afeta apenas os módulos pertencentes ao mesmo `course_id`.
   - A reordenação de aulas afeta apenas as aulas do mesmo `module_id`.
   - A reordenação de blocos afeta apenas os blocos da mesma `lesson_id`.
+- **Flexibilidade de Títulos**:
+  - Módulos e aulas podem compartilhar títulos idênticos no mesmo curso (ex: múltiplos módulos "Exercícios Práticos" ou "Introdução"), permitindo organização pedagógica livre pelo instrutor.
 - **Publicação Parcial & Controle de Acesso**:
   - Módulos ou aulas com status `draft` permanecem visíveis apenas na área administrativa/instrutor e são filtrados na área do aluno.
-- **Cálculo de Duração**:
-  - A duração da aula pode ser recalculada automaticamente pela soma dos blocos de vídeo (`video`) ou ajustada manualmente pelo instrutor.
-- **Payload Estruturado por Tipo de Bloco**:
-  - `video`: `{"provider": "youtube|vimeo|bunny|custom", "url": "...", "duration_in_seconds": 360}`
-  - `text`: `{"content": "..."}`
-  - `attachment`: `{"filename": "...", "filepath": "...", "filesize": 1024, "extension": "pdf"}`
-  - `quiz`: `{"questions": [...]}`
+- **Payload Estruturado por Tipo de Bloco Ativo**:
+  - `video`: `{"provider": "youtube|custom", "url": "...", "duration_in_seconds": 360}`
+  - `text`: `{"content": "...", "min_reading_time_in_minutes": 5}`
+  - `attachment`: `{"filename": "...", "filepath": "...", "file_size": 1024, "file_type": "pdf", "min_reading_time_in_minutes": 2}`
+  - `quiz`: *(Em desenvolvimento — IOEDU-0014)*
 
 ---
 
