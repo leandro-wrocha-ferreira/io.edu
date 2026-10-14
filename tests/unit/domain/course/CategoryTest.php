@@ -4,7 +4,7 @@ namespace tests\unit\domain\course;
 
 use app\domain\course\Category;
 use app\domain\course\constants\CategoryStatus;
-use InvalidArgumentException;
+use app\domain\exceptions\ValidationException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -36,13 +36,13 @@ class CategoryTest extends TestCase
 
 	public function test_empty_name_throws_exception(): void
 	{
-		$this->expectException(InvalidArgumentException::class);
+		$this->expectException(ValidationException::class);
 		Category::create('   ', 'tecnologia');
 	}
 
 	public function test_invalid_status_throws_exception(): void
 	{
-		$this->expectException(InvalidArgumentException::class);
+		$this->expectException(ValidationException::class);
 		Category::create('Tecnologia', 'tecnologia', 'unknown_status');
 	}
 
@@ -68,5 +68,26 @@ class CategoryTest extends TestCase
 		$this->assertTrue($category->is_deleted());
 		$this->assertFalse($category->is_active());
 		$this->assertNotNull($category->get_deleted_at());
+	}
+
+	public function test_set_empty_name_throws_exception(): void
+	{
+		$category = Category::create('Design', 'design');
+		$this->expectException(ValidationException::class);
+		$category->set_name('   ');
+	}
+
+	public function test_set_empty_slug_throws_exception(): void
+	{
+		$category = Category::create('Design', 'design');
+		$this->expectException(ValidationException::class);
+		$category->set_slug('   ');
+	}
+
+	public function test_set_invalid_status_throws_exception(): void
+	{
+		$category = Category::create('Design', 'design');
+		$this->expectException(ValidationException::class);
+		$category->set_status('invalid');
 	}
 }

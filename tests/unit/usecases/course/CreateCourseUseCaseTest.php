@@ -64,6 +64,7 @@ class CreateCourseUseCaseTest extends TestCase
 		$this->assertSame('public/uploads/courses/1/image.png', $course->get_image());
 		$this->assertSame('https://example.com/shared.jpg', $course->get_image_url());
 		$this->assertTrue($course->is_certificate_enabled());
+		$this->assertSame(80, $course->get_video_min_completion_percentage());
 	}
 
 	public function test_create_course_success_with_lifetime_access(): void

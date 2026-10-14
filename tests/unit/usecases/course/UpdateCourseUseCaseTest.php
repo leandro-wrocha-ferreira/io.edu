@@ -58,7 +58,8 @@ class UpdateCourseUseCaseTest extends TestCase
 			'Novo público',
 			'Novos requisitos',
 			false,
-			'https://example.com/shared-updated.jpg'
+			'https://example.com/shared-updated.jpg',
+			75
 		);
 
 		$this->assertSame('Curso Atualizado', $updated->get_title());
@@ -69,6 +70,7 @@ class UpdateCourseUseCaseTest extends TestCase
 		$this->assertFalse($updated->is_certificate_enabled());
 		$this->assertSame('public/uploads/courses/1/image.png', $updated->get_image());
 		$this->assertSame('https://example.com/shared-updated.jpg', $updated->get_image_url());
+		$this->assertSame(75, $updated->get_video_min_completion_percentage());
 	}
 
 	public function test_update_course_keeping_same_slug_success(): void

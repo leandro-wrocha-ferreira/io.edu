@@ -8,7 +8,6 @@ use app\domain\course\value_objects\CourseSlug;
 use app\domain\course\value_objects\CourseStatus;
 use app\domain\course\value_objects\Workload;
 use app\domain\exceptions\ValidationException;
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -127,13 +126,13 @@ class CourseTest extends TestCase
 
 	public function test_invalid_category_id_throws_exception(): void
 	{
-		$this->expectException(InvalidArgumentException::class);
+		$this->expectException(ValidationException::class);
 		Course::create(0, 'Título', 'slug-teste');
 	}
 
 	public function test_empty_title_throws_exception(): void
 	{
-		$this->expectException(InvalidArgumentException::class);
+		$this->expectException(ValidationException::class);
 		Course::create(1, '   ', 'slug-teste');
 	}
 
@@ -189,7 +188,8 @@ class CourseTest extends TestCase
 			'Novo público',
 			'Novos pré-requisitos',
 			false,
-			'https://example.com/updated-shared.png'
+			'https://example.com/updated-shared.png',
+			90
 		);
 
 		$this->assertSame(2, $course->get_category_id());
@@ -200,5 +200,12 @@ class CourseTest extends TestCase
 		$this->assertFalse($course->is_certificate_enabled());
 		$this->assertSame('nova_imagem.png', $course->get_image());
 		$this->assertSame('https://example.com/updated-shared.png', $course->get_image_url());
+		$this->assertSame(90, $course->get_video_min_completion_percentage());
+	}
+
+	public function test_invalid_video_percentage_throws_exception(): void
+	{
+		$this->expectException(ValidationException::class);
+		Course::create(1, 'Curso Teste', 'curso-teste', CourseStatus::DRAFT, null, null, null, null, null, 0, null, null, null, true, null, null, null, null, null, null, 150);
 	}
 }
