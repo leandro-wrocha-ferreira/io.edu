@@ -82,7 +82,7 @@ class ActivateUserUseCase
 
 ## Rules
 
-1. **Logical Dependency**: Use Cases depend on Domain Repository Interfaces (`app\domain\<context>\repositories\...`) via STRICT constructor dependency injection. (No optional parameters or ModelFactory fallbacks inside the Use Case itself).
+1. **Logical Dependency**: Use Cases depend on Domain Repository Interfaces (`app\domain\<context>\repositories\...`) and Domain Service Interfaces (e.g. `StorageServiceInterface`) via STRICT constructor dependency injection. (No optional parameters, `get_instance()`, or ModelFactory/LibraryFactory fallbacks inside the Use Case itself).
 2. **Domain Isolation from Infrastructure**: Use Cases coordinate Domain Entities and Value Objects (`app\domain\<context>\value_objects\...`). They MUST NOT interact with Mappers (`*Mapper`) or Database DTOs (`*Database`), which are internal to the Infrastructure layer.
 3. **Orchestration Only**: Use Cases orchestrate business rules and domain operations; they do NOT contain UI logic or direct SQL.
 4. **Single Responsibility**: One Use Case per business action with a standard `execute()` method.
@@ -98,6 +98,6 @@ class ActivateUserUseCase
 ❌ **Importing Repository from Context Root**: Importing `use app\domain\<context>\<Entity>RepositoryInterface` instead of `use app\domain\<context>\repositories\<Entity>RepositoryInterface`.
 ❌ **Throwing `\RuntimeException`**: Throwing generic unclassified exceptions instead of semantic exceptions from `app\domain\exceptions\`.
 ❌ **Direct `get_instance()` Coupling**: Calling `$CI =& get_instance()` directly inside Use Cases instead of using constructor dependency injection.
-❌ **Using ModelFactory internally**: Instantiating repositories inside the Use Case constructor with `ModelFactory::make()`. Dependencies must be injected from the outside.
+❌ **Using ModelFactory or LibraryFactory internally**: Instantiating repositories or CI3 libraries inside the Use Case constructor with `ModelFactory::make()` or `LibraryFactory::make()`. Dependencies must be resolved at the presentation/factory boundary and injected from the outside.
 ❌ **Returning Raw Arrays**: Returning raw database rows or untyped associative arrays from `execute()` when representing domain models.
 ❌ **Multiple Business Actions in One Use Case**: Creating a monolithic service with multiple unrelated public methods instead of dedicated single-action Use Cases.

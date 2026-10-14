@@ -33,7 +33,7 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
 ### Regras
 
 - **Domain** NÃO depende de CI3. Sem `get_instance()`, sem `CI_Model`.
-- **Use Cases** usam `Model_factory` para carregar models (não `get_instance()` direto).
+- **Use cases** recebem dependências injetadas no construtor; controllers usam `ModelFactory::make()` e `LibraryFactory::make()` para resolver models e bibliotecas.
 - **Models** implementam interfaces do domain (`implements UserRepositoryInterface`).
 - **Controllers** extend `MY_Controller` (in `application/core/MY_Controller.php`).
 - **Controllers** delegam lógica para Use Cases, nunca direto para Models.
@@ -45,7 +45,7 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
 - **Domain Exceptions**: Throw semantic exceptions from `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`) instead of generic `\RuntimeException`.
 - **Controllers** NÃO devem carregar `session`, `url` ou `form` manualmente — já estão no autoload.
 - **Controllers** NÃO devem carregar idiomas (`$this->lang->load()`) nem checar `HTTP_ACCEPT_LANGUAGE` manualmente — a detecção e carregamento de idioma é gerenciada globalmente via hook `Language_check` no `post_controller_constructor` com fallback para `english`.
-- **Controllers** delegam para Use Cases (que resolvem models via `Model_factory`). Controllers não precisam pré-carregar models no `__construct()` a menos que haja necessidade específica.
+- **Controllers** delegam para Use Cases (injetando models via `ModelFactory::make()` e bibliotecas via `LibraryFactory::make()`). Controllers não precisam pré-carregar models no `__construct()` a menos que haja necessidade específica.
 - **Models** NÃO devem setar `created_at`/`updated_at` — isso é responsabilidade do banco via triggers.
 - **Models** ficam em `application/models/` (lowercase) — CI3 requer esta convenção.
 - **Controllers** ficam em `application/controllers/` com subdiretórios (`auth/`, `admin/`, `student/`).
@@ -61,7 +61,7 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
 | Entities | `PascalCase` (com namespace) | `User.php`, `Course.php` |
 | Value Objects | `PascalCase` (com namespace) | `Email.php`, `Role.php` |
 | Interfaces | `NameInterface` (com namespace) | `UserRepositoryInterface.php` |
-| Factories | `PascalCase` (com namespace) | `Model_factory.php` |
+| Factories | `PascalCase` (com namespace) | `ModelFactory.php`, `LibraryFactory.php` |
 
 ## PSR-4 Autoloading
 
@@ -86,7 +86,7 @@ O projeto usa Composer PSR-4 para autoloading:
 |--------|-----------|---------|
 | Domain | `app\domain\<context>` | `app\domain\identity\User` |
 | Use Cases | `app\usecases\<context>` | `app\usecases\identity\AuthenticateUserUseCase` |
-| Factories | `app\factories` | `app\factories\Model_factory` |
+| Factories | `app\factories` | `app\factories\ModelFactory`, `app\factories\LibraryFactory` |
 | Tests | `Tests\<Type>` | `Tests\Acceptance\LoginCest` |
 
 ### Notas Importantes
@@ -217,18 +217,31 @@ interface UserRepositoryInterface
 }
 ```
 
-### Model Factory
+### Factories
 
 ```php
-// application/factories/Model_factory.php
+// application/factories/ModelFactory.php
 namespace app\factories;
 
-class Model_factory
+class ModelFactory
 {
     public static function make(string $name)
     {
         $CI =& get_instance();
         $CI->load->model($name);
+        return $CI->{$name};
+    }
+}
+
+// application/factories/LibraryFactory.php
+namespace app\factories;
+
+class LibraryFactory
+{
+    public static function make(string $name, array $params = [])
+    {
+        $CI =& get_instance();
+        $CI->load->library($name, $params);
         return $CI->{$name};
     }
 }
@@ -243,28 +256,24 @@ namespace app\usecases\identity;
 use app\domain\identity\Email;
 use app\domain\identity\User;
 use app\domain\exceptions\UnauthorizedException;
-use app\factories\Model_factory;
+use app\domain\identity\repositories\UserRepositoryInterface;
 
 /**
  * Use case for authenticating a user in the system.
  */
 class AuthenticateUserUseCase
 {
-    /** @var \app\domain\identity\UserRepositoryInterface */
-    private $user_repository;
+    /** @var UserRepositoryInterface */
+    private UserRepositoryInterface $user_repository;
 
     /**
      * Constructor.
      *
-     * @param \app\domain\identity\UserRepositoryInterface|null $repository Repository for testing (optional)
+     * @param UserRepositoryInterface $user_repository
      */
-    public function __construct($repository = null)
+    public function __construct(UserRepositoryInterface $user_repository)
     {
-        if ($repository !== null) {
-            $this->user_repository = $repository;
-        } else {
-            $this->user_repository = Model_factory::make('user_model');
-        }
+        $this->user_repository = $user_repository;
     }
 
     /**
@@ -444,6 +453,6 @@ vendor/bin/codecept run acceptance           # e2e
 - Controllers não usam namespaces — CI3 carrega por path discovery
 - Para acessar classes com namespace: `use app\domain\identity\User;`
 - Domain entities NÃO devem chamar `get_instance()` — dependência pura
-- Use cases usam `Model_factory::make()` em vez de `get_instance()`
+- Use cases recebem dependências injetadas no construtor; controllers usam `ModelFactory::make()` e `LibraryFactory::make()`
 - Rodar `composer dump-autoload` após adicionar/modificar classes namespaced
 - Hooks `pre_controller` rodam ANTES do controller — usar `post_controller_constructor` para middleware

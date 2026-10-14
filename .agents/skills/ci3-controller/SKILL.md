@@ -25,16 +25,21 @@ Use this skill when creating or modifying:
 4. **Form Flow (Single View Load)**: DO NOT create private `_handle_*()` helper methods that duplicate view assembly and `$this->load->view()`. Evaluate `$this->form_validation->run() === TRUE` directly in the action. View preparation (`$data`) and rendering happen **ONCE** at the end of the action.
 5. **No Try/Catch for Standard Exceptions**: Uncaught semantic domain exceptions (`NotFoundException`, `ValidationException`, `ConflictException`, etc.) are intercepted by `MY_Controller::_remap()`, which returns JSON for AJAX or sets flashdata and redirects for HTML.
 6. **Controllers Delegate to Use Cases**: Controllers instantiate and call Use Cases (`app\usecases\...`) to orchestrate business actions. Controllers MUST NOT interact with Mappers (`*Mapper`) or Database DTOs (`*Database`), which belong exclusively to the Infrastructure layer.
-7. **Standardized Responses**:
+7. **Dependency Resolution via Factories (`ModelFactory` and `LibraryFactory`)**:
+   - Controllers resolve dependencies and inject them into Use Case constructors.
+   - **Models / Repositories**: Use `ModelFactory::make('user_model')` (resolves the CI3 model implementing the domain repository interface).
+   - **CI3 Libraries / Service Adapters**: Use `LibraryFactory::make('storage_library')` (resolves the CI3 library instance implementing the domain service interface, e.g. `StorageServiceInterface`).
+   - Controllers MUST NOT call `$CI =& get_instance()` directly or instantiate models/libraries manually.
+8. **Standardized Responses**:
    - For JSON output (e.g. DataTables, AJAX, API endpoints), ALWAYS use `json_response($data, $status_code)` from `response_helper.php`.
    - DO NOT call `$this->output->set_content_type('application/json')->set_output(json_encode(...))` manually.
    - For file downloads (such as PDF/DOCX), use response helpers when available (e.g., `response_pdf()`).
-8. **Global Language Management**:
+9. **Global Language Management**:
    - DO NOT call `$this->lang->load()` or check `HTTP_ACCEPT_LANGUAGE` in controllers.
    - Language detection and loading is handled globally via the `Language_check` hook (`post_controller_constructor`).
-9. **Autoloaded Resources**:
+10. **Autoloaded Resources**:
    - DO NOT manually load `session`, `url`, `form`, `database`, or `response` helpers/libraries — they are registered in `$autoload`.
-10. **No `$this->input->post('field', TRUE)` (Input XSS Filtering is Forbidden)**:
+11. **No `$this->input->post('field', TRUE)` (Input XSS Filtering is Forbidden)**:
    - NEVER pass `TRUE` as the second parameter to `$this->input->post()`, `$this->input->get()`, or `$this->input->cookie()`.
    - Passing `TRUE` triggers CI3's internal regex-heavy XSS filtering on each captured field, making requests excessively heavy and slow.
    - Receiving raw data via form submissions is acceptable; XSS protection MUST be handled exclusively when outputting data to views using CodeIgniter's built-in `html_escape()` helper (or `htmlspecialchars()`).
@@ -81,10 +86,10 @@ XSS protection belongs exclusively to the **presentation/view output layer**. Wh
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use app\factories\ModelFactory;
+use app\factories\LibraryFactory;
 use app\usecases\admin\ListPaginatedUsersUseCase;
-use app\usecases\admin\GetUserUseCase;
 use app\usecases\admin\CreateUserUseCase;
-use app\usecases\admin\UpdateUserUseCase;
 
 /**
  * Users Controller (Admin)
@@ -125,11 +130,16 @@ class Users extends MY_Controller
 		$this->form_validation->set_rules('email', 'Email', 'required|trim|valid_email');
 
 		if ($this->form_validation->run() === TRUE) {
-			$use_case = new CreateUserUseCase();
+			$use_case = new CreateUserUseCase(
+				ModelFactory::make('user_model'),
+				ModelFactory::make('role_model')
+			);
 			$use_case->execute(
 				$this->input->post('name'),
 				$this->input->post('email'),
-				$this->input->post('password')
+				$this->input->post('password'),
+				$this->input->post('role_ids') ?? [],
+				(bool) $this->session->userdata('is_admin')
 			);
 
 			$this->session->set_flashdata('success', 'Usuário criado com sucesso.');
@@ -152,7 +162,7 @@ class Users extends MY_Controller
 	 */
 	public function ajax_data()
 	{
-		$use_case = new ListPaginatedUsersUseCase();
+		$use_case = new ListPaginatedUsersUseCase(ModelFactory::make('user_model'));
 		$result = $use_case->execute(0, 10, '', 'name', 'ASC');
 
 		json_response([
@@ -170,6 +180,7 @@ class Users extends MY_Controller
 ❌ **Direct Infrastructure/Mapper Access**: Using Mappers (`UserMapper`) or Database DTOs (`UserDatabase`) in controllers. Controllers communicate solely with Use Cases and presentation views/JSON.
 ❌ **Business logic in Controller**: Calculating metrics, sorting/filtering domain objects, or validating domain invariants directly in controllers instead of delegating to Use Cases.
 ❌ **Direct Model manipulation**: Invoking model CRUD queries directly from controllers for business workflows instead of calling Use Cases.
+❌ **Direct `get_instance()` or `$this->load->library()` coupling for services**: Calling `$CI =& get_instance()` or `$this->load->library(...)` directly to resolve dependencies instead of using `LibraryFactory::make('storage_library')` or `ModelFactory::make('user_model')`.
 ❌ **Private `_handle_*` methods**: Duplicating `$data` assembly and view loading in private helpers instead of keeping a single `$this->load->view()` at the end of the action.
 ❌ **Manual Try/Catch for standard exceptions**: Catching `NotFoundException`, `ValidationException`, `ConflictException`, etc. inside controllers instead of letting `MY_Controller::_remap()` handle them globally.
 ❌ **Manual language loading**: Calling `$this->lang->load()` or checking `HTTP_ACCEPT_LANGUAGE` in controllers instead of relying on the global `Language_check` hook.

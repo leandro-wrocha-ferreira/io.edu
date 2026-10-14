@@ -14,6 +14,9 @@ permission:
     "git-leandro git diff*": allow
     "git-leandro git log*": allow
     "bash .agents/scripts/check-conventions.sh*": allow
+    "docker compose exec app php .agents/scripts/verify-usecase-tests.php*": allow
+    "docker compose exec app php .agents/scripts/verify-rbac-routes.php*": allow
+    "docker compose exec app php .agents/scripts/verify-block-types.php*": allow
     "docker compose exec app vendor/bin/phpunit*": allow
     "docker compose exec app vendor/bin/codecept*": allow
   glob: allow
@@ -63,12 +66,15 @@ Review files **individually, file by file**. Do NOT emit generic global generali
 * **Views & Layouts:** Direct master layout loading (`layout/admin`, `layout/student`, `layout/auth`, `layout/public`), no `defined('BASEPATH')`, `.edu-*` classes, `--edu-*` tokens, `.page-header`, `.edu-form-card`, `.edu-data-toolbar`, `render_branding_styles()` hook.
 * **JavaScript:** Guard clauses (`if (!tableEl) return;`), DataTables custom `dom: 'rt<...>ip'`, 300ms debounce on search, custom `.edu-table-empty`, native `Http` client.
 
-### 5. Unit Tests for Use Cases
-Verify that **each modified or created Use Case has a corresponding 1:1 unit test** in `tests/unit/usecases/`. Run the test suite:
+### 5. Unit Tests & Deterministic Verifications
+Verify that all deterministic verifiers pass and that **each modified or created Use Case has a corresponding 1:1 unit test** in `tests/unit/usecases/`:
 ```bash
+docker compose exec app php .agents/scripts/verify-usecase-tests.php
+docker compose exec app php .agents/scripts/verify-rbac-routes.php
+docker compose exec app php .agents/scripts/verify-block-types.php
 docker compose exec app vendor/bin/phpunit tests/unit/
 ```
-If a Use Case was changed but its unit test was not updated or created, this is an automatic failure.
+If a Use Case was changed but its unit test was not updated or created, or if any verification script fails, this is an automatic failure.
 
 ### 6. Explicit UI Auditing Check (Web Design Guidelines)
 When reviewing UI views (HTML/PHP), audit against modern UX and accessibility standards (`aria-label` on icon buttons, skip links, semantic headings, visible focus, touch targets >= 32px, `prefers-reduced-motion`). Translate any React terminology to native HTML5/PHP.

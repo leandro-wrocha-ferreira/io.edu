@@ -56,7 +56,7 @@ Request → Controller → Use Case → Domain → Repository Interface → Mode
 | Entities | `PascalCase` (com namespace) | `User.php`, `Course.php` |
 | Value Objects | `PascalCase` (com namespace) | `Email.php`, `Role.php` |
 | Interfaces | `NameInterface` (com namespace) | `UserRepositoryInterface.php` |
-| Factories | `PascalCase` (com namespace) | `ModelFactory.php` |
+| Factories | `PascalCase` (com namespace) | `ModelFactory.php`, `LibraryFactory.php` |
 
 ## PSR-4 Autoloading
 
@@ -81,7 +81,7 @@ O projeto usa Composer PSR-4 para autoloading:
 |--------|-----------|---------|
 | Domain | `app\domain\<context>` | `app\domain\identity\User` |
 | Use Cases | `app\usecases\<context>` | `app\usecases\identity\AuthenticateUserUseCase` |
-| Factories | `app\factories` | `app\factories\Model_factory` |
+| Factories | `app\factories` | `app\factories\ModelFactory`, `app\factories\LibraryFactory` |
 
 ### Notas Importantes
 
@@ -304,6 +304,6 @@ Testing rules (Unit Tests, 1:1 Use Case mapping, Shared Mocks, classmap namespac
 - Controllers não usam namespaces — CI3 carrega por path discovery
 - Para acessar classes com namespace: `use app\domain\identity\User;`
 - Domain entities NÃO devem chamar `get_instance()` — dependência pura
-- Use cases usam `Model_factory::make()` em vez de `get_instance()`
+- Use cases recebem dependências injetadas no construtor; controllers usam `ModelFactory::make()` e `LibraryFactory::make()` para instanciá-las
 - Rodar `composer dump-autoload` após adicionar/modificar classes namespaced
 - Hooks `pre_controller` rodam ANTES do controller — usar `post_controller_constructor` para middleware

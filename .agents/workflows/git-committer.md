@@ -19,6 +19,10 @@ permission:
     "git-leandro git log*": allow
     "git-leandro git add *": allow
     "git-leandro git commit *": allow
+    "bash .agents/scripts/check-conventions.sh*": allow
+    "docker compose exec app php .agents/scripts/verify-usecase-tests.php*": allow
+    "docker compose exec app php .agents/scripts/verify-rbac-routes.php*": allow
+    "docker compose exec app php .agents/scripts/verify-block-types.php*": allow
     "docker compose exec app vendor/bin/phpunit*": allow
     "docker compose exec app vendor/bin/codecept*": allow
   glob: allow
@@ -40,6 +44,10 @@ Before staging or committing ANY changes, you **MUST** execute and pass the foll
 
 ### Gate 1: 1:1 Use Case Unit Test Verification
 * Every single Use Case in the application (`application/usecases/`) touched or present in the codebase MUST have a corresponding 1:1 unit test in `tests/unit/usecases/` matching `<Area>/<UseCaseName>Test.php`.
+* Execute the deterministic verifier to ensure 100% test coverage:
+  ```bash
+  docker compose exec app php .agents/scripts/verify-usecase-tests.php
+  ```
 * If ANY modified, created, or existing Use Case in the ticket scope does not have a 1:1 unit test, **COMMITTING IS STRICTLY FORBIDDEN**.
 * You must abort immediately and report:
   > *"Commit bloqueado: O Use Case `<UseCaseName>` não possui um teste unitário 1:1 declarado em `tests/unit/usecases/`. Todos os casos de uso devem ter cobertura unitária obrigatória antes do commit."*

@@ -13,7 +13,9 @@ permission:
     "git-leandro mv *": allow
     "docker compose exec app *": allow
     "bash .agents/scripts/check-conventions.sh*": allow
-    "php bin/verify-usecase-tests.php*": allow
+    "php .agents/scripts/verify-usecase-tests.php*": allow
+    "php .agents/scripts/verify-rbac-routes.php*": allow
+    "php .agents/scripts/verify-block-types.php*": allow
   glob: allow
   grep: allow
   todowrite: allow
@@ -140,7 +142,9 @@ Ensure **0 violations** are reported before proceeding.
 ### Step 5: 1:1 Use Case Test Gate & Test Suite Verification
 Verify that all Use Cases have 1:1 matching unit tests and that all tests pass cleanly:
 ```bash
-docker compose exec app php bin/verify-usecase-tests.php
+docker compose exec app php .agents/scripts/verify-usecase-tests.php
+docker compose exec app php .agents/scripts/verify-rbac-routes.php
+docker compose exec app php .agents/scripts/verify-block-types.php
 docker compose exec app vendor/bin/phpunit
 ```
 
