@@ -4,11 +4,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 use app\domain\course\value_objects\CourseAccessPeriod;
 use app\domain\course\value_objects\CourseStatus;
+use app\domain\exceptions\NotFoundException;
 use app\factories\ModelFactory;
 use app\usecases\category\ListCategoriesUseCase;
 use app\usecases\course\ArchiveCourseUseCase;
 use app\usecases\course\CreateCourseUseCase;
 use app\usecases\course\DeleteCourseUseCase;
+use app\usecases\course\GetCourseCurriculumUseCase;
 use app\usecases\course\GetCourseDetailUseCase;
 use app\usecases\course\ListPaginatedCoursesUseCase;
 use app\usecases\course\UpdateCourseUseCase;
@@ -154,8 +156,12 @@ class Courses extends MY_Controller
 	 * @param int $course_id Course identifier
 	 * @return void
 	 */
-	public function detail($course_id = 1)
+	public function detail($course_id = null)
 	{
+		if ($course_id === null || (int) $course_id <= 0) {
+			throw new NotFoundException("Course not found");
+		}
+
 		$course_id = (int) $course_id;
 		$course_model = ModelFactory::make('course_model');
 		$use_case = new GetCourseDetailUseCase($course_model);
@@ -225,6 +231,10 @@ class Courses extends MY_Controller
 				? (int) $this->input->post('workload_in_hours')
 				: null;
 
+			$video_min_completion_percentage = $this->input->post('video_min_completion_percentage') !== null && $this->input->post('video_min_completion_percentage') !== ''
+				? (int) $this->input->post('video_min_completion_percentage')
+				: 80;
+
 			$image_type = $this->input->post('image_type');
 			$image = null;
 			$image_url = ($image_type === 'url') ? ($this->input->post('image_url') ?: null) : null;
@@ -253,7 +263,8 @@ class Courses extends MY_Controller
 				$this->input->post('target_audience') ?: null,
 				$this->input->post('requirements') ?: null,
 				$this->input->post('certificate_enabled') ? true : false,
-				$image_url
+				$image_url,
+				$video_min_completion_percentage
 			);
 
 			$this->session->set_flashdata('success', 'Curso cadastrado com sucesso!');
@@ -278,8 +289,12 @@ class Courses extends MY_Controller
 	 * @param int $course_id Course identifier
 	 * @return void
 	 */
-	public function edit($course_id = 1)
+	public function edit($course_id = null)
 	{
+		if ($course_id === null || (int) $course_id <= 0) {
+			throw new NotFoundException("Course not found");
+		}
+
 		$course_id = (int) $course_id;
 		$course_model = ModelFactory::make('course_model');
 		$category_model = ModelFactory::make('category_model');
@@ -333,6 +348,10 @@ class Courses extends MY_Controller
 				? (int) $this->input->post('workload_in_hours')
 				: null;
 
+			$video_min_completion_percentage = $this->input->post('video_min_completion_percentage') !== null && $this->input->post('video_min_completion_percentage') !== ''
+				? (int) $this->input->post('video_min_completion_percentage')
+				: 80;
+
 			$image_type = $this->input->post('image_type');
 			$image = $course->get_image();
 			$image_url = $course->get_image_url();
@@ -366,7 +385,8 @@ class Courses extends MY_Controller
 				$this->input->post('target_audience') ?: null,
 				$this->input->post('requirements') ?: null,
 				$this->input->post('certificate_enabled') ? true : false,
-				$image_url
+				$image_url,
+				$video_min_completion_percentage
 			);
 
 			$this->session->set_flashdata('success', 'Curso atualizado com sucesso!');
@@ -391,8 +411,12 @@ class Courses extends MY_Controller
 	 * @param int $course_id Course identifier
 	 * @return void
 	 */
-	public function archive($course_id = 1)
+	public function archive($course_id = null)
 	{
+		if ($course_id === null || (int) $course_id <= 0) {
+			throw new NotFoundException("Course not found");
+		}
+
 		$course_id = (int) $course_id;
 		$course_model = ModelFactory::make('course_model');
 		$use_case = new ArchiveCourseUseCase($course_model);
@@ -408,8 +432,12 @@ class Courses extends MY_Controller
 	 * @param int $course_id Course identifier
 	 * @return void
 	 */
-	public function delete($course_id = 1)
+	public function delete($course_id = null)
 	{
+		if ($course_id === null || (int) $course_id <= 0) {
+			throw new NotFoundException("Course not found");
+		}
+
 		$course_id = (int) $course_id;
 		$course_model = ModelFactory::make('course_model');
 		$use_case = new DeleteCourseUseCase($course_model);
@@ -420,24 +448,41 @@ class Courses extends MY_Controller
 	}
 
 	/**
-	 * Display curriculum content hierarchy (Modules -> Sections -> Lessons).
+	 * Display curriculum content hierarchy (Modules -> Lessons -> Blocks).
 	 *
 	 * @param int $course_id Course identifier
 	 * @return void
 	 */
-	public function content($course_id = 1)
+	public function content($course_id = null)
 	{
+		if ($course_id === null || (int) $course_id <= 0) {
+			throw new NotFoundException("Course not found");
+		}
+
 		$course_id = (int) $course_id;
 		$course_model = ModelFactory::make('course_model');
-		$use_case = new GetCourseDetailUseCase($course_model);
-		$course = $use_case->execute($course_id);
+		$module_model = ModelFactory::make('course_module_model');
+		$lesson_model = ModelFactory::make('course_lesson_model');
+		$block_model = ModelFactory::make('lesson_block_model');
+
+		$curriculum_use_case = new GetCourseCurriculumUseCase(
+			$course_model,
+			$module_model,
+			$lesson_model,
+			$block_model
+		);
+
+		$curriculum_data = $curriculum_use_case->execute($course_id);
 
 		$data = [
-			'title' => 'Estrutura Curricular — ' . $course->get_title(),
+			'title' => 'Estrutura Curricular — ' . $curriculum_data['course']->get_title(),
 			'page_name' => 'admin/courses/content',
-			'course' => [
-				'id' => $course->get_id(),
-				'title' => $course->get_title(),
+			'course' => $curriculum_data['course'],
+			'modules' => $curriculum_data['modules'],
+			'metrics' => $curriculum_data['metrics'],
+			'page_js' => [
+				'admin/courses/curriculum-reorder.js',
+				'admin/courses/curriculum.js',
 			],
 		];
 

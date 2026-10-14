@@ -118,14 +118,46 @@
 	cursor: grab;
 	font-size: 1.1rem;
 	opacity: 0.6;
-	transition: opacity var(--edu-transition-fast);
-	display: flex;
+	transition: opacity var(--edu-transition-fast), color var(--edu-transition-fast);
+	display: inline-flex;
 	align-items: center;
+	justify-content: center;
+	touch-action: none;
+	user-select: none;
+	padding: 0.2rem;
+	border-radius: var(--edu-radius-sm, 4px);
 }
 
 .edu-reorder-handle:hover {
 	opacity: 1;
 	color: var(--edu-primary);
+	background-color: var(--edu-primary-ghost, rgba(59, 130, 246, 0.08));
+}
+
+.edu-reorder-handle:active {
+	cursor: grabbing;
+}
+
+/* Floating clone during active drag */
+.edu-drag-floating {
+	position: fixed !important;
+	pointer-events: none !important;
+	z-index: 10000 !important;
+	opacity: 0.95 !important;
+	transform: scale(1.02) rotate(0.6deg) !important;
+	box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28), 0 0 0 1px var(--edu-primary) !important;
+	transition: transform 0.1s ease, box-shadow 0.1s ease !important;
+	will-change: transform, top, left;
+}
+
+/* Dotted placeholder slot */
+.edu-drag-placeholder {
+	border: 2px dashed var(--edu-primary) !important;
+	background: var(--edu-primary-ghost, rgba(59, 130, 246, 0.06)) !important;
+	border-radius: var(--edu-radius-md, 8px) !important;
+	box-sizing: border-box !important;
+	pointer-events: none !important;
+	transition: height 0.15s ease;
 }
 
 .edu-module-index {
@@ -250,3 +282,233 @@
 		justify-content: space-between;
 	}
 }
+
+/* ==========================================================================
+   Content Blocks Editor Styles (.edu-block-item)
+   ========================================================================== */
+
+.edu-block-item {
+	background-color: var(--edu-bg-surface);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-lg);
+	padding: 1.25rem;
+	transition: border-color var(--edu-transition-fast), box-shadow var(--edu-transition-fast);
+	position: relative;
+}
+
+.edu-block-item:hover {
+	border-color: var(--edu-border-strong);
+}
+
+.edu-block-item.is-editing {
+	border-color: var(--edu-border-strong);
+	background-color: var(--edu-bg-surface);
+}
+
+.edu-block-item.is-new {
+	animation: edu-fade-in 0.3s ease-out;
+}
+
+.edu-block-item.is-active-block {
+	border-color: var(--edu-primary) !important;
+	box-shadow: 0 0 0 1px var(--edu-primary), var(--edu-shadow-sm) !important;
+}
+
+.edu-block-item.is-saved-flash {
+	animation: edu-pulse-success 1.5s ease-out;
+}
+
+@keyframes edu-pulse-success {
+	0% {
+		border-color: var(--edu-success);
+		box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35);
+	}
+	100% {
+		border-color: var(--edu-border);
+		box-shadow: none;
+	}
+}
+
+.edu-block-handle {
+	cursor: grab;
+	color: var(--edu-text-muted);
+	padding: 0.35rem;
+	border-radius: var(--edu-radius-sm);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color var(--edu-transition-fast), color var(--edu-transition-fast);
+}
+
+.edu-block-handle:hover {
+	background-color: var(--edu-bg-subtle);
+	color: var(--edu-text-heading);
+}
+
+.edu-block-handle:active {
+	cursor: grabbing;
+}
+
+.cursor-grab {
+	cursor: grab;
+}
+
+.edu-block-preview {
+	color: var(--edu-text-body);
+	font-size: 0.875rem;
+	line-height: 1.5;
+}
+
+.edu-block-preview-snippet {
+	color: var(--edu-text-muted);
+	font-size: 0.8125rem;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+
+.edu-block-form {
+	padding-top: 1rem;
+	margin-top: 1rem;
+	border-top: 1px dashed var(--edu-border);
+}
+
+.edu-drag-placeholder {
+	border: 2px dashed var(--edu-primary);
+	border-radius: var(--edu-radius-lg);
+	background-color: var(--edu-primary-ghost);
+	margin-bottom: 0.75rem;
+}
+
+.edu-drag-floating {
+	position: fixed;
+	z-index: 1050;
+	pointer-events: none;
+	opacity: 0.95;
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes edu-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* ==========================================================================
+   Dropzone, Upload Progress & Media Player (.edu-dropzone, .edu-upload-progress)
+   ========================================================================== */
+
+:root {
+	--plyr-color-main: var(--edu-primary);
+}
+
+.edu-dropzone {
+	border: 2px dashed var(--edu-border-strong);
+	border-radius: var(--edu-radius-lg);
+	padding: 2rem 1.5rem;
+	text-align: center;
+	background-color: var(--edu-bg-subtle);
+	cursor: pointer;
+	transition: border-color var(--edu-transition-fast), background-color var(--edu-transition-fast);
+}
+
+.edu-dropzone:hover,
+.edu-dropzone.is-dragover {
+	border-color: var(--edu-primary);
+	background-color: var(--edu-primary-ghost);
+}
+
+.edu-dropzone-icon {
+	font-size: 2.25rem;
+	color: var(--edu-text-muted);
+	margin-bottom: 0.5rem;
+}
+
+.edu-upload-progress {
+	height: 8px;
+	border-radius: var(--edu-radius-pill);
+	background-color: var(--edu-bg-subtle);
+	overflow: hidden;
+	margin-top: 0.75rem;
+}
+
+.edu-upload-progress-bar {
+	height: 100%;
+	background-color: var(--edu-primary);
+	transition: width 0.2s ease;
+}
+
+.edu-plyr-container {
+	border-radius: var(--edu-radius-md);
+	overflow: hidden;
+	background-color: #000;
+	margin: 0.75rem auto 0 auto;
+	max-width: 440px;
+	position: relative;
+	box-shadow: var(--edu-shadow-sm);
+}
+
+/* Intercept clicks on YouTube top bar (channel avatar, title, watch later, copy link) */
+.edu-plyr-container.is-youtube::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 52px;
+	background: linear-gradient(to bottom, rgba(0, 0, 0, 0.88) 0%, transparent 100%);
+	pointer-events: none;
+	z-index: 2;
+}
+
+.edu-plyr-container.is-youtube::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 56px;
+	background: transparent;
+	pointer-events: auto;
+	z-index: 5;
+	cursor: default;
+}
+
+.edu-file-info-card {
+	background-color: var(--edu-bg-subtle);
+	border: 1px solid var(--edu-border);
+	border-radius: var(--edu-radius-md);
+	padding: 0.875rem 1rem;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.edu-blocks-bottom-toolbar {
+	background-color: var(--edu-bg-subtle);
+	border: 1px dashed var(--edu-border-strong);
+	border-radius: var(--edu-radius-lg);
+	padding: 1.25rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	flex-wrap: wrap;
+	transition: background-color var(--edu-transition-fast);
+}
+
+.edu-blocks-bottom-toolbar:hover {
+	background-color: var(--edu-bg-surface);
+}
+
+
+

@@ -29,12 +29,12 @@ class Evaluations extends MY_Controller
 	/**
 	 * Display detail view for a specific evaluation.
 	 *
-	 * @param int $evaluation_id Evaluation identifier
+	 * @param int|null $evaluation_id Evaluation identifier
 	 * @return void
 	 */
-	public function detail($evaluation_id = 1)
+	public function detail($evaluation_id = null)
 	{
-		$evaluation_id = (int) $evaluation_id;
+		$evaluation_id = (int) ($evaluation_id ?: 1);
 		$evaluation = get_mock_evaluation_by_id($evaluation_id);
 
 		$data = [
@@ -67,12 +67,12 @@ class Evaluations extends MY_Controller
 	/**
 	 * Display authoring/editing form for an existing evaluation.
 	 *
-	 * @param int $evaluation_id Evaluation ID
+	 * @param int|null $evaluation_id Evaluation ID
 	 * @return void
 	 */
-	public function edit($evaluation_id = 1)
+	public function edit($evaluation_id = null)
 	{
-		$evaluation_id = (int) $evaluation_id;
+		$evaluation_id = (int) ($evaluation_id ?: 1);
 		$evaluation = get_mock_evaluation_by_id($evaluation_id);
 
 		$data = [

@@ -29,12 +29,12 @@ class Classes extends MY_Controller
 	/**
 	 * Display detail view for a specific class cohort.
 	 *
-	 * @param int $class_id Class identifier
+	 * @param int|null $class_id Class identifier
 	 * @return void
 	 */
-	public function detail($class_id = 1)
+	public function detail($class_id = null)
 	{
-		$class_id = (int) $class_id;
+		$class_id = (int) ($class_id ?: 1);
 		$cohort = get_mock_class_by_id($class_id);
 
 		$data = [

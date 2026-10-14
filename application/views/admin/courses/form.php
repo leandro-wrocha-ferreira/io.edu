@@ -266,6 +266,30 @@
 						<span class="edu-form-hint">Exemplos: 365 (1 ano), 180 (6 meses), 730 (2 anos).</span>
 					</div>
 
+					<div class="col-md-6 edu-form-field">
+						<label class="edu-form-label edu-label-required" for="video-min-completion-percentage">Meta de Reprodução de Vídeos (%)</label>
+						<?php
+							$current_video_percentage = set_value(
+								'video_min_completion_percentage',
+								!empty($course) ? $course->get_video_min_completion_percentage() : 80
+							);
+						?>
+						<div class="input-group">
+							<input type="number"
+							       class="form-control edu-form-control"
+							       id="video-min-completion-percentage"
+							       name="video_min_completion_percentage"
+							       min="1"
+							       max="100"
+							       step="1"
+							       value="<?= html_escape($current_video_percentage) ?>"
+							       placeholder="80"
+							       required>
+							<span class="input-group-text">%</span>
+						</div>
+						<span class="edu-form-hint">Percentual mínimo assistido para considerar um vídeo como concluído automaticamente.</span>
+					</div>
+
 					<div class="col-12 edu-form-field">
 						<div class="form-check form-switch pt-2">
 							<?php

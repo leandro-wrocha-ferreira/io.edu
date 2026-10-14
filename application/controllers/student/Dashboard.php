@@ -59,11 +59,12 @@ class Dashboard extends MY_Controller
 	 *
 	 * Provides the lecture viewer, syllabus playlist, and learning resources.
 	 *
-	 * @param int|string $course_id Identifier of the course
+	 * @param int|string|null $course_id Identifier of the course
 	 * @return void
 	 */
-	public function classroom($course_id = 1)
+	public function classroom($course_id = null)
 	{
+		$course_id = $course_id ?? 1;
 		$data = [
 			'user_name' => $this->session->userdata('user_name') ?? 'Estudante',
 			'title' => 'Sala de Aula Virtual — ' . get_institution_name(),

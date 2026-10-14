@@ -163,6 +163,41 @@ class MY_Controller extends CI_Controller
 	}
 
 	/**
+	 * Retrieve request parameter value from POST data or raw JSON payload.
+	 *
+	 * @param string|null $parameter Parameter name to retrieve, or null for all inputs
+	 * @param mixed $fallback Default fallback value if parameter is not present
+	 * @return mixed
+	 */
+	protected function get_input(?string $parameter = null, $fallback = null)
+	{
+		$post_data = $this->input->post();
+		if (is_array($post_data) && !empty($post_data)) {
+			if ($parameter === null) {
+				return $post_data;
+			}
+			return array_key_exists($parameter, $post_data) ? $post_data[$parameter] : $fallback;
+		}
+
+		$raw_stream = $this->input->raw_input_stream;
+		if (!empty($raw_stream)) {
+			$json_data = json_decode($raw_stream, true);
+			if (is_array($json_data)) {
+				if ($parameter === null) {
+					return $json_data;
+				}
+				return array_key_exists($parameter, $json_data) ? $json_data[$parameter] : $fallback;
+			}
+		}
+
+		if ($parameter === null) {
+			return [];
+		}
+
+		return $this->input->post($parameter) ?? $fallback;
+	}
+
+	/**
 	 * Get fallback URL for redirection after errors.
 	 *
 	 * @return string
