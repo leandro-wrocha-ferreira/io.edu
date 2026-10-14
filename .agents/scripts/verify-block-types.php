@@ -8,7 +8,7 @@
  * 2. Proper persistence mapping in LessonBlockMapper::to_child_database_data().
  *
  * Usage:
- *   php bin/verify-block-types.php
+ *   php .agents/scripts/verify-block-types.php
  *
  * Exit Codes:
  *   0 - All block types have matching child tables and mapper handlers.
@@ -17,7 +17,7 @@
 
 declare(strict_types=1);
 
-$project_root = dirname(__DIR__);
+$project_root = dirname(__DIR__, 2);
 $block_type_file = $project_root . '/application/domain/course/constants/BlockType.php';
 $mapper_file = $project_root . '/application/models/mappers/LessonBlockMapper.php';
 $migrations_dir = $project_root . '/application/migrations';

@@ -7,7 +7,7 @@
  * under tests/unit/usecases/ following the DDD-lite architecture guidelines.
  *
  * Usage:
- *   php bin/verify-usecase-tests.php
+ *   php .agents/scripts/verify-usecase-tests.php
  *
  * Exit Codes:
  *   0 - All Use Cases have corresponding unit tests.
@@ -16,7 +16,7 @@
 
 declare(strict_types=1);
 
-$project_root = dirname(__DIR__);
+$project_root = dirname(__DIR__, 2);
 $usecases_dir = $project_root . '/application/usecases';
 $tests_dir = $project_root . '/tests/unit/usecases';
 

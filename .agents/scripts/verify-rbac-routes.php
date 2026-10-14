@@ -7,7 +7,7 @@
  * permission mapping entries in Middleware::$route_permission_map.
  *
  * Usage:
- *   php bin/verify-rbac-routes.php
+ *   php .agents/scripts/verify-rbac-routes.php
  *
  * Exit Codes:
  *   0 - All admin routes and controllers are protected by RBAC.
@@ -16,7 +16,7 @@
 
 declare(strict_types=1);
 
-$project_root = dirname(__DIR__);
+$project_root = dirname(__DIR__, 2);
 $routes_file = $project_root . '/application/config/routes.php';
 $middleware_file = $project_root . '/application/hooks/Middleware.php';
 $admin_controllers_dir = $project_root . '/application/controllers/admin';

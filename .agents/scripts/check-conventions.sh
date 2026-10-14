@@ -15,8 +15,8 @@
 # 9. No Direct Model Persistence Calls in Controllers (Check C)
 # 10. No Antipattern Hydration Methods in Domain Entities (Check D)
 # 11. Mandatory Form Validation in Controller Mutation Actions (Check F)
-# 12. RBAC Route Coverage Verification (Check E via bin/verify-rbac-routes.php)
-# 13. Block Types & Child Table Persistence (Check G via bin/verify-block-types.php)
+# 12. RBAC Route Coverage Verification (Check E via .agents/scripts/verify-rbac-routes.php)
+# 13. Block Types & Child Table Persistence (Check G via .agents/scripts/verify-block-types.php)
 # ==============================================================================
 
 set -e
@@ -255,22 +255,22 @@ if [ "$#" -eq 0 ] || [ "$1" == "--all" ]; then
 	echo -e "${BLUE}================================================================${NC}\n"
 
 	# Use Cases 1:1 Test Verifier
-	if [ -f "bin/verify-usecase-tests.php" ]; then
-		if ! php bin/verify-usecase-tests.php; then
+	if [ -f ".agents/scripts/verify-usecase-tests.php" ]; then
+		if ! php .agents/scripts/verify-usecase-tests.php; then
 			TOTAL_VIOLATIONS=$((TOTAL_VIOLATIONS + 1))
 		fi
 	fi
 
 	# RBAC Route Coverage Verifier (Check E)
-	if [ -f "bin/verify-rbac-routes.php" ]; then
-		if ! php bin/verify-rbac-routes.php; then
+	if [ -f ".agents/scripts/verify-rbac-routes.php" ]; then
+		if ! php .agents/scripts/verify-rbac-routes.php; then
 			TOTAL_VIOLATIONS=$((TOTAL_VIOLATIONS + 1))
 		fi
 	fi
 
 	# Block Types Persistence Verifier (Check G)
-	if [ -f "bin/verify-block-types.php" ]; then
-		if ! php bin/verify-block-types.php; then
+	if [ -f ".agents/scripts/verify-block-types.php" ]; then
+		if ! php .agents/scripts/verify-block-types.php; then
 			TOTAL_VIOLATIONS=$((TOTAL_VIOLATIONS + 1))
 		fi
 	fi
