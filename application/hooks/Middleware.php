@@ -40,13 +40,17 @@ class Middleware
 		'admin/perfis/editar' => PermissionSlug::ROLES_EDIT,
 		'admin/perfis/excluir' => PermissionSlug::ROLES_DELETE,
 
-		// Cursos
+		// Cursos 
 		'admin/cursos' => PermissionSlug::COURSES_VIEW,
 		'admin/cursos/dados' => PermissionSlug::COURSES_VIEW,
 		'admin/cursos/novo' => PermissionSlug::COURSES_CREATE,
 		'admin/cursos/editar' => PermissionSlug::COURSES_EDIT,
 		'admin/cursos/arquivar' => PermissionSlug::COURSES_EDIT,
 		'admin/cursos/excluir' => PermissionSlug::COURSES_DELETE,
+		'admin/cursos/modulos' => PermissionSlug::COURSES_EDIT,
+		'admin/cursos/aulas' => PermissionSlug::COURSES_EDIT,
+		'admin/cursos/blocos' => PermissionSlug::COURSES_EDIT,
+		'admin/storage' => PermissionSlug::COURSES_EDIT,
 
 		// Categorias
 		'admin/categorias' => PermissionSlug::CATEGORIES_VIEW,
@@ -54,6 +58,21 @@ class Middleware
 		'admin/categorias/nova' => PermissionSlug::CATEGORIES_CREATE,
 		'admin/categorias/editar' => PermissionSlug::CATEGORIES_EDIT,
 		'admin/categorias/excluir' => PermissionSlug::CATEGORIES_DELETE,
+
+		// Controller Path Aliases & Future Modules
+		'admin/users' => PermissionSlug::USERS_VIEW,
+		'admin/roles' => PermissionSlug::ROLES_VIEW,
+		'admin/courses' => PermissionSlug::COURSES_VIEW,
+		'admin/categories' => PermissionSlug::CATEGORIES_VIEW,
+		'admin/modules' => PermissionSlug::COURSES_EDIT,
+		'admin/lessons' => PermissionSlug::COURSES_EDIT,
+		'admin/blocks' => PermissionSlug::COURSES_EDIT,
+		'admin/classes' => PermissionSlug::COURSES_VIEW,
+		'admin/evaluations' => PermissionSlug::COURSES_VIEW,
+		'admin/reports' => PermissionSlug::DASHBOARD_VIEW,
+		'admin/turmas' => PermissionSlug::COURSES_VIEW,
+		'admin/avaliacoes' => PermissionSlug::COURSES_VIEW,
+		'admin/relatorios' => PermissionSlug::DASHBOARD_VIEW,
 	];
 
 	/**

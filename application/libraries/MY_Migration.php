@@ -7,7 +7,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Records one row per successfully executed migration in the migrations
  * table (version, class, created_at) instead of a single version row.
  */
-class MY_Migration extends CI_Migration {
+class MY_Migration extends CI_Migration
+{
 
 	/**
 	 * Constructor.

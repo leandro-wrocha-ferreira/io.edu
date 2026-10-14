@@ -27,7 +27,8 @@
 		"php": ">=8.2",
 		"twbs/bootstrap": "5.3.8",
 		"ezyang/htmlpurifier": "^4.19",
-		"quilljs/quill": "2.0.3"
+		"quilljs/quill": "2.0.3",
+		"aws/aws-sdk-php": "^3.400"
 	},
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"

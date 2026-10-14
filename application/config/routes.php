@@ -94,7 +94,28 @@ $route['admin/cursos/arquivar/(:num)'] = 'admin/courses/archive/$1';
 $route['admin/cursos/excluir/(:num)'] = 'admin/courses/delete/$1';
 $route['admin/cursos/(:num)/modulos'] = 'admin/courses/content/$1';
 $route['admin/cursos/(:num)/conteudo'] = 'admin/courses/content/$1';
-$route['admin/cursos/(:num)/aulas/editor'] = 'admin/courses/lesson_editor/$1';
+$route['admin/cursos/(:num)/aulas/editor'] = 'admin/lessons/editor/$1';
+$route['admin/cursos/(:num)/aulas/editor/(:num)'] = 'admin/lessons/editor/$1/$2';
+
+// Currículo & Conteúdo (Módulos, Aulas e Blocos)
+$route['admin/cursos/modulos/salvar'] = 'admin/modules/save';
+$route['admin/cursos/modulos/excluir/(:num)'] = 'admin/modules/delete/$1';
+$route['admin/cursos/modulos/reordenar'] = 'admin/modules/reorder';
+$route['admin/cursos/aulas/salvar'] = 'admin/lessons/save';
+$route['admin/cursos/aulas/excluir/(:num)'] = 'admin/lessons/delete/$1';
+$route['admin/cursos/aulas/reordenar'] = 'admin/lessons/reorder';
+$route['admin/cursos/aulas/dados/(:num)'] = 'admin/lessons/ajax_data/$1';
+$route['admin/cursos/blocos/salvar'] = 'admin/blocks/save';
+$route['admin/cursos/blocos/excluir/(:num)'] = 'admin/blocks/delete/$1';
+$route['admin/cursos/blocos/reordenar'] = 'admin/blocks/reorder';
+
+// Armazenamento & Multipart Upload
+$route['admin/storage/multipart/iniciar'] = 'admin/storage/initiate_multipart';
+$route['admin/storage/multipart/assinar-parte'] = 'admin/storage/sign_part';
+$route['admin/storage/multipart/listar-partes'] = 'admin/storage/list_parts';
+$route['admin/storage/multipart/concluir'] = 'admin/storage/complete_multipart';
+
+
 
 // Turmas
 $route['admin/turmas'] = 'admin/classes/index';
