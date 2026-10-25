@@ -58,6 +58,54 @@ final class CourseSlug
 	}
 
 	/**
+	 * Check if a slug string contains the '[id]-' or 'id-' placeholder prefix.
+	 *
+	 * @param string $slug
+	 * @return bool
+	 */
+	public static function has_id_placeholder(string $slug): bool
+	{
+		return (bool) preg_match('/^(\[id\]-|id-)/i', trim($slug));
+	}
+
+	/**
+	 * Extract clean base slug text by removing any leading '[id]-' or 'id-' placeholder.
+	 *
+	 * @param string $slug_or_title
+	 * @return string
+	 */
+	public static function extract_base_slug(string $slug_or_title): string
+	{
+		$clean = trim($slug_or_title);
+		$clean = preg_replace('/^(\[id\]-|id-)/i', '', $clean);
+		return self::slugify($clean);
+	}
+
+	/**
+	 * Format a course slug with its numeric course ID prefix: "{course_id}-{clean_slug}".
+	 *
+	 * Strips placeholder prefixes like '[id]-' or 'id-', and course ID prefix if already present,
+	 * ensuring the returned slug is always "{course_id}-{clean_slug}".
+	 *
+	 * @param int $course_id Course ID
+	 * @param string $slug_or_title Raw slug or title
+	 * @return self
+	 */
+	public static function format_with_id(int $course_id, string $slug_or_title): self
+	{
+		$clean = trim($slug_or_title);
+		$clean = preg_replace('/^(\[id\]-|id-)/i', '', $clean);
+		$clean = preg_replace('/^' . preg_quote((string) $course_id, '/') . '-/i', '', $clean);
+		$clean_slug = self::slugify($clean);
+
+		if ($clean_slug === '') {
+			$clean_slug = 'curso';
+		}
+
+		return new self($course_id . '-' . $clean_slug);
+	}
+
+	/**
 	 * Create a CourseSlug from raw string or title.
 	 *
 	 * @param string $text
