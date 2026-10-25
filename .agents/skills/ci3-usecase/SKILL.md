@@ -88,7 +88,8 @@ class ActivateUserUseCase
 4. **Single Responsibility**: One Use Case per business action with a standard `execute()` method.
 5. **Throw Semantic Domain Exceptions**: Always throw semantic exceptions from `app\domain\exceptions\` (`NotFoundException`, `ValidationException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`). Never throw generic `\RuntimeException`.
 6. **Return Domain Entities**: Return hydrated Domain Entities or DTOs, not raw database associative arrays.
-7. **Global Style**: All style rules (PSR-12, docblocks, no single-letter variables) MUST follow the global conventions defined in `GEMINI.md`.
+7. **Transactional Boundary**: Inject `TransactionInterface` (`app\infrastructure\database\TransactionInterface`) via constructor ONLY in Use Cases that orchestrate multiple repositories/aggregates requiring atomic cross-boundary persistence (e.g. Course + Commercial Product). Single-repository Use Cases do NOT inject `TransactionInterface`. The runner executes `$this->transaction->run(function () { ... })` guaranteeing rollback on any `Throwable`, explicit `false` return, or database status failure.
+8. **Global Style**: All style rules (PSR-12, docblocks, no single-letter variables) MUST follow the global conventions defined in `GEMINI.md`.
 
 ---
 

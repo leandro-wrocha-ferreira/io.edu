@@ -45,7 +45,7 @@ Mappers and DTOs completely decouple the database schema from Domain Entities:
 
 1. **`MY_Model` (CRUD Engine)**:
    - Operates purely with raw arrays and scalars (`find_by_id`, `find_all`, `insert`, `update`, `destroy`, `count_all`).
-   - Automatically writes audit logs to the `logs` table.
+   - Automatically dispatches lifecycle events via `ModelEventDispatcher` (with `AuditLogObserver` logging to the `logs` table).
    - Does **NOT** contain entity hydration logic (no `$entity_class`, no `from_database()`, no `to_entity()`).
 
 2. **Database DTO (`application/models/dtos/<Entity>Database.php`)**:
