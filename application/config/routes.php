@@ -83,6 +83,20 @@ $route['admin/categorias/nova'] = 'admin/categories/create';
 $route['admin/categorias/editar/(:num)'] = 'admin/categories/update/$1';
 $route['admin/categorias/excluir/(:num)'] = 'admin/categories/delete/$1';
 
+// Centros de Custo
+$route['admin/centros-de-custo'] = 'admin/cost_centers/index';
+$route['admin/centros-de-custo/dados'] = 'admin/cost_centers/ajax_data';
+$route['admin/centros-de-custo/novo'] = 'admin/cost_centers/create';
+$route['admin/centros-de-custo/editar/(:num)'] = 'admin/cost_centers/update/$1';
+$route['admin/centros-de-custo/excluir/(:num)'] = 'admin/cost_centers/delete/$1';
+
+// Configurações de Pagamento
+$route['admin/configuracoes-pagamento'] = 'admin/payment_configurations/index';
+$route['admin/configuracoes-pagamento/dados'] = 'admin/payment_configurations/ajax_data';
+$route['admin/configuracoes-pagamento/novo'] = 'admin/payment_configurations/create';
+$route['admin/configuracoes-pagamento/editar/(:num)'] = 'admin/payment_configurations/update/$1';
+$route['admin/configuracoes-pagamento/excluir/(:num)'] = 'admin/payment_configurations/delete/$1';
+
 // Cursos
 $route['admin/cursos'] = 'admin/courses/index';
 $route['admin/cursos/dados'] = 'admin/courses/ajax_data';
@@ -114,8 +128,6 @@ $route['admin/storage/multipart/iniciar'] = 'admin/storage/initiate_multipart';
 $route['admin/storage/multipart/assinar-parte'] = 'admin/storage/sign_part';
 $route['admin/storage/multipart/listar-partes'] = 'admin/storage/list_parts';
 $route['admin/storage/multipart/concluir'] = 'admin/storage/complete_multipart';
-
-
 
 // Turmas
 $route['admin/turmas'] = 'admin/classes/index';

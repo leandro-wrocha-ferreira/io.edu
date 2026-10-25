@@ -59,11 +59,27 @@ class Middleware
 		'admin/categorias/editar' => PermissionSlug::CATEGORIES_EDIT,
 		'admin/categorias/excluir' => PermissionSlug::CATEGORIES_DELETE,
 
+		// Centros de Custo
+		'admin/centros-de-custo' => PermissionSlug::COURSES_VIEW,
+		'admin/centros-de-custo/dados' => PermissionSlug::COURSES_VIEW,
+		'admin/centros-de-custo/novo' => PermissionSlug::COURSES_CREATE,
+		'admin/centros-de-custo/editar' => PermissionSlug::COURSES_EDIT,
+		'admin/centros-de-custo/excluir' => PermissionSlug::COURSES_DELETE,
+
+		// Configurações de Pagamento
+		'admin/configuracoes-pagamento' => PermissionSlug::COURSES_VIEW,
+		'admin/configuracoes-pagamento/dados' => PermissionSlug::COURSES_VIEW,
+		'admin/configuracoes-pagamento/novo' => PermissionSlug::COURSES_CREATE,
+		'admin/configuracoes-pagamento/editar' => PermissionSlug::COURSES_EDIT,
+		'admin/configuracoes-pagamento/excluir' => PermissionSlug::COURSES_DELETE,
+
 		// Controller Path Aliases & Future Modules
 		'admin/users' => PermissionSlug::USERS_VIEW,
 		'admin/roles' => PermissionSlug::ROLES_VIEW,
 		'admin/courses' => PermissionSlug::COURSES_VIEW,
 		'admin/categories' => PermissionSlug::CATEGORIES_VIEW,
+		'admin/cost_centers' => PermissionSlug::COURSES_VIEW,
+		'admin/payment_configurations' => PermissionSlug::COURSES_VIEW,
 		'admin/modules' => PermissionSlug::COURSES_EDIT,
 		'admin/lessons' => PermissionSlug::COURSES_EDIT,
 		'admin/blocks' => PermissionSlug::COURSES_EDIT,
