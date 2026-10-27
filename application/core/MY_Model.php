@@ -1,6 +1,8 @@
 <?php
 
 use app\domain\exceptions\NotFoundException;
+use app\infrastructure\events\ModelEventDispatcher;
+use app\infrastructure\events\observers\AuditLogObserver;
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
@@ -8,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Base Model for the Application.
  *
  * Provides a lightweight CRUD Engine returning and receiving 100% pure data
- * (raw arrays and scalars) with automatic auditing via the `logs` table.
+ * (raw arrays and scalars) with automatic auditing dispatched via ModelEventDispatcher.
  */
 class MY_Model extends CI_Model
 {
@@ -39,6 +41,10 @@ class MY_Model extends CI_Model
 	public function __construct()
 	{
 		parent::__construct();
+
+		if (!ModelEventDispatcher::has_observers()) {
+			ModelEventDispatcher::register(new AuditLogObserver());
+		}
 	}
 
 	/**
@@ -117,7 +123,7 @@ class MY_Model extends CI_Model
 
 		if ($insert_id === false) return null;
 
-		$this->log_audit('insert', $insert_id, null, $data, $target_table);
+		ModelEventDispatcher::dispatch('insert', $target_table, $insert_id, null, $data);
 
 		return $insert_id;
 	}
@@ -136,7 +142,7 @@ class MY_Model extends CI_Model
 		if ($target_table === '') return null;
 
 		$inserted_count = $this->db->insert_batch($target_table, $data);
-		$this->log_audit('insert_many', 'batch', null, $data, $target_table);
+		ModelEventDispatcher::dispatch('insert_many', $target_table, 'batch', null, $data);
 		return $inserted_count;
 	}
 
@@ -164,7 +170,7 @@ class MY_Model extends CI_Model
 
 		if ($result) {
 			$row_identifier = $before[$this->primary_key] ?? null;
-			$this->log_audit('update', $row_identifier, $before, $data, $target_table);
+			ModelEventDispatcher::dispatch('update', $target_table, $row_identifier, $before, $data);
 		}
 
 		return $result;
@@ -204,14 +210,14 @@ class MY_Model extends CI_Model
 			$affected = $this->db->affected_rows();
 
 			if ($affected > 0) {
-				$this->log_audit('update_many', 'batch', $before, $data, $target_table);
+				ModelEventDispatcher::dispatch('update_many', $target_table, 'batch', $before, $data);
 			}
 
 			return $affected;
 		}
 
 		$affected = $this->db->update_batch($target_table, $data, $where_or_index);
-		$this->log_audit('update_many', 'batch', null, $data, $target_table);
+		ModelEventDispatcher::dispatch('update_many', $target_table, 'batch', null, $data);
 
 		return (int) $affected;
 	}
@@ -238,7 +244,7 @@ class MY_Model extends CI_Model
 
 		if ($result) {
 			$row_identifier = $before[$this->primary_key] ?? null;
-			$this->log_audit('destroy', $row_identifier, $before, null, $target_table);
+			ModelEventDispatcher::dispatch('destroy', $target_table, $row_identifier, $before, null);
 		}
 
 		return $result;
@@ -269,15 +275,16 @@ class MY_Model extends CI_Model
 		$affected = $this->db->affected_rows();
 
 		if ($affected > 0) {
-			$this->log_audit('destroy_many', 'batch', $before, null, $target_table);
+			ModelEventDispatcher::dispatch('destroy_many', $target_table, 'batch', $before, null);
 		}
 
 		return $affected;
 	}
 
 	/**
-	 * Audit log for successful operations into the `logs` table.
+	 * Audit log dispatch helper for backward compatibility.
 	 *
+	 * @deprecated Use ModelEventDispatcher::dispatch() instead.
 	 * @param string $action Database action context
 	 * @param int|string|null $row_identifier The affected row identifier or conditions
 	 * @param array|null $before Data before the operation
@@ -288,59 +295,6 @@ class MY_Model extends CI_Model
 	protected function log_audit(string $action, int|string|null $row_identifier, ?array $before, ?array $after, ?string $table = null): void
 	{
 		$target_table = $table ?? $this->table;
-
-		if ($target_table === 'logs' || empty($target_table)) {
-			return;
-		}
-
-		$user_id = $this->session->userdata('user_id') ?? null;
-
-		if ($action === 'update' && is_array($before) && is_array($after)) {
-			$diff_before = [];
-			$diff_after = [];
-
-			$is_multi_row = array_is_list($before) && isset($before[0]) && is_array($before[0]);
-			$rows_before = $is_multi_row ? $before : [$before];
-
-			foreach ($rows_before as $row) {
-				$row_diff_before = [];
-				$row_diff_after = [];
-
-				foreach ($after as $key => $value) {
-					if (is_array($row) && array_key_exists($key, $row)) {
-						if ($row[$key] != $value) {
-							$row_diff_before[$key] = $row[$key];
-							$row_diff_after[$key] = $value;
-						}
-					} else {
-						$row_diff_after[$key] = $value;
-					}
-				}
-
-				if ($is_multi_row) {
-					$diff_before[] = $row_diff_before;
-					$diff_after[] = $row_diff_after;
-				} else {
-					$diff_before = $row_diff_before;
-					$diff_after = $row_diff_after;
-				}
-			}
-
-			$before = $diff_before;
-			$after = $diff_after;
-		}
-
-		$content = json_encode([
-			'action' => $action,
-			'before' => $before,
-			'after' => $after,
-		], JSON_UNESCAPED_UNICODE);
-
-		$this->db->insert('logs', [
-			'user_execute' => $user_id,
-			'table' => $target_table,
-			'row' => $row_identifier,
-			'content' => $content,
-		]);
+		ModelEventDispatcher::dispatch($action, $target_table, $row_identifier, $before, $after);
 	}
 }

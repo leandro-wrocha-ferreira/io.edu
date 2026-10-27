@@ -41,7 +41,10 @@
 			"app\\models\\dtos\\": "application/models/dtos/",
 			"app\\models\\mappers\\": "application/models/mappers/",
 			"app\\infrastructure\\": "application/infrastructure/"
-		}
+		},
+		"classmap": [
+			"application/libraries/"
+		]
 	},
 	"autoload-dev": {
 		"classmap": [

@@ -153,12 +153,36 @@
 							<h3 class="edu-card-title">Regras Comerciais</h3>
 						</div>
 						<div class="edu-card-body">
-							<div class="d-flex align-items-center gap-2 mb-2">
-								<i class="bi bi-cart-check fs-5 text-primary"></i>
-								<span class="fw-semibold text-body">Venda Contínua Avulsa</span>
+							<div class="d-flex align-items-center justify-content-between mb-3">
+								<span class="text-muted small">Status de Venda:</span>
+								<?php if ($course->is_available_for_sale()): ?>
+									<span class="edu-badge edu-badge-success">Disponível para Venda</span>
+								<?php else: ?>
+									<span class="edu-badge edu-badge-neutral">Venda Desativada</span>
+								<?php endif; ?>
 							</div>
-							<p class="text-muted small mb-0">
-								O curso fica disponível para compra imediata na vitrine. Ao se matricular, o aluno recebe acesso imediato com validade de 
+
+							<?php if (!empty($product)): ?>
+								<div class="d-flex align-items-center justify-content-between mb-2">
+									<span class="text-muted small">Preço de Tabela:</span>
+									<span class="fw-bold text-heading fs-6"><?= $product->is_free() ? '<span class="edu-badge edu-badge-success">Gratuito</span>' : ($product->get_price() ? $product->get_price()->format() : '—') ?></span>
+								</div>
+								<div class="d-flex align-items-center justify-content-between mb-2">
+									<span class="text-muted small">Modelo:</span>
+									<span class="fw-medium text-body small">
+										<?= (string) $product->get_billing_model() === 'subscription' ? 'Assinatura Recorrente' : 'Pagamento Único' ?>
+									</span>
+								</div>
+								<?php if (!$product->is_free() && (string) $product->get_billing_model() === 'one_time'): ?>
+									<div class="d-flex align-items-center justify-content-between mb-2">
+										<span class="text-muted small">Parcelamento Máx.:</span>
+										<span class="fw-medium text-body small"><?= $product->get_max_installments()->get_limit() ?>x</span>
+									</div>
+								<?php endif; ?>
+							<?php endif; ?>
+
+							<p class="text-muted small mb-0 pt-2 border-top">
+								Validade da matrícula: 
 								<?= $course->get_access_period()->is_lifetime() ? '<strong>acesso vitalício</strong>' : '<strong>' . $course->get_access_period()->get_days() . ' dias</strong>' ?>.
 							</p>
 						</div>

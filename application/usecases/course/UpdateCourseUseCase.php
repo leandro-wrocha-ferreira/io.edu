@@ -2,6 +2,7 @@
 
 namespace app\usecases\course;
 
+use app\domain\commercial\repositories\ProductRepositoryInterface;
 use app\domain\course\Course;
 use app\domain\course\repositories\CategoryRepositoryInterface;
 use app\domain\course\repositories\CourseRepositoryInterface;
@@ -11,6 +12,7 @@ use app\domain\course\value_objects\CourseStatus;
 use app\domain\course\value_objects\Workload;
 use app\domain\exceptions\ConflictException;
 use app\domain\exceptions\NotFoundException;
+use app\domain\exceptions\ValidationException;
 
 /**
  * Use case for updating an existing course.
@@ -23,19 +25,25 @@ class UpdateCourseUseCase
 	/** @var CategoryRepositoryInterface */
 	private CategoryRepositoryInterface $category_repository;
 
+	/** @var ProductRepositoryInterface|null */
+	private ?ProductRepositoryInterface $product_repository;
+
 	/**
 	 * Constructor.
 	 *
 	 * @param CourseRepositoryInterface $course_repository
 	 * @param CategoryRepositoryInterface $category_repository
+	 * @param ProductRepositoryInterface|null $product_repository
 	 */
 	public function __construct(
 		CourseRepositoryInterface $course_repository,
-		CategoryRepositoryInterface $category_repository
+		CategoryRepositoryInterface $category_repository,
+		?ProductRepositoryInterface $product_repository = null
 	)
 	{
 		$this->course_repository = $course_repository;
 		$this->category_repository = $category_repository;
+		$this->product_repository = $product_repository;
 	}
 
 	/**
@@ -58,9 +66,11 @@ class UpdateCourseUseCase
 	 * @param bool $certificate_enabled Certificate emission toggle
 	 * @param string|null $image_url External image URL
 	 * @param int $video_min_completion_percentage Minimum video percentage required for completion
+	 * @param bool $is_available_for_sale Commercial availability for sale
 	 * @return Course
 	 * @throws NotFoundException When course or category not found
 	 * @throws ConflictException When slug is already taken
+	 * @throws ValidationException When invariants are violated
 	 */
 	public function execute(
 		int $id,
@@ -79,7 +89,8 @@ class UpdateCourseUseCase
 		?string $requirements = null,
 		bool $certificate_enabled = true,
 		?string $image_url = null,
-		int $video_min_completion_percentage = 80
+		int $video_min_completion_percentage = 80,
+		bool $is_available_for_sale = false
 	): Course
 	{
 		$course = $this->course_repository->find_by_id($id);
@@ -92,7 +103,15 @@ class UpdateCourseUseCase
 			throw new NotFoundException("Category not found");
 		}
 
-		$course_slug = !empty($slug) ? new CourseSlug($slug) : new CourseSlug($title);
+		if (!empty($slug)) {
+			if (CourseSlug::has_id_placeholder($slug)) {
+				$course_slug = CourseSlug::format_with_id($id, $slug);
+			} else {
+				$course_slug = new CourseSlug($slug);
+			}
+		} else {
+			$course_slug = new CourseSlug($title);
+		}
 
 		$existing = $this->course_repository->find_by_slug($course_slug);
 		if ($existing !== null && $existing->get_id() !== $id) {
@@ -121,6 +140,18 @@ class UpdateCourseUseCase
 
 		if ($course->get_status()->get_value() !== $status) {
 			$course->change_status($status);
+		}
+
+		if ($is_available_for_sale) {
+			if ($this->product_repository !== null) {
+				$product = $this->product_repository->find_by_course_id($id);
+				if ($product !== null) {
+					$product->validate_sales_eligibility();
+				}
+			}
+			$course->enable_for_sale();
+		} else {
+			$course->disable_for_sale();
 		}
 
 		return $this->course_repository->save($course);

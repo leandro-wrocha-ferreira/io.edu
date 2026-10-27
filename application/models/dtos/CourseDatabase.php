@@ -27,6 +27,7 @@ final class CourseDatabase
 	public string $access_period_type;
 	public ?int $access_days;
 	public int $certificate_enabled;
+	public int $is_available_for_sale;
 	public DateTime $created_at;
 	public ?DateTime $updated_at;
 	public ?DateTime $deleted_at;
@@ -57,6 +58,7 @@ final class CourseDatabase
 		$this->access_period_type = (string) ($data['access_period_type'] ?? 'limited_time');
 		$this->access_days = isset($data['access_days']) && $data['access_days'] !== '' && $data['access_days'] !== null ? (int) $data['access_days'] : null;
 		$this->certificate_enabled = !empty($data['certificate_enabled']) ? 1 : 0;
+		$this->is_available_for_sale = !empty($data['is_available_for_sale']) ? 1 : 0;
 		$this->created_at = !empty($data['created_at']) ? new DateTime((string) $data['created_at']) : new DateTime();
 		$this->updated_at = !empty($data['updated_at']) ? new DateTime((string) $data['updated_at']) : null;
 		$this->deleted_at = !empty($data['deleted_at']) ? new DateTime((string) $data['deleted_at']) : null;

@@ -54,7 +54,8 @@ class CourseMapper
 			$row->deleted_at,
 			$row->category_name,
 			$row->image_url,
-			$row->video_min_completion_percentage
+			$row->video_min_completion_percentage,
+			(bool) $row->is_available_for_sale
 		);
 	}
 
@@ -104,6 +105,7 @@ class CourseMapper
 			'access_period_type' => $course->get_access_period()->get_type(),
 			'access_days' => $course->get_access_period()->get_days(),
 			'certificate_enabled' => $course->is_certificate_enabled() ? 1 : 0,
+			'is_available_for_sale' => $course->is_available_for_sale() ? 1 : 0,
 		];
 	}
 
@@ -133,6 +135,7 @@ class CourseMapper
 			'access_period_type' => $course->get_access_period()->get_type(),
 			'access_days' => $course->get_access_period()->get_days(),
 			'certificate_enabled' => $course->is_certificate_enabled() ? 1 : 0,
+			'is_available_for_sale' => $course->is_available_for_sale() ? 1 : 0,
 			'deleted_at' => $course->get_deleted_at() ? $course->get_deleted_at()->format('Y-m-d H:i:s') : null,
 		];
 	}

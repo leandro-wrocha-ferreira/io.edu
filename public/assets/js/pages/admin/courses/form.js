@@ -132,8 +132,8 @@ document.addEventListener('DOMContentLoaded', function () {
 					fileLabel.classList.add('has-file');
 
 					const reader = new FileReader();
-					reader.onload = function (e) {
-						localFileDataUrl = e.target.result;
+					reader.onload = function (event) {
+						localFileDataUrl = event.target.result;
 						if (uploadRadio.checked) {
 							showPreview(localFileDataUrl, 'Arquivo selecionado: ' + fileName, false);
 						}
@@ -224,9 +224,88 @@ document.addEventListener('DOMContentLoaded', function () {
 
 		titleInput.addEventListener('input', syncSlugPreview);
 
-		// Initialize preview on page load if title exists but slug is empty
+		// Initialize preview on page load if title exists but slug is empty,
+		// or if in edit mode with courseId and slug contains an 'id-' or '[id]-' placeholder
 		if (titleInput.value && !slugInput.value) {
 			syncSlugPreview();
+		} else if (courseId && slugInput.value && /^(\[id\]-|id-)/i.test(slugInput.value)) {
+			const cleanExisting = slugInput.value.replace(/^(\[id\]-|id-)/i, '');
+			slugInput.value = `${courseId}-${cleanExisting}`;
 		}
+	}
+
+	// 5. Commercial Conditions Reactive Controls
+	const isFreeCheckbox = document.getElementById('is-free');
+	const commercialWrapper = document.getElementById('commercial-fields-wrapper');
+	const billingModelSelect = document.getElementById('billing-model');
+	const billingOneTimeFields = document.getElementById('billing-one-time-fields');
+	const billingIntervalField = document.getElementById('billing-subscription-interval-field');
+	const billingCyclesField = document.getElementById('billing-subscription-cycles-field');
+	const coursePriceInput = document.getElementById('course-price');
+	const changeReasonContainer = document.getElementById('change-reason-container');
+
+	if (isFreeCheckbox && commercialWrapper) {
+		function syncCommercialVisibility() {
+			if (isFreeCheckbox.checked) {
+				commercialWrapper.classList.add('d-none');
+			} else {
+				commercialWrapper.classList.remove('d-none');
+			}
+		}
+
+		isFreeCheckbox.addEventListener('change', syncCommercialVisibility);
+		syncCommercialVisibility();
+	}
+
+	if (billingModelSelect && billingOneTimeFields && billingIntervalField && billingCyclesField) {
+		function syncBillingModelFields() {
+			const selectedModel = billingModelSelect.value;
+			if (selectedModel === 'subscription') {
+				billingOneTimeFields.classList.add('d-none');
+				billingIntervalField.classList.remove('d-none');
+				billingCyclesField.classList.remove('d-none');
+			} else {
+				billingOneTimeFields.classList.remove('d-none');
+				billingIntervalField.classList.add('d-none');
+				billingCyclesField.classList.add('d-none');
+			}
+		}
+
+		billingModelSelect.addEventListener('change', syncBillingModelFields);
+		syncBillingModelFields();
+	}
+
+	if (coursePriceInput && changeReasonContainer) {
+		const initialPrice = coursePriceInput.dataset.initialPrice ? coursePriceInput.dataset.initialPrice.trim() : '';
+
+		function checkPriceChange() {
+			const currentPrice = coursePriceInput.value.trim();
+			if (initialPrice !== '' && currentPrice !== initialPrice) {
+				changeReasonContainer.classList.remove('d-none');
+			} else {
+				changeReasonContainer.classList.add('d-none');
+			}
+		}
+
+		['input', 'change', 'blur'].forEach(function (eventName) {
+			coursePriceInput.addEventListener(eventName, checkPriceChange);
+		});
+		checkPriceChange();
+	}
+
+	// Simple Currency Input Mask for BRL (e.g. 199,90)
+	if (coursePriceInput) {
+		coursePriceInput.addEventListener('input', function () {
+			let rawDigits = this.value.replace(/\D/g, '');
+			if (!rawDigits) {
+				this.value = '';
+				return;
+			}
+			const centsNumber = parseInt(rawDigits, 10);
+			const formattedUnits = Math.floor(centsNumber / 100);
+			const formattedCents = String(centsNumber % 100).padStart(2, '0');
+			const formattedWithThousands = formattedUnits.toLocaleString('pt-BR');
+			this.value = `${formattedWithThousands},${formattedCents}`;
+		});
 	}
 });

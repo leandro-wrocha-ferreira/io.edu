@@ -18,12 +18,12 @@ document.addEventListener('DOMContentLoaded', function () {
 		ajax: {
 			url: window.location.origin + '/admin/cursos/dados',
 			type: 'GET',
-			data: function (d) {
+			data: function (params) {
 				if (categoryFilter && categoryFilter.value) {
-					d.category_id = categoryFilter.value;
+					params.category_id = categoryFilter.value;
 				}
 				if (statusFilter && statusFilter.value) {
-					d.status = statusFilter.value;
+					params.status = statusFilter.value;
 				}
 			},
 			headers: {

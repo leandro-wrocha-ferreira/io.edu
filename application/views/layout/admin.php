@@ -143,7 +143,23 @@
 					</li>
 
 					<li class="nav-item nav-section" role="none">
-						<span class="nav-section-title">Configuração</span>
+						<span class="nav-section-title">Financeiro & Configuração</span>
+					</li>
+					<li class="nav-item" role="none">
+						<a class="nav-link <?= $seg2 == 'centros-de-custo' ? 'active' : '' ?>"
+						   href="<?= base_url('admin/centros-de-custo') ?>"
+						   role="menuitem"
+						   <?= $seg2 == 'centros-de-custo' ? 'aria-current="page"' : '' ?>>
+							<i class="bi bi-diagram-3" aria-hidden="true"></i> Centros de Custo
+						</a>
+					</li>
+					<li class="nav-item" role="none">
+						<a class="nav-link <?= $seg2 == 'configuracoes-pagamento' ? 'active' : '' ?>"
+						   href="<?= base_url('admin/configuracoes-pagamento') ?>"
+						   role="menuitem"
+						   <?= $seg2 == 'configuracoes-pagamento' ? 'aria-current="page"' : '' ?>>
+							<i class="bi bi-credit-card-2-front" aria-hidden="true"></i> Provedores de Pagamento
+						</a>
 					</li>
 					<li class="nav-item" role="none">
 						<a class="nav-link <?= $seg2 == 'perfis' ? 'active' : '' ?>"

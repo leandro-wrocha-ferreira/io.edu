@@ -141,6 +141,13 @@ final class Course
 	private bool $certificate_enabled = true;
 
 	/**
+	 * Commercial availability for new sales in the catalog.
+	 *
+	 * @var bool
+	 */
+	private bool $is_available_for_sale = false;
+
+	/**
 	 * Creation timestamp.
 	 *
 	 * @var DateTime|null
@@ -185,6 +192,7 @@ final class Course
 	 * @param string|null $category_name Optional category name
 	 * @param string|null $image_url External image URL
 	 * @param int $video_min_completion_percentage Minimum video percentage required for completion
+	 * @param bool $is_available_for_sale Commercial availability for sale in catalog
 	 * @return self
 	 * @throws ValidationException When validation fails
 	 */
@@ -209,7 +217,8 @@ final class Course
 		?DateTime $deleted_at = null,
 		?string $category_name = null,
 		?string $image_url = null,
-		int $video_min_completion_percentage = 80
+		int $video_min_completion_percentage = 80,
+		bool $is_available_for_sale = false
 	): self
 	{
 		if ($category_id <= 0) {
@@ -228,6 +237,10 @@ final class Course
 		$course_slug = $slug instanceof CourseSlug ? $slug : new CourseSlug($slug);
 		$course_status = $status instanceof CourseStatus ? $status : new CourseStatus($status);
 		$course_access_period = $access_period ?? CourseAccessPeriod::lifetime();
+
+		if ($is_available_for_sale && !$course_status->is_active()) {
+			throw new ValidationException("Only active courses can be available for sale");
+		}
 
 		$course_workload = null;
 		if ($workload instanceof Workload) {
@@ -255,6 +268,7 @@ final class Course
 		$course->target_audience = $target_audience;
 		$course->requirements = $requirements;
 		$course->certificate_enabled = $certificate_enabled;
+		$course->is_available_for_sale = $is_available_for_sale;
 		$course->created_at = $created_at ?? new DateTime();
 		$course->updated_at = $updated_at ?? ($id === null ? new DateTime() : null);
 		$course->deleted_at = $deleted_at;
@@ -329,6 +343,17 @@ final class Course
 	}
 
 	/**
+	 * Set or update the course slug.
+	 *
+	 * @param CourseSlug|string $slug
+	 * @return void
+	 */
+	public function set_slug(CourseSlug|string $slug): void
+	{
+		$this->slug = $slug instanceof CourseSlug ? $slug : new CourseSlug($slug);
+	}
+
+	/**
 	 * Update minimum video percentage required for completion.
 	 *
 	 * @param int $percentage
@@ -360,6 +385,44 @@ final class Course
 		}
 
 		$this->status = $target_status;
+		if (!$this->status->is_active()) {
+			$this->is_available_for_sale = false;
+		}
+	}
+
+	/**
+	 * Check if the course is commercially available for sale.
+	 *
+	 * @return bool
+	 */
+	public function is_available_for_sale(): bool
+	{
+		return $this->is_available_for_sale;
+	}
+
+	/**
+	 * Enable course for commercial sale in the catalog.
+	 *
+	 * @return void
+	 * @throws ValidationException If course is not active
+	 */
+	public function enable_for_sale(): void
+	{
+		if (!$this->status->is_active()) {
+			throw new ValidationException("Only active courses can be available for sale");
+		}
+
+		$this->is_available_for_sale = true;
+	}
+
+	/**
+	 * Disable course for commercial sale in the catalog.
+	 *
+	 * @return void
+	 */
+	public function disable_for_sale(): void
+	{
+		$this->is_available_for_sale = false;
 	}
 
 	/**

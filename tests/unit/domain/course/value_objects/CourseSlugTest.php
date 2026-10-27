@@ -45,4 +45,39 @@ class CourseSlugTest extends TestCase
 		$this->assertTrue($slug1->equals($slug2));
 		$this->assertFalse($slug1->equals($slug3));
 	}
+
+	public function test_has_id_placeholder_detection(): void
+	{
+		$this->assertTrue(CourseSlug::has_id_placeholder('[id]-curso-teste'));
+		$this->assertTrue(CourseSlug::has_id_placeholder('id-curso-teste'));
+		$this->assertTrue(CourseSlug::has_id_placeholder('[ID]-curso-teste'));
+		$this->assertTrue(CourseSlug::has_id_placeholder('ID-curso-teste'));
+		$this->assertFalse(CourseSlug::has_id_placeholder('5-curso-teste'));
+		$this->assertFalse(CourseSlug::has_id_placeholder('curso-teste'));
+	}
+
+	public function test_extract_base_slug(): void
+	{
+		$this->assertSame('curso-teste', CourseSlug::extract_base_slug('[id]-curso-teste'));
+		$this->assertSame('curso-teste', CourseSlug::extract_base_slug('id-curso-teste'));
+		$this->assertSame('curso-teste', CourseSlug::extract_base_slug('Curso Teste'));
+	}
+
+	public function test_format_with_id(): void
+	{
+		$slug1 = CourseSlug::format_with_id(5, '[id]-curso-php');
+		$this->assertSame('5-curso-php', (string) $slug1);
+
+		$slug2 = CourseSlug::format_with_id(5, 'id-curso-php');
+		$this->assertSame('5-curso-php', (string) $slug2);
+
+		$slug3 = CourseSlug::format_with_id(5, '5-curso-php');
+		$this->assertSame('5-curso-php', (string) $slug3);
+
+		$slug4 = CourseSlug::format_with_id(12, 'Arquitetura Limpa!');
+		$this->assertSame('12-arquitetura-limpa', (string) $slug4);
+
+		$slug5 = CourseSlug::format_with_id(7, '');
+		$this->assertSame('7-curso', (string) $slug5);
+	}
 }
