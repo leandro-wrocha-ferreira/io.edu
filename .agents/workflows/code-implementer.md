@@ -7,10 +7,10 @@ permission:
   edit: allow
   bash:
     "*": deny
-    "git-leandro status*": allow
-    "git-leandro diff*": allow
-    "git-leandro log*": allow
-    "git-leandro mv *": allow
+    "git-jail status*": allow
+    "git-jail diff*": allow
+    "git-jail log*": allow
+    "git-jail mv *": allow
     "docker compose exec app *": allow
     "bash .agents/scripts/check-conventions.sh*": allow
     "php .agents/scripts/verify-usecase-tests.php*": allow

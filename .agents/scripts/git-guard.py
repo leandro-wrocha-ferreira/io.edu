@@ -53,7 +53,7 @@ def is_authorized_by_env_or_cmd(command_line: str) -> bool:
     if os.environ.get('ALLOW_GIT_COMMIT') == '1':
         return True
 
-    # Check if prefixed in the command line itself (e.g. GIT_AGENT=git-committer git-leandro commit ...)
+    # Check if prefixed in the command line itself (e.g. GIT_AGENT=git-committer git-jail commit ...)
     for auth_token in AUTHORIZED_ENV_VARS:
         if auth_token in command_line:
             return True
@@ -97,7 +97,7 @@ def is_authorized_by_transcript(transcript_path: str) -> bool:
 def extract_git_subcommands(command_line: str):
     """
     Parse command line (which may contain pipes, chaining &&, ||, ;)
-    and yield any git / git-leandro subcommands found.
+    and yield any git / git-jail subcommands found.
     """
     # Split by chain operators: &&, ||, ;, |
     sub_commands = re.split(r'&&|\|\||;|\|', command_line)
@@ -124,14 +124,14 @@ def extract_git_subcommands(command_line: str):
             continue
 
         base_bin = os.path.basename(cmd_tokens[0])
-        if base_bin in ('git', 'git-leandro'):
+        if base_bin in ('git', 'git-jail'):
             # The next non-flag argument is the git subcommand
             sub_action = None
             for token in cmd_tokens[1:]:
                 if token.startswith('-'):
                     continue
-                # If command is 'git-leandro git commit', skip redundant 'git'
-                if base_bin == 'git-leandro' and token == 'git':
+                # If command is 'git-jail git commit', skip redundant 'git'
+                if base_bin == 'git-jail' and token == 'git':
                     continue
                 sub_action = token
                 break

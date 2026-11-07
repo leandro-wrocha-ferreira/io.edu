@@ -27,7 +27,7 @@ O versionamento de código e envio ao repositório remoto são atribuições EXC
      `{"decision": "deny", "reason": "[TRAVA DETERMINÍSTICA - IOEDU-0016] ..."}` abortando a chamada na IDE.
 
 3. **Alinhamento do Agente de Versionamento (`.agents/workflows/git-committer.md`)**:
-   - Permissões de bash atualizadas para incluir `GIT_AGENT=git-committer git-leandro *` e `git-leandro push*`.
+   - Permissões de bash atualizadas para incluir `GIT_AGENT=git-committer git-jail *` e `git-jail push*`.
    - Instrução obrigatória para prefixar comandos de versionamento com `GIT_AGENT=git-committer`.
 
 4. **Centralização de Scripts em `.agents/scripts/`**:
@@ -37,7 +37,7 @@ O versionamento de código e envio ao repositório remoto são atribuições EXC
    - Todos os utilitários de agentes e automação agora residem centralizados sob `.agents/scripts/`.
 
 5. **Preservação de Regras Globais (`AGENTS.md` e `GEMINI.md`)**:
-   - As instruções globais de uso do `git-leandro` permanecem intactas para orientar desenvolvedores e ações manuais.
+   - As instruções globais de uso do `git-jail` permanecem intactas para orientar desenvolvedores e ações manuais.
 
 ---
 

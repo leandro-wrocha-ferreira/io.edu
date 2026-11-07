@@ -8,7 +8,7 @@ Criar e integrar um subagente auditor especializado para atuar como revisor obri
 - Criar o arquivo `.agents/workflows/implementation-auditor.md` (ou definir a especificação do subagente revisor) com:
   - `mode: subagent` (ou workflow dedicado acionável).
   - `temperature: 0.1` (determinístico, rigoroso, tolerância zero a desvios).
-  - Permissões estritamente de leitura (`edit: deny`, comandos bash limitados a `git-leandro status`, `git-leandro diff`, `git-leandro log`).
+  - Permissões estritamente de leitura (`edit: deny`, comandos bash limitados a `git-jail status`, `git-jail diff`, `git-jail log`).
   - Proibição estrita de editar código: o subagente é 100% auditor e nunca altera arquivos diretamente.
 
 2. Checklist de Auditoria Minuciosa (100% dos Pontos Obrigatórios):
@@ -32,7 +32,7 @@ Criar e integrar um subagente auditor especializado para atuar como revisor obri
 
 3. Integração ao Workflow `code-implementer.md`:
 - Atualizar `.agents/workflows/code-implementer.md` para incluir a etapa formal de validação:
-  - Antes de concluir qualquer tarefa ou repassar para commit, o `code-implementer` DEVE acionar o subagente auditor para validar o diff completo da implementação (`git-leandro diff`).
+  - Antes de concluir qualquer tarefa ou repassar para commit, o `code-implementer` DEVE acionar o subagente auditor para validar o diff completo da implementação (`git-jail diff`).
   - Se o auditor apontar qualquer desconformidade, o implementador deve corrigir os apontamentos e submeter novamente até obter aprovação total (100% clean).
 
 4. Formato do Relatório de Auditoria:

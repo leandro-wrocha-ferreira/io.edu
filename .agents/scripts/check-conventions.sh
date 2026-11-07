@@ -32,8 +32,8 @@ CHECKED_FILES=0
 
 get_files_to_check() {
 	if [ "$1" == "--staged" ]; then
-		if command -v git-leandro &>/dev/null; then
-			git-leandro --no-pager diff --name-only --cached -- 'application/*.php' 'tests/*.php'
+		if command -v git-jail &>/dev/null; then
+			git-jail --no-pager diff --name-only --cached -- 'application/*.php' 'tests/*.php'
 		else
 			git --no-pager diff --name-only --cached -- 'application/*.php' 'tests/*.php'
 		fi
@@ -254,23 +254,28 @@ if [ "$#" -eq 0 ] || [ "$1" == "--all" ]; then
 	echo -e "${BLUE}        Verificações Estruturais e de Integração Sistêmica        ${NC}"
 	echo -e "${BLUE}================================================================${NC}\n"
 
+	PHP_CMD="php"
+	if ! command -v php &>/dev/null; then
+		PHP_CMD="docker compose exec -T app php"
+	fi
+
 	# Use Cases 1:1 Test Verifier
 	if [ -f ".agents/scripts/verify-usecase-tests.php" ]; then
-		if ! php .agents/scripts/verify-usecase-tests.php; then
+		if ! $PHP_CMD .agents/scripts/verify-usecase-tests.php; then
 			TOTAL_VIOLATIONS=$((TOTAL_VIOLATIONS + 1))
 		fi
 	fi
 
 	# RBAC Route Coverage Verifier (Check E)
 	if [ -f ".agents/scripts/verify-rbac-routes.php" ]; then
-		if ! php .agents/scripts/verify-rbac-routes.php; then
+		if ! $PHP_CMD .agents/scripts/verify-rbac-routes.php; then
 			TOTAL_VIOLATIONS=$((TOTAL_VIOLATIONS + 1))
 		fi
 	fi
 
 	# Block Types Persistence Verifier (Check G)
 	if [ -f ".agents/scripts/verify-block-types.php" ]; then
-		if ! php .agents/scripts/verify-block-types.php; then
+		if ! $PHP_CMD .agents/scripts/verify-block-types.php; then
 			TOTAL_VIOLATIONS=$((TOTAL_VIOLATIONS + 1))
 		fi
 	fi

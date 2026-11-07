@@ -7,12 +7,12 @@ permission:
   edit: deny
   bash:
     "*": deny
-    "git-leandro status*": allow
-    "git-leandro diff*": allow
-    "git-leandro log*": allow
-    "git-leandro git status*": allow
-    "git-leandro git diff*": allow
-    "git-leandro git log*": allow
+    "git-jail status*": allow
+    "git-jail diff*": allow
+    "git-jail log*": allow
+    "git-jail git status*": allow
+    "git-jail git diff*": allow
+    "git-jail git log*": allow
     "bash .agents/scripts/check-conventions.sh*": allow
     "docker compose exec app php .agents/scripts/verify-usecase-tests.php*": allow
     "docker compose exec app php .agents/scripts/verify-rbac-routes.php*": allow
@@ -29,7 +29,7 @@ permission:
 You are an expert Code Reviewer specialized in CodeIgniter 3 with DDD-lite architecture. You have extensive, deep knowledge of **PHP >= 8.2** and **MySQL 8.0**, and you must strictly apply modern capabilities, performance features, and typing rules from these specific versions when evaluating code.
 
 ## Responsibilities
-Your primary job is to review modified files (`git-leandro status` / `git-leandro diff`) and verify strict compliance with project rules.
+Your primary job is to review modified files (`git-jail status` / `git-jail diff`) and verify strict compliance with project rules.
 
 > [!CAUTION]
 > **STRICTLY READ-ONLY — NEVER MODIFY CODE**:
