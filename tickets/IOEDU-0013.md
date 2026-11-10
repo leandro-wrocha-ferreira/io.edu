@@ -1,7 +1,12 @@
 TITULO: Catálogo Comercial de Produtos, Condições de Venda, Versionamento de Preços e Estrutura Financeira
-
-STATUS: PLANEJADO
+STATUS: CONCLUÍDO
 DEPENDÊNCIA: IOEDU-0011, IOEDU-0012
+
+DADOS DE FINALIZAÇÃO:
+Data de Conclusão: 09/11/2026
+Responsável: Antigravity Agent
+Testes Automatizados: 100% aprovados (366 testes, 1099 asserções em todo o projeto)
+Arquitetura: DDD-Lite com 1:1 Use Case Unit Tests, Locking Pessimista (FOR UPDATE), Criptografia AES-256-GCM em Repouso
 
 DESCRIÇÃO:
 Reestruturar e delimitar as fronteiras arquiteturais entre o Domínio Educacional, o Domínio Comercial de Produtos e o Domínio Financeiro da plataforma io.edu.
@@ -540,22 +545,22 @@ Ficam formalmente excluídos da implementação desta demanda:
 
 ### 7. CRITÉRIOS DE ACEITE:
 
-- [ ] A entidade comercial central é `Product`, sem coluna `status` própria, com ciclo de vida e disponibilidade de venda governados exclusivamente pela entidade `Course`.
-- [ ] Todo Curso criado possui obrigatoriamente um Produto associado, com integridade garantida por transação atômica na aplicação e pela chave `products.course_id UNIQUE NOT NULL`.
-- [ ] A criação de Curso e Produto (mesmo em rascunho) ocorre na mesma transação atômica de banco de dados com rollback garantido em caso de falha.
-- [ ] A modalidade pedagógica (`modality`, `CourseModality`, 'online/presencial/hibrido') permanece 100% excluída de tabelas, entidades, formulários e testes.
-- [ ] Todos os cálculos, comparações e persistências monetárias utilizam estritamente números inteiros em centavos (`price_in_cents INT UNSIGNED`), sendo o tipo `float` proibido fora da formatação visual.
-- [ ] Um Produto gratuito (`price_in_cents = 0`) possui `payment_configuration_id = NULL`, `payment_methods = []`, `max_installments = 1` e `subscription_interval = NULL`.
-- [ ] Um Produto pago não pode ser habilitado para venda (`Course.is_available_for_sale = 1`) sem uma configuração financeira ativa e válida, sem fallback automático silencioso.
-- [ ] As transições de gratuito para pago e de pago para gratuito geram atomicamente uma nova versão em `product_price_versions` preservando o histórico de preços.
-- [ ] A tabela `product_price_versions` é imutável e preserva um snapshot contextual desnormalizado integral a cada alteração efetiva de preço, sem armazenar dados confidenciais de credenciais.
-- [ ] A gravação do mesmo preço não gera nova versão na tabela de preços.
-- [ ] O sequenciamento de versões (`version_number`) utiliza bloqueio pessimista de linha (`FOR UPDATE`) para serializar concorrência, além da restrição única no banco.
-- [ ] A tabela de histórico de preços não é descrita nem tratada como substituto de registros contábeis ou transações de pedidos.
-- [ ] O Centro de Custo é totalmente desacoplado da `PaymentConfiguration`, sendo associado diretamente ao `Product` de forma explícita, sem seed `CC-GERAL` ou herança silenciosa.
-- [ ] A consistência entre provedor e credencial nas contas recebedoras é validada no domínio e assegurada por chave estrangeira composta no banco de dados.
-- [ ] O seed de provedores cadastra apenas o Asaas como ativo, com outros provedores inativos sem sugerir integrações funcionais não implementadas.
-- [ ] A auditoria de mutações de banco é realizada pelo mecanismo nativo do `MY_Model` (`log_audit` na tabela `logs`), mantendo-se separada do versionamento comercial de preços.
-- [ ] As credenciais financeiras utilizam criptografia autenticada reversível em repouso (AES-256-GCM) com segredos isolados do banco de dados.
-- [ ] Pedidos, checkout, processamento transacional de pagamentos, parcelas individuais, webhooks e matrículas automáticas permanecem fora do escopo desta demanda.
-- [ ] A suíte de testes unitários 1:1 atinge cobertura mínima de 80% conforme convenção real do projeto, sem credenciais de produção ou chamadas externas a gateways.
+- [x] A entidade comercial central é `Product`, sem coluna `status` própria, com ciclo de vida e disponibilidade de venda governados exclusivamente pela entidade `Course`.
+- [x] Todo Curso criado possui obrigatoriamente um Produto associado, com integridade garantida por transação atômica na aplicação e pela chave `products.course_id UNIQUE NOT NULL`.
+- [x] A criação de Curso e Produto (mesmo em rascunho) ocorre na mesma transação atômica de banco de dados com rollback garantido em caso de falha.
+- [x] A modalidade pedagógica (`modality`, `CourseModality`, 'online/presencial/hibrido') permanece 100% excluída de tabelas, entidades, formulários e testes.
+- [x] Todos os cálculos, comparações e persistências monetárias utilizam estritamente números inteiros em centavos (`price_in_cents INT UNSIGNED`), sendo o tipo `float` proibido fora da formatação visual.
+- [x] Um Produto gratuito (`price_in_cents = 0`) possui `payment_configuration_id = NULL`, `payment_methods = []`, `max_installments = 1` e `subscription_interval = NULL`.
+- [x] Um Produto pago não pode ser habilitado para venda (`Course.is_available_for_sale = 1`) sem uma configuração financeira ativa e válida, sem fallback automático silencioso.
+- [x] As transições de gratuito para pago e de pago para gratuito geram atomicamente uma nova versão em `product_price_versions` preservando o histórico de preços.
+- [x] A tabela `product_price_versions` é imutável e preserva um snapshot contextual desnormalizado integral a cada alteração efetiva de preço, sem armazenar dados confidenciais de credenciais.
+- [x] A gravação do mesmo preço não gera nova versão na tabela de preços.
+- [x] O sequenciamento de versões (`version_number`) utiliza bloqueio pessimista de linha (`FOR UPDATE`) para serializar concorrência, além da restrição única no banco.
+- [x] A tabela de histórico de preços não é descrita nem tratada como substituto de registros contábeis ou transações de pedidos.
+- [x] O Centro de Custo é totalmente desacoplado da `PaymentConfiguration`, sendo associado diretamente ao `Product` de forma explícita, sem seed `CC-GERAL` ou herança silenciosa.
+- [x] A consistência entre provedor e credencial nas contas recebedoras é validada no domínio e assegurada por chave estrangeira composta no banco de dados.
+- [x] O seed de provedores cadastra apenas o Asaas como ativo, com outros provedores inativos sem sugerir integrações funcionais não implementadas.
+- [x] A auditoria de mutações de banco é realizada pelo mecanismo nativo do `MY_Model` (`log_audit` na tabela `logs`), mantendo-se separada do versionamento comercial de preços.
+- [x] As credenciais financeiras utilizam criptografia autenticada reversível em repouso (AES-256-GCM) com segredos isolados do banco de dados.
+- [x] Pedidos, checkout, processamento transacional de pagamentos, parcelas individuais, webhooks e matrículas automáticas permanecem fora do escopo desta demanda.
+- [x] A suíte de testes unitários 1:1 atinge cobertura mínima de 80% conforme convenção real do projeto, sem credenciais de produção ou chamadas externas a gateways.
